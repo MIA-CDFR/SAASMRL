@@ -7,6 +7,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 def save_activity(data):
+    print("3")
     db.collection("activities").add(data)
 
 def get_all_activities():

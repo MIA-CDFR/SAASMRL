@@ -1,32 +1,3 @@
-# from spade.agent import Agent
-# from spade.behaviour import CyclicBehaviour
-# import json
-
-# class SensorAgent(Agent):
-
-#     class ReceiveBehaviour(CyclicBehaviour):
-#         async def run(self):
-#             msg = await self.receive(timeout=10)
-#             if msg:
-#                 print("\nAgente recebeu:")
-#                 print(msg.body)
-
-#                 data = json.loads(msg.body)
-
-#                 print("\nDados estruturados:")
-#                 print(data)
-
-#                 ritmo = data.get("ritmo")
-#                 acc = data.get("acc")
-#                 gyro = data.get("gyro")
-#                 hr = data.get("hr")
-
-#                 print(f"Ritmo: {ritmo}, HR: {hr}")
-
-#     async def setup(self):
-#         print("Agente Sensorial iniciado")
-#         self.add_behaviour(self.ReceiveBehaviour())
-
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
 from spade.message import Message
@@ -58,57 +29,67 @@ def calcular_interesse(acc, ritmo):
 
 
 class SensorAgent(Agent):
+    async def process_sensor_data(self, payload):
+        if isinstance(payload, str):
+            try:
+                data = json.loads(payload)
+            except json.JSONDecodeError:
+                print("Mensagem recebida nao esta em JSON valido:")
+                print(payload)
+                return False
+        elif isinstance(payload, dict):
+            data = payload
+        else:
+            print(f"Payload invalido recebido: {type(payload)}")
+            return False
+
+        acc = data.get("acc", 0)
+        hr = data.get("hr", 0)
+        ritmo = data.get("ritmo", 0)
+
+        lat = data.get("latitude", 0)
+        lon = data.get("longitude", 0)
+
+        # IA
+        atividade = calcular_atividade(acc, hr)
+        interesse = calcular_interesse(acc, ritmo)
+
+        resultado = {
+            "userId": data.get("userId"),
+            "atividade": atividade,
+            "interesse": interesse,
+            "acc": acc,
+            "hr": hr,
+            "ritmo": ritmo,
+            "lat": lat,
+            "lon": lon,
+            "timestamp": data.get("timestamp")
+        }
+
+        print("\nResultado:")
+        print(resultado)
+
+        # guardar no Firebase
+        try:
+            print("1")
+            save_activity(resultado)
+            print("2")
+        except Exception as e:
+            print(f"Erro a guardar atividade no Firebase: {e}")
+            return False
+
+        # enviar para MatchingAgent
+        msg_out = Message(to="matching_agent@localhost")
+        msg_out.body = json.dumps(resultado)
+        await self.send(msg_out)
+        return True
 
     class ReceiveBehaviour(CyclicBehaviour):
         async def run(self):
             msg = await self.receive(timeout=10)
 
             if msg:
-                try:
-                    data = json.loads(msg.body)
-                except json.JSONDecodeError:
-                    print("Mensagem recebida nao esta em JSON valido:")
-                    print(msg.body)
-                    return
-
-                acc = data.get("acc", 0)
-                hr = data.get("hr", 0)
-                ritmo = data.get("ritmo", 0)
-
-                lat = data.get("latitude", 0)
-                lon = data.get("longitude", 0)
-
-                # IA
-                atividade = calcular_atividade(acc, hr)
-                interesse = calcular_interesse(acc, ritmo)
-
-                resultado = {
-                    "userId": data.get("userId"),
-                    "atividade": atividade,
-                    "interesse": interesse,
-                    "acc": acc,
-                    "hr": hr,
-                    "ritmo": ritmo,
-                    "lat": lat,
-                    "lon": lon,
-                    "timestamp": data.get("timestamp")
-                }
-
-                print("\nResultado:")
-                print(resultado)
-
-                # guardar no Firebase
-                try:
-                    save_activity(resultado)
-                except Exception as e:
-                    print(f"Erro a guardar atividade no Firebase: {e}")
-                    return
-
-                # enviar para MatchingAgent
-                msg_out = Message(to="matching_agent@localhost")
-                msg_out.body = json.dumps(resultado)
-
-                await self.send(msg_out)
+                await self.agent.process_sensor_data(msg.body)
 
     async def setup(self):
         print("SensorAgent iniciado")

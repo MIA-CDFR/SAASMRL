@@ -1,22 +1,26 @@
 from flask import Flask, request, jsonify
-import json
+import asyncio
 
 app = Flask(__name__)
 
 sensor_agent = None
 sensor_agent_jid = "sensor_agent@localhost"
+sensor_agent_loop = None
 
 
 def send_data_to_sensor_agent(data):
-    if sensor_agent is None or sensor_agent.client is None:
+    if sensor_agent is None or sensor_agent_loop is None:
         return False
 
-    sensor_agent.client.send_message(
-        mto=sensor_agent_jid,
-        mbody=json.dumps(data),
-        mtype="chat",
-    )
-    return True
+    try:
+        future = asyncio.run_coroutine_threadsafe(
+            sensor_agent.process_sensor_data(data),
+            sensor_agent_loop,
+        )
+        return future.result(timeout=10)
+    except Exception as e:
+        print(f"Erro ao enviar dados para SensorAgent: {e}")
+        return False
 
 
 @app.route('/MIA_SA_ASM_RL', methods=['POST'])
