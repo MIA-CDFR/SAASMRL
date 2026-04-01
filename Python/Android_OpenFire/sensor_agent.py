@@ -5,6 +5,7 @@ import json
 
 from firebase_db import save_activity
 
+import dance4life_phyton.server as server
 
 def calcular_atividade(acc, hr):
     intensidade = 0.7 * acc + 0.3 * (hr / 100)
@@ -65,6 +66,13 @@ class SensorAgent(Agent):
             "lon": lon,
             "timestamp": data.get("timestamp")
         }
+
+        server.add_message(data.get("userId"), {
+            "type": "match",
+            "user":"a",
+            "score": "20"
+        })
+
 
         print("\nResultado:")
         print(resultado)

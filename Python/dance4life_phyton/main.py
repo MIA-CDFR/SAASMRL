@@ -1,10 +1,9 @@
 import asyncio
 import threading
+from agents.sensor_agent import SensorAgent
+#from matching_agent import MatchingAgent
 
-from sensor_agent import SensorAgent
-from matching_agent import MatchingAgent
-
-import dance4life_phyton.server as server
+import api.server as server
 
 
 def start_flask():
@@ -28,17 +27,16 @@ async def _stop_agent(agent):
 async def run():
     # criar agentes
     sensor_agent = SensorAgent("sensor_agent@localhost", "password")
-    matching_agent = MatchingAgent("matching_agent@localhost", "password")
+    #matching_agent = MatchingAgent("matching_agent@localhost", "password")
 
     # iniciar agentes
     await _start_agent(sensor_agent)
-    await _start_agent(matching_agent)
+    #await _start_agent(matching_agent)
 
     print("Agentes iniciados")
 
-    # ligar Flask ao SensorAgent (MUITO IMPORTANTE)
+    # ligar Flask ao SensorAgent
     server.sensor_agent = sensor_agent
-    server.sensor_agent_jid = "sensor_agent@localhost"
     server.sensor_agent_loop = asyncio.get_running_loop()
 
     # iniciar Flask
@@ -53,7 +51,7 @@ async def run():
             await asyncio.sleep(1)
     finally:
         await _stop_agent(sensor_agent)
-        await _stop_agent(matching_agent)
+     #   await _stop_agent(matching_agent)
 
 
 if __name__ == "__main__":

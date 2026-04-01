@@ -18,11 +18,14 @@ import android.location.Geocoder
 import android.os.Handler
 import android.os.Looper
 import java.util.Locale
-import android.util.Log
 import android.widget.SeekBar
 import android.widget.Toast
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import androidx.appcompat.app.AlertDialog
+import org.json.JSONArray
 
 class MainActivity : AppCompatActivity(), SensorEventListener  {
 
@@ -67,6 +70,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
 
     //ID
     private lateinit var userId: String
+
+    //poling de mensagens
+    private lateinit var handler: Handler
+    private lateinit var runnable: Runnable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,12 +133,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
         val initialHR = hrSeekBar.progress.coerceAtLeast(40)
         currentHR = initialHR
         hrData.add(currentHR)
-        hr_value.text = "HR: $initialHR bpm"
+        hr_value.text = "$initialHR bpm"
         sliderHR = initialHR
         hrSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val hr = progress.coerceAtLeast(40)
-                hr_value.text = "HR: $hr bpm"
+                hr_value.text = "$hr bpm"
                 sliderHR = hr
                 currentHR = sliderHR
                 hrData.add(currentHR)
@@ -141,7 +148,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        //mensagens do servidor
+        handler = Handler(Looper.getMainLooper())
 
+        runnable = object : Runnable {
+            override fun run() {
+                getUpdates()
+                handler.postDelayed(this, 5000)
+            }
+        }
+
+        handler.postDelayed(runnable, 5000)
         /*
         heartRateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE)
         if (heartRateSensor == null) {
@@ -156,6 +173,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
             Log.d("SENSOR_LIST", sensor.name)
         }
         */
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(runnable)
     }
 
     override fun onResume() {
@@ -229,13 +250,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
         val autoHR = atualizarHRComMovimento(lastAcc, lastGyro)
         currentHR = combinarHR(autoHR, sliderHR)
 
-        hr_value.text = "HR: $currentHR bpm"
+        hr_value.text = "$currentHR bpm"
         hrData.add(currentHR)
 
-        hr_value.text = "HR: $currentHR bpm"
+        hr_value.text = "$currentHR bpm"
 
         if (event.sensor.type == Sensor.TYPE_HEART_RATE) {
-            hr_value.text = "HR: ${event.values[0]}"
+            hr_value.text = "${event.values[0]}"
         }
     }
 
@@ -263,8 +284,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
                 val lat = location.latitude
                 val lon = location.longitude
 
-                latitude_value.text = "Lat: $lat"
-                longitude_value.text = "Lon: $lon"
+                latitude_value.text = lat.toString()
+                longitude_value.text = lon.toString()
 
                 currentLat = location.latitude
                 currentLon = location.longitude
@@ -338,7 +359,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
             // repetir automaticamente
             iniciarRecolha()
 
-        }, 30000) // 10 segundos
+        }, 10000) // 10 segundos
     }
 
     /*private fun dataAtual(): String {
@@ -371,7 +392,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
             .toRequestBody("application/json".toMediaType())
 
         val request = okhttp3.Request.Builder()
-            .url("http://192.168.1.68:5000/MIA_SA_ASM_RL")
+            .url("http://192.168.1.68:5000/collect_data_activities")
             .post(body)
             .build()
 
@@ -403,5 +424,82 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
         val finalHR = (0.7 * autoHR + 0.3 * sliderHR).toInt()
 
         return finalHR
+    }
+
+    fun getUpdates() {
+        val client = OkHttpClient()
+
+        val request = Request.Builder()
+            .url("http://192.168.1.68:5000/get_updates/$userId")
+            .get()
+            .build()
+
+        runOnUiThread {
+            Toast.makeText(this, "getUpdates", Toast.LENGTH_SHORT).show()
+        }
+
+        Thread {
+            try {
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+
+                runOnUiThread {
+                    Toast.makeText(this, "Updates: $body", Toast.LENGTH_LONG).show()
+                }
+
+                /*if (body != null) {
+                    println("Updates: $body")
+
+                    if (body.contains("match")) {
+                        println("Encontraste um parceiro!")
+
+                        runOnUiThread {
+                            Toast.makeText(this, "Encontraste um parceiro!", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }*/
+                if (body != null && body != "[]") {
+                    println("Updates: $body")
+
+                    val jsonArray = JSONArray(body)
+
+                    for (i in 0 until jsonArray.length()) {
+                        val obj = jsonArray.getJSONObject(i)
+
+                        val type = obj.getString("type")
+
+                        if (type == "match") {
+                            val user = obj.getString("user")
+                            val score = obj.getDouble("score")
+
+                            runOnUiThread {
+                                showMatchDialog(user, score)
+                            }
+                        }
+                    }
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+
+                runOnUiThread {
+                    Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }.start()
+    }
+
+    private fun showMatchDialog(user: String, score: Double) {
+        val builder = AlertDialog.Builder(this)
+
+        builder.setTitle("Novo Match!")
+        builder.setMessage("Encontraste o $user!\nCompatibilidade: $score")
+
+        builder.setPositiveButton("OK") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
     }
 }

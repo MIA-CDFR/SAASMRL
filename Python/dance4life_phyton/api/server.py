@@ -4,9 +4,7 @@ import asyncio
 app = Flask(__name__)
 
 sensor_agent = None
-sensor_agent_jid = "sensor_agent@localhost"
 sensor_agent_loop = None
-pending_messages = {}
 
 
 def send_data_to_sensor_agent(data):
@@ -23,16 +21,9 @@ def send_data_to_sensor_agent(data):
         print(f"Erro ao enviar dados para SensorAgent: {e}")
         return False
 
-def add_message(user_id, message):
-    print(f"userid={user_id}, {message}")
-    if user_id not in pending_messages:
-        pending_messages[user_id] = []
-        print(pending_messages)
 
-    pending_messages[user_id].append(message)
-
-@app.route('/MIA_SA_ASM_RL', methods=['POST'])
-def receber_dados():
+@app.route('/collect_data_activities', methods=['POST'])
+def collect_data_activities():
     data = request.json
 
     print("\nDados recebidos:")
@@ -43,12 +34,3 @@ def receber_dados():
         return jsonify({"status": "agent_not_ready"}), 503
 
     return jsonify({"status": "ok"}), 200
-
-@app.route('/get_updates/<user_id>', methods=['GET'])
-def get_updates(user_id):
-    msgs = pending_messages.get(user_id, [])
-
-    # limpar depois de enviar
-    pending_messages[user_id] = []
-
-    return jsonify(msgs)
