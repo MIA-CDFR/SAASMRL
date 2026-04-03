@@ -1,0 +1,44 @@
+import requests
+import time
+import random
+from datetime import datetime, UTC
+
+URL = "http://localhost:5000/collect_data_activities"
+# URL = "http://192.168.1.108:5000/collect_data_activities"
+# URL = "http://127.0.0.1:5000/collect_data_activities"
+
+
+def generate_random_data():
+    return {
+        "userId": f"user_{random.randint(1, 5)}",
+        "acc": round(random.uniform(0.0, 1.0), 2),
+        "hr": random.randint(60, 160),
+        "ritmo": round(random.uniform(0.0, 1.0), 2),
+        "latitude": round(random.uniform(41.0, 42.0), 6),
+        "longitude": round(random.uniform(-8.8, -8.0), 6),
+        "timestamp": datetime.now(UTC).isoformat(),
+    }
+
+
+def send_data():
+    data = generate_random_data()
+
+    try:
+        response = requests.post(URL, json=data, timeout=5)
+
+        print("\n📤 Enviado:")
+        print(data)
+
+        print("📥 Resposta:")
+        print(response.status_code, response.json())
+
+    except Exception as e:
+        print(f"❌ Erro ao enviar: {e}")
+
+
+if __name__ == "__main__":
+    print("🚀 Simulador Android iniciado...\n")
+
+    while True:
+        send_data()
+        time.sleep(3)  # envia de 3 em 3 segundos

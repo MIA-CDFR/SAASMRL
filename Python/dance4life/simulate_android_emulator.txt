@@ -1,0 +1,1 @@
+PS C:\MIA\SAASMRL\Python\dance4life> C:\Users\cbergueira\AppData\Local\Programs\Python\Python312\python.exe c:/MIA/SAASMRL/Python/dance4life/_simulate_android_emulator.py
