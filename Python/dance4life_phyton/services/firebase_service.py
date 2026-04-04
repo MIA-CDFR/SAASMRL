@@ -11,7 +11,7 @@ db = firestore.client()
 # RAW data
 def save_raw_activity(data):
     print("SAVE RAW:", data)
-    db.collection("activities_raw").add(data)
+    db.collection("activities_raw_test").add(data)
 
 
 # # 🧠 dados inteligentes
