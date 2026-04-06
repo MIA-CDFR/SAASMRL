@@ -13,7 +13,7 @@ REQUEST_TIMEOUT = (3, 20)  # (connect_timeout, read_timeout)
 
 def generate_random_data():
     return {
-        "userId": f"user_{random.randint(1, 5)}",
+        "utilizador_id": f"user_{random.randint(1, 5)}",
         "acc": round(random.uniform(0.0, 1.0), 2),
         "hr": random.randint(60, 160),
         "ritmo": round(random.uniform(0.0, 1.0), 2),
@@ -49,4 +49,4 @@ if __name__ == "__main__":
 
     while True:
         send_data()
-        time.sleep(3)  # envia de 3 em 3 segundos
+        time.sleep(30)  # envia de 3 em 3 segundos
