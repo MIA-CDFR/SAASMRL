@@ -8,11 +8,15 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 
-# RAW data
-def save_raw_activity(data):
-    print("SAVE RAW:", data)
-    db.collection("activities_raw_test").add(data)
-
+async def save_activity(data):
+    try:
+        data_dict = data.dict()
+        print("SAVE RAW:", data)
+        await db.collection("dance4life_activity").add(data_dict)
+        return True  # sucesso
+    except Exception as error:
+        print(error)
+        return False  # falha
 
 # # 🧠 dados inteligentes
 # def save_activity(data):

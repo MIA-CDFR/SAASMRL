@@ -111,16 +111,11 @@ class SensorAgent(Agent):
                         result_ok = await future_sa
 
                     try:
-                        if result_ok:
-                            result = {
-                                "status": "processed",
-                                "user": data.utilizador_id
-                            }
-                        else:
-                            result = {
-                                "status": "error",
-                                "user": data.utilizador_id
-                            }
+                        result = {
+                            "status": "processed" if result_ok else "failed",
+                            "user": data.utilizador_id,
+                            "conv_id": conv_id
+                        }
 
                         # INFORM
                         inform = msg.make_reply()

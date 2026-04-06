@@ -4,6 +4,9 @@ from spade.presence import PresenceType, PresenceShow
 from agents.sensor_agent import SensorAgent
 from agents.api_agent import ApiAgent
 from agents.coordinator_agent import CoordinatorAgent
+from agents.har_agent import HARAgent
+from agents.environment_agent import EnvironmentAgent
+from agents.database_agent import DatabaseAgent
 
 #from matching_agent import MatchingAgent
 
@@ -33,38 +36,46 @@ async def run():
     coordinator_agent = CoordinatorAgent("coordinator_agent@localhost", "password")
     sensor_agent = SensorAgent("sensor_agent@localhost", "password")
     api_agent = ApiAgent("api_agent@localhost", "password")
-    #matching_agent = MatchingAgent("matching_agent@localhost", "password")
+    har_agent = HARAgent("har_agent@localhost", "password")
+    environment_agent = EnvironmentAgent("environment_agent@localhost", "password")
+    database_agent = DatabaseAgent("database_agent@localhost", "password")
 
 
     # iniciar agentes
     await _start_agent(coordinator_agent)
     await _start_agent(sensor_agent)
     await _start_agent(api_agent)
+    await _start_agent(har_agent)
+    await _start_agent(environment_agent)
+    await _start_agent(database_agent)
     #await _start_agent(matching_agent)
 
     coordinator_agent.web.start(hostname="127.0.0.1", port="10000")
     sensor_agent.web.start(hostname="127.0.0.1", port="10001")
     api_agent.web.start(hostname="127.0.0.1", port="10002")
+    har_agent.web.start(hostname="127.0.0.1", port="10003")
+    environment_agent.web.start(hostname="127.0.0.1", port="10004")
+    database_agent.web.start(hostname="127.0.0.1", port="10005")
 
 
-    coordinator_agent.presence.set_presence(
-                                presence_type=PresenceType.AVAILABLE,  # set availability
-                                show=PresenceShow.CHAT,  # show status
-                                status="Lunch",  # status message
-                                priority=2  # connection priority
-                                )
-    sensor_agent.presence.set_presence(
-                                presence_type=PresenceType.AVAILABLE,  # set availability
-                                show=PresenceShow.CHAT,  # show status
-                                status="Lunch",  # status message
-                                priority=2  # connection priority
-                                )
-    api_agent.presence.set_presence(
-                                presence_type=PresenceType.AVAILABLE,  # set availability
-                                show=PresenceShow.CHAT,  # show status
-                                status="Lunch",  # status message
-                                priority=2  # connection priority
-                                )
+    # coordinator_agent.presence.set_presence(
+    #                             presence_type=PresenceType.AVAILABLE,  # set availability
+    #                             show=PresenceShow.CHAT,  # show status
+    #                             status="Lunch",  # status message
+    #                             priority=2  # connection priority
+    #                             )
+    # sensor_agent.presence.set_presence(
+    #                             presence_type=PresenceType.AVAILABLE,  # set availability
+    #                             show=PresenceShow.CHAT,  # show status
+    #                             status="Lunch",  # status message
+    #                             priority=2  # connection priority
+    #                             )
+    # api_agent.presence.set_presence(
+    #                             presence_type=PresenceType.AVAILABLE,  # set availability
+    #                             show=PresenceShow.CHAT,  # show status
+    #                             status="Lunch",  # status message
+    #                             priority=2  # connection priority
+    #                             )
     #contact = api_agent.presence.get_contact("sensor_agent@localhost")
 
     print("Agentes iniciados")
