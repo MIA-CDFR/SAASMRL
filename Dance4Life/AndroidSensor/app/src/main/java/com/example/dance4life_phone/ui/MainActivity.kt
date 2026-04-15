@@ -29,6 +29,8 @@ import com.example.dance4life_phone.domain.location.PhoneLocationProvider
 import com.example.dance4life_phone.domain.sensor.PhoneSensorProvider
 import com.example.dance4life_phone.ui.notifier.InviteNotifier
 
+import com.dance4life.core.rlinference.RlCoachPolicyFactory
+
 class MainActivity : AppCompatActivity()  {
 
     private lateinit var sensorProvider: SensorProvider
@@ -57,6 +59,8 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -72,6 +76,8 @@ class MainActivity : AppCompatActivity()  {
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
+        //-------------------------
+        val policy = RlCoachPolicyFactory.create(this)
 
         // Providers
         deviceProvider = PhoneDeviceProvider(this)
