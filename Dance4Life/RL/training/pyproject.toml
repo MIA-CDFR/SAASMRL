@@ -1,0 +1,22 @@
+[project]
+name = "ar-rl-training"
+version = "0.1.0"
+description = "Reinforcement learning training workspace for AR project"
+requires-python = ">=3.11"
+dependencies = [
+  "gymnasium>=1.0.0",
+  "stable-baselines3>=2.4.0",
+  "numpy>=2.1.0",
+  "torch>=2.5.0",
+  "onnx>=1.16.0",
+  "onnxruntime>=1.19.0",
+  "pyyaml>=6.0",
+  "rich>=13.0",
+  "tensorboard>=2.20.0",
+  "tqdm>=4.67.3",
+  "onnxscript>=0.6.2",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
