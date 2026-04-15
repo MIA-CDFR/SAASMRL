@@ -1,0 +1,4 @@
+C:\Users\TEU_USER\AppData\Local\Android\Sdk\platform-tools
+.\adb shell pm grant com.dance4life.wear android.permission.BODY_SENSORS
+.\adb shell pm grant com.dance4life.wear android.permission.BODY_SENSORS_BACKGROUND
+.\adb shell pm grant com.dance4life.wear android.permission.ACCESS_FINE_LOCATION

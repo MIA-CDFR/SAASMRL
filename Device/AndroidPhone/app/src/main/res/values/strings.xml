@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Dance4Life_mobile</string>
+    <string name="title">Dance4LiFe</string>
+    <string name="gyroscope">Giroscópio</string>
+    <string name="accelerometer">Acelerômetro</string>
+    <string name="location">Localização</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="country">Pais</string>
+    <string name="city">Cidade</string>
+    <string name="street">Rua</string>
+    <string name="x">X</string>
+    <string name="y">Y</string>
+    <string name="z">Z</string>
+    <string name="url">URL</string>
+    <string name="ok">OK</string>
+    <string name="default_0">0</string>
+    <string name="default_70">0</string>
+    <string name="default_no_value">No Value</string>
+    <string name="hr">HD</string>
+    <string name="hr_ext">Heart Rate</string>
+</resources>

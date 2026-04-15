@@ -1,3 +1,5 @@
+import random
+
 from flask import Flask, request, jsonify
 import asyncio
 from pydantic import ValidationError
@@ -73,3 +75,45 @@ def collect_data_activities():
             "status": "error",
             "details": e.errors()
         }), 400
+
+pending_messages = {}
+
+
+def add_invite(user_id, invite_id, from_user):
+    if user_id not in pending_messages:
+        pending_messages[user_id] = []
+
+    pending_messages[user_id].append({
+        "type": "invite",
+        "id": invite_id,
+        "user": from_user
+    })
+
+@app.route('/get_updates/<user_id>', methods=['GET'])
+def get_updates(user_id):
+    add_invite(user_id, f"invite{random.randint(1000, 9999)}", f"user{random.randint(1000, 9999)}")  # Exemplo de convite para teste
+    msgs = pending_messages.get(user_id, [])
+
+    # limpar depois de enviar
+    pending_messages[user_id] = []
+    print(f"Enviando mensagens para {user_id}: {msgs}")
+
+    return jsonify(msgs)
+
+@app.route('/accept_invite', methods=['POST'])
+def accept_invite():
+    data = request.json
+    invite_id = data.get("inviteId")
+
+    print(f"Invite aceite: {invite_id}")
+
+    return jsonify({"status": "ok"})
+
+@app.route('/reject_invite', methods=['POST'])
+def reject_invite():
+    data = request.json
+    invite_id = data.get("inviteId")
+
+    print(f"Invite rejeitado: {invite_id}")
+
+    return jsonify({"status": "ok"})
