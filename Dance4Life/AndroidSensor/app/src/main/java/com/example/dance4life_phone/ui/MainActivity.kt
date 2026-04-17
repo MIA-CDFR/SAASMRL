@@ -17,6 +17,7 @@ import com.example.dance4life_phone.data.rl.RlMetricsManager
 import com.dance4life.core.data.model.MovementObservation
 import com.dance4life.core.data.model.MovementRecommendation
 import com.dance4life.core.data.model.SensorData
+import com.dance4life.core.data.model.LocationData
 import com.dance4life.core.data.repository.DataRepository
 import com.dance4life.core.domain.controller.DanceController
 import com.example.dance4life_phone.R
@@ -35,6 +36,7 @@ import com.dance4life.core.rlinference.RlCoachPolicy
 import com.dance4life.core.rlinference.RlCoachPolicyFactory
 import java.util.ArrayDeque
 import kotlin.math.abs
+import kotlin.math.floor
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
@@ -71,27 +73,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var hr_value: TextView
 
     // RL inference state
-    private var sedentaryMinutesEstimate: Int = 0
-    private var lastSensorTimestampMs: Long = 0L
     private var lastCoachTimestampMs: Long = 0L
     private var lastActionId: String? = null
     private var currentStepsLastHour: Int = 0
-    private var lastStepsWindowSnapshot: Int = 0
     private var lastRawStepCounter: Int? = null
+    private var lastStepCounterEventMs: Long = 0L
     private val stepTimestampsMs = ArrayDeque<Long>()
     private var rlInferenceCount: Int = 0
 
-    private var latestSensorSnapshot = SensorData(
-        accX = 0f,
-        accY = 0f,
-        accZ = 0f,
-        gyroX = 0f,
-        gyroY = 0f,
-        gyroZ = 0f,
-        heartRate = 70,
-        accMagnitude = 9.81,
-        gyroMagnitude = 0.0,
-    )
+    // Motion-based accumulation for emulator fallback (no hardware step counter).
+    private var lastRawMotionTimestampMs: Long = 0L
+    private var pendingEstimatedSteps: Double = 0.0
+
+    // Route-based accumulation for emulator geo route playback.
+    private var lastRouteLocation: LocationData? = null
+    private var lastRouteStepUpdateMs: Long = 0L
+    private var pendingRouteMeters: Double = 0.0
 
     private lateinit var sensorManager: SensorManager
     private var stepCounterSensor: Sensor? = null
@@ -182,8 +179,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             hr_value.text = "${data.heartRate} bpm"
 
-                latestSensorSnapshot = data
-                maybeRecommendCoaching(data)
+            maybeRecommendCoaching(data)
         }
 
         // 📍 LOCATION → UI
@@ -194,12 +190,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             country_value.text = location.country
             city_value.text = location.city
             street_value.text = location.street
+
+            updateStepsFromRouteLocation(location, System.currentTimeMillis())
         }
 
         // 🎵 RITMO → UI
-        controller.setRitmoListener { ritmo ->
-            Toast.makeText(this, "Ritmo: $ritmo", Toast.LENGTH_SHORT).show()
-        }
+        // controller.setRitmoListener { ritmo ->
+        //    Toast.makeText(this, "Ritmo: $ritmo", Toast.LENGTH_SHORT).show()
+        //}
 
         // Permissões
         if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -318,18 +316,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private fun maybeRecommendCoaching(data: SensorData) {
         val now = System.currentTimeMillis()
-        updateSedentaryEstimate(now, currentStepsLastHour)
+        updateRawStepWindowFromMotion(data, now)
 
         if (now - lastCoachTimestampMs < RL_COACH_MIN_INTERVAL_MS) {
             return
         }
 
-        val observation = MovementObservation(
-            stepsLastHour = currentStepsLastHour,
-            sedentaryMinutesToday = sedentaryMinutesEstimate,
-            energyLevel = estimateEnergyLevel(data.heartRate),
-            mobilityConfidence = estimateMobilityConfidence(data.accMagnitude, data.gyroMagnitude),
-        )
+        val observation = buildObservationFromRawSensors(data)
 
         runRlInference(
             observation = observation,
@@ -338,6 +331,134 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             allowCadenceControl = true,
             nowMs = now,
         )
+    }
+
+    private fun buildObservationFromRawSensors(data: SensorData): MovementObservation {
+        val accDeltaFromGravity = abs(data.accMagnitude - 9.81)
+        val gyroMagnitude = data.gyroMagnitude.coerceAtLeast(0.0)
+
+        val stepsLastHourProxy = currentStepsLastHour.coerceIn(0, 1000)
+        val sedentaryMinutesProxy =
+            (((1000.0 - stepsLastHourProxy) / 1000.0) * 480.0).toInt().coerceIn(0, 480)
+
+        val energyLevelRaw = (((data.heartRate.coerceIn(40, 200) - 40) / 160.0) * 10.0)
+            .toInt()
+            .coerceIn(1, 10)
+
+        val mobilityRaw = (accDeltaFromGravity * 1.2 + gyroMagnitude * 1.5)
+            .toInt()
+            .coerceIn(1, 10)
+
+        return MovementObservation(
+            stepsLastHour = stepsLastHourProxy,
+            sedentaryMinutesToday = sedentaryMinutesProxy,
+            energyLevel = energyLevelRaw,
+            mobilityConfidence = mobilityRaw,
+        )
+    }
+
+    private fun updateRawStepWindowFromMotion(data: SensorData, nowMs: Long) {
+        val hasRecentStepCounterEvent =
+            stepCounterSensor != null &&
+                lastStepCounterEventMs != 0L &&
+                (nowMs - lastStepCounterEventMs) <= STEP_COUNTER_STALE_MS
+
+        val hasRecentRouteUpdates =
+            lastRouteStepUpdateMs != 0L &&
+                (nowMs - lastRouteStepUpdateMs) <= ROUTE_STEP_PRIORITY_MS
+
+        if (hasRecentStepCounterEvent || hasRecentRouteUpdates) {
+            val cutoff = nowMs - ONE_HOUR_MS
+            while (stepTimestampsMs.isNotEmpty() && stepTimestampsMs.first() < cutoff) {
+                stepTimestampsMs.removeFirst()
+            }
+            currentStepsLastHour = stepTimestampsMs.size.coerceIn(0, 1000)
+            return
+        }
+
+        if (lastRawMotionTimestampMs == 0L) {
+            lastRawMotionTimestampMs = nowMs
+        }
+
+        val deltaMs = (nowMs - lastRawMotionTimestampMs).coerceAtLeast(0L)
+        lastRawMotionTimestampMs = nowMs
+        val deltaSec = (deltaMs / 1000.0).coerceAtMost(1.5)
+
+        val accDeltaFromGravity = abs(data.accMagnitude - 9.81)
+        val gyroMagnitude = data.gyroMagnitude.coerceAtLeast(0.0)
+        val motionIntensity = (accDeltaFromGravity * 2.0 + gyroMagnitude * 0.8).coerceIn(0.0, 10.0)
+
+        val estimatedStepsPerSec = (motionIntensity / 10.0) * RAW_MAX_STEPS_PER_SECOND
+        pendingEstimatedSteps += estimatedStepsPerSec * deltaSec
+
+        val newSteps = floor(pendingEstimatedSteps).toInt().coerceIn(0, RAW_MAX_STEP_BURST)
+        if (newSteps > 0) {
+            pendingEstimatedSteps -= newSteps.toDouble()
+            repeat(newSteps) {
+                stepTimestampsMs.addLast(nowMs)
+            }
+        }
+
+        val cutoff = nowMs - ONE_HOUR_MS
+        while (stepTimestampsMs.isNotEmpty() && stepTimestampsMs.first() < cutoff) {
+            stepTimestampsMs.removeFirst()
+        }
+
+        currentStepsLastHour = stepTimestampsMs.size.coerceIn(0, 1000)
+    }
+
+    private fun updateStepsFromRouteLocation(location: LocationData, nowMs: Long) {
+        val previous = lastRouteLocation
+        lastRouteLocation = location
+        if (previous == null) {
+            return
+        }
+
+        val distanceMeters = haversineDistanceMeters(
+            lat1 = previous.latitude,
+            lon1 = previous.longitude,
+            lat2 = location.latitude,
+            lon2 = location.longitude,
+        )
+
+        // Ignore tiny GPS jitter from route playback.
+        val usableDistanceMeters = if (distanceMeters < ROUTE_MIN_DISTANCE_METERS) 0.0 else distanceMeters
+        pendingRouteMeters += usableDistanceMeters
+
+        val newSteps = floor(pendingRouteMeters / METERS_PER_STEP)
+            .toInt()
+            .coerceIn(0, ROUTE_MAX_STEP_BURST)
+
+        if (newSteps > 0) {
+            pendingRouteMeters -= newSteps * METERS_PER_STEP
+            repeat(newSteps) {
+                stepTimestampsMs.addLast(nowMs)
+            }
+            lastRouteStepUpdateMs = nowMs
+        }
+
+        val cutoff = nowMs - ONE_HOUR_MS
+        while (stepTimestampsMs.isNotEmpty() && stepTimestampsMs.first() < cutoff) {
+            stepTimestampsMs.removeFirst()
+        }
+        currentStepsLastHour = stepTimestampsMs.size.coerceIn(0, 1000)
+    }
+
+    private fun haversineDistanceMeters(
+        lat1: Double,
+        lon1: Double,
+        lat2: Double,
+        lon2: Double,
+    ): Double {
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+        val a =
+            kotlin.math.sin(dLat / 2) * kotlin.math.sin(dLat / 2) +
+                kotlin.math.cos(Math.toRadians(lat1)) *
+                kotlin.math.cos(Math.toRadians(lat2)) *
+                kotlin.math.sin(dLon / 2) * kotlin.math.sin(dLon / 2)
+        val c = 2 * kotlin.math.atan2(kotlin.math.sqrt(a), kotlin.math.sqrt(1 - a))
+        return EARTH_RADIUS_METERS * c
     }
 
     private fun runRlInference(
@@ -385,52 +506,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         rl_sedentary_value.text = observation.sedentaryMinutesToday.toString()
         rl_energy_value.text = observation.energyLevel.toString()
         rl_mobility_value.text = observation.mobilityConfidence.toString()
-        rl_action_value.text = recommendation.actionId
+        rl_action_value.text =
+            "${recommendation.actionId} - ${recommendation.title} (${recommendation.durationMinutes} min)"
         rl_inference_count_value.text = rlInferenceCount.toString()
         rl_source_value.text = sourceLabel
-    }
-
-    private fun updateSedentaryEstimate(nowMs: Long, stepsLastHour: Int) {
-        if (lastSensorTimestampMs == 0L) {
-            lastSensorTimestampMs = nowMs
-            lastStepsWindowSnapshot = stepsLastHour
-            return
-        }
-
-        val elapsedMin = ((nowMs - lastSensorTimestampMs) / 60000f).coerceAtLeast(0f)
-        lastSensorTimestampMs = nowMs
-        val stepDelta = (stepsLastHour - lastStepsWindowSnapshot).coerceAtLeast(0)
-        lastStepsWindowSnapshot = stepsLastHour
-
-        if (stepDelta <= SEDENTARY_STEP_DELTA_THRESHOLD) {
-            sedentaryMinutesEstimate += elapsedMin.toInt().coerceAtLeast(1)
-        } else {
-            sedentaryMinutesEstimate -= (elapsedMin * 2f).toInt().coerceAtLeast(1)
-        }
-
-        sedentaryMinutesEstimate = sedentaryMinutesEstimate.coerceIn(0, 480)
-    }
-
-    private fun estimateEnergyLevel(heartRate: Int): Int {
-        val hr = heartRate.coerceIn(40, 200)
-        return when {
-            hr <= 65 -> 9
-            hr <= 80 -> 8
-            hr <= 95 -> 6
-            hr <= 110 -> 4
-            else -> 3
-        }
-    }
-
-    private fun estimateMobilityConfidence(accMagnitude: Double, gyroMagnitude: Double): Int {
-        val movementScore = (abs(accMagnitude - 9.81) * 1.5 + (gyroMagnitude * 0.5)).toInt()
-        return movementScore.coerceIn(1, 10)
     }
 
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type != Sensor.TYPE_STEP_COUNTER) return
 
         val now = System.currentTimeMillis()
+        lastStepCounterEventMs = now
         val totalSteps = event.values[0].toInt()
 
         val previous = lastRawStepCounter
@@ -461,7 +547,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     companion object {
         private const val RL_COACH_MIN_INTERVAL_MS = 20_000L
         private const val RL_COACH_FORCE_NOTIFY_MS = 60_000L
-        private const val SEDENTARY_STEP_DELTA_THRESHOLD = 2
         private const val ONE_HOUR_MS = 3_600_000L
+        private const val STEP_COUNTER_STALE_MS = 10_000L
+        private const val ROUTE_STEP_PRIORITY_MS = 5_000L
+        private const val RAW_MAX_STEPS_PER_SECOND = 2.5
+        private const val RAW_MAX_STEP_BURST = 20
+        private const val METERS_PER_STEP = 0.75
+        private const val ROUTE_MIN_DISTANCE_METERS = 1.5
+        private const val ROUTE_MAX_STEP_BURST = 50
+        private const val EARTH_RADIUS_METERS = 6_371_000.0
     }
 }
