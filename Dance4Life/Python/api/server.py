@@ -6,6 +6,10 @@ from pydantic import ValidationError
 from agents.api_agent import ApiAgent
 from model.data_model import SensorActivityData
 from spade.template import Template
+from config.config import (
+    DANCE4LIFE_RL_METRICS_COLLECTION_FIREBASE,
+)
+from services.firebase_service import save_data_from_collectors
 
 app = Flask(__name__)
 
@@ -54,11 +58,17 @@ def send_data_to_sensor_agent(data):
 @app.route('/collect_data_activities', methods=['POST'])
 def collect_data_activities():
     try:
-        data = request.json
-        #SensorActivityData
+        data = request.json or {}
 
         print("\nDados recebidos:")
         print(data)
+
+        if data.get("eventType") == "rl_metric":
+            save_data_from_collectors(DANCE4LIFE_RL_METRICS_COLLECTION_FIREBASE, data)
+            return jsonify({"status": "ok", "stored": "rl_metric"}), 200
+
+        if "utilizador_id" not in data and "userId" in data:
+            data["utilizador_id"] = data["userId"]
 
         sensor_data = SensorActivityData(**data)
         print(sensor_data)

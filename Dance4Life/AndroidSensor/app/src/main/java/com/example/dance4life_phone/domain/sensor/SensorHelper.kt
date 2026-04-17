@@ -34,6 +34,7 @@ class SensorHelper(
 
     private var accUpdated = false
     private var gyroUpdated = false
+    private var latestRealHr: Int? = null
 
     private val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     private val gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
@@ -58,6 +59,10 @@ class SensorHelper(
 
     override fun onSensorChanged(event: SensorEvent) {
 
+        if (event.sensor.type == Sensor.TYPE_HEART_RATE) {
+            latestRealHr = event.values[0].toInt().coerceIn(35, 220)
+        }
+
         if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
 
             accX = event.values[0]
@@ -81,7 +86,7 @@ class SensorHelper(
         //só quando ambos estiverem atualizados
         if (accUpdated && gyroUpdated) {
 
-            val currentHR = HrCalculator.calculate(lastAcc, lastGyro)//atualizarHRComMovimento(lastAcc, lastGyro)
+            val currentHR = latestRealHr ?: HrCalculator.calculate(lastAcc, lastGyro)
 
             hrData.add(currentHR)
 
@@ -97,20 +102,6 @@ class SensorHelper(
 
             accUpdated = false
             gyroUpdated = false
-
-            if (event.sensor.type == Sensor.TYPE_HEART_RATE) {
-                val realHR = event.values[0].toInt()
-
-                val data = SensorData(
-                    accX, accY, accZ,
-                    gyroX, gyroY, gyroZ,
-                    realHR,
-                    lastAcc,
-                    lastGyro
-                )
-
-                onData(data)
-            }
         }
     }
 

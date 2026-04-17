@@ -2,6 +2,7 @@ package com.dance4life.core.data.repository
 
 import android.util.Log
 import com.dance4life.core.data.network.ApiService
+import org.json.JSONObject
 
 class DataRepository {
 
@@ -20,5 +21,9 @@ class DataRepository {
 
     fun obterUpdates(userId: String, callback: (String?) -> Unit) {
         ApiService.getUpdates(userId, callback)
+    }
+
+    fun enviarMetricaRl(payload: JSONObject, callback: (Boolean) -> Unit) {
+        ApiService.sendRlMetric(payload, callback)
     }
 }

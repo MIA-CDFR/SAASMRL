@@ -16,7 +16,25 @@
     <string name="ok">OK</string>
     <string name="default_0">0</string>
     <string name="default_70">0</string>
+    <string name="default_dash">-</string>
     <string name="default_no_value">No Value</string>
     <string name="hr">HD</string>
     <string name="hr_ext">Heart Rate</string>
+    <string name="rl_metrics">RL Metrics</string>
+    <string name="rl_policy">Policy</string>
+    <string name="steps_last_hour">Steps (last hour)</string>
+    <string name="sedentary_minutes">Sedentary (min)</string>
+    <string name="energy_level">Energy level</string>
+    <string name="mobility_confidence">Mobility conf.</string>
+    <string name="last_action">Last action</string>
+    <string name="inference_count">Inferences</string>
+    <string name="last_source">Source</string>
+    <string name="simulation">Simulate behavior</string>
+    <string name="sim_steps">Steps / hour</string>
+    <string name="sim_sedentary">Sedentary (min)</string>
+    <string name="sim_energy">Energy (1&#8211;10)</string>
+    <string name="sim_mobility">Mobility (1&#8211;10)</string>
+    <string name="sim_run">Run RL Model</string>
+    <string name="live_sensor">Live sensor</string>
+    <string name="simulated_prefix">Simulated</string>
 </resources>
