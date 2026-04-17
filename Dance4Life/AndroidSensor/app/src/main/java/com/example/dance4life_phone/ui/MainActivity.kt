@@ -10,7 +10,6 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -21,7 +20,6 @@ import com.dance4life.core.data.model.SensorData
 import com.dance4life.core.data.repository.DataRepository
 import com.dance4life.core.domain.controller.DanceController
 import com.example.dance4life_phone.R
-import com.google.android.material.button.MaterialButton
 
 
 import com.dance4life.core.domain.sensor.SensorProvider
@@ -59,16 +57,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var rl_action_value: TextView
     private lateinit var rl_inference_count_value: TextView
     private lateinit var rl_source_value: TextView
-
-    private lateinit var sim_steps_seekbar: SeekBar
-    private lateinit var sim_sedentary_seekbar: SeekBar
-    private lateinit var sim_energy_seekbar: SeekBar
-    private lateinit var sim_mobility_seekbar: SeekBar
-    private lateinit var sim_steps_val: TextView
-    private lateinit var sim_sedentary_val: TextView
-    private lateinit var sim_energy_val: TextView
-    private lateinit var sim_mobility_val: TextView
-    private lateinit var sim_run_btn: MaterialButton
 
     private lateinit var gyroscope_x_value: TextView
     private lateinit var gyroscope_y_value: TextView
@@ -108,8 +96,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var stepCounterSensor: Sensor? = null
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -123,35 +109,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         rl_action_value = findViewById(R.id.rl_action_value)
         rl_inference_count_value = findViewById(R.id.rl_inference_count_value)
         rl_source_value = findViewById(R.id.rl_source_value)
-
-        sim_steps_seekbar = findViewById(R.id.sim_steps_seekbar)
-        sim_sedentary_seekbar = findViewById(R.id.sim_sedentary_seekbar)
-        sim_energy_seekbar = findViewById(R.id.sim_energy_seekbar)
-        sim_mobility_seekbar = findViewById(R.id.sim_mobility_seekbar)
-        sim_steps_val = findViewById(R.id.sim_steps_val)
-        sim_sedentary_val = findViewById(R.id.sim_sedentary_val)
-        sim_energy_val = findViewById(R.id.sim_energy_val)
-        sim_mobility_val = findViewById(R.id.sim_mobility_val)
-        sim_run_btn = findViewById(R.id.sim_run_btn)
-
-        val seekListener = object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
-                when (bar.id) {
-                    R.id.sim_steps_seekbar    -> sim_steps_val.text    = progress.toString()
-                    R.id.sim_sedentary_seekbar -> sim_sedentary_val.text = progress.toString()
-                    R.id.sim_energy_seekbar   -> sim_energy_val.text   = (progress + 1).toString()
-                    R.id.sim_mobility_seekbar -> sim_mobility_val.text = (progress + 1).toString()
-                }
-            }
-            override fun onStartTrackingTouch(bar: SeekBar) = Unit
-            override fun onStopTrackingTouch(bar: SeekBar) = Unit
-        }
-        sim_steps_seekbar.setOnSeekBarChangeListener(seekListener)
-        sim_sedentary_seekbar.setOnSeekBarChangeListener(seekListener)
-        sim_energy_seekbar.setOnSeekBarChangeListener(seekListener)
-        sim_mobility_seekbar.setOnSeekBarChangeListener(seekListener)
-
-        sim_run_btn.setOnClickListener { runManualSimulation() }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -431,28 +388,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         rl_action_value.text = recommendation.actionId
         rl_inference_count_value.text = rlInferenceCount.toString()
         rl_source_value.text = sourceLabel
-    }
-
-    private fun runManualSimulation() {
-        val steps = sim_steps_seekbar.progress
-        val sedentary = sim_sedentary_seekbar.progress
-        val energy = sim_energy_seekbar.progress + 1    // SeekBar 0–9 → 1–10
-        val mobility = sim_mobility_seekbar.progress + 1
-
-        val observation = MovementObservation(
-            stepsLastHour = steps,
-            sedentaryMinutesToday = sedentary,
-            energyLevel = energy,
-            mobilityConfidence = mobility,
-        )
-
-        runRlInference(
-            observation = observation,
-            sensor = latestSensorSnapshot,
-            sourceLabel = getString(R.string.simulated_prefix),
-            allowCadenceControl = false,
-            nowMs = System.currentTimeMillis(),
-        )
     }
 
     private fun updateSedentaryEstimate(nowMs: Long, stepsLastHour: Int) {

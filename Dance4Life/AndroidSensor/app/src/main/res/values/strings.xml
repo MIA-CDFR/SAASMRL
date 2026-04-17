@@ -30,11 +30,5 @@
     <string name="inference_count">Inferences</string>
     <string name="last_source">Source</string>
     <string name="simulation">Simulate behavior</string>
-    <string name="sim_steps">Steps / hour</string>
-    <string name="sim_sedentary">Sedentary (min)</string>
-    <string name="sim_energy">Energy (1&#8211;10)</string>
-    <string name="sim_mobility">Mobility (1&#8211;10)</string>
-    <string name="sim_run">Run RL Model</string>
     <string name="live_sensor">Live sensor</string>
-    <string name="simulated_prefix">Simulated</string>
 </resources>
