@@ -21,3 +21,24 @@ COLLECTORS_AIR_QUALITY_COLLECTION_FIREBASE = "collectors_air_quality"
 COLLECTORS_TRAFFIC_COLLECTION_FIREBASE = "collectors_traffic"
 
 DANCE4LIFE_ACTIVITY_COLLECTION_FIREBASE = "dance4life_activity"
+
+
+AGENT_PASSWORD = "password"
+class AgentAddresses:
+    API_AGENT = "api_agent@localhost"
+    SENSOR_AGENT = "sensor_agent@localhost"
+    COORDINATOR_AGENT = "coordinator_agent@localhost"
+    ENVIRONMENT_AGENT = "environment_agent@localhost"
+    HAR_AGENT = "har_agent@localhost"
+    DATABASE_AGENT = "database_agent@localhost"
+    MATCHING_AGENT = "matching_agent@localhost"
+
+
+class AgentOntologies:
+    SENSOR_ACTIVITY = "sensor_activity"
+
+class AgentPerformatives:
+    REQUEST = "request"
+    AGREE = "agree"
+    INFORM = "inform"
+    FAILURE = "failure"

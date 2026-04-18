@@ -1,102 +1,73 @@
 import asyncio
-import time
-
+import threading
 import jsonpickle
-from pydantic import BaseModel
-from spade.agent import Agent, Message
-from spade.behaviour import CyclicBehaviour, OneShotBehaviour, Template
-from model.data_model import EnvironmentData
-from utilities import helper
+ 
+from spade.agent import Agent
+from spade.behaviour import CyclicBehaviour, Message
+from agents.base_background_agent import BaseBackgroundAgent
+from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
 
-
-ontology_list = ["sensor_activity"]
-
-class EnvironmentAgent(Agent):
-
-    class ReceiveBehaviourEnvironmentAgent(CyclicBehaviour):
-        global ontology_list
+class EnvironmentAgent(BaseBackgroundAgent):
+ 
+    class EnvironmentDataBehaviour(CyclicBehaviour):
         async def run(self):
             msg = await self.receive(timeout=10)
-
+ 
             if msg:
-                conv_id = msg.get_metadata("conversation-id")
-                perf = msg.get_metadata("performative")
+                print("\n[EnvironmentAgent] Mensagem recebida")
+ 
+                sender = msg.sender
+                performative = msg.get_metadata("performative")
                 ontology = msg.get_metadata("ontology")
+                conversation_id = msg.get_metadata("conversation-id")
                 
-                print(f"[EnvironmentAgent] Mensagem recebida: : perf={perf}, ontology={ontology}, conv_id={conv_id}")
-                
-                if perf == "request":
-                    print(f"[EnvironmentAgent] REQUEST recebida (conv_id={conv_id})")
+                print(f"[EnvironmentAgent] Performative: {performative}")
+                print(f"[EnvironmentAgent] Ontology: {ontology}")
+                print(f"[EnvironmentAgent] Conversation ID: {conversation_id}")
+ 
+                try:
+                    payload = jsonpickle.decode(msg.body)
+ 
+                    print("**********[EnvironmentAgent] Payload recebido:")
+                    print(payload)
+ 
+                    if ontology == AgentOntologies.SENSOR_ACTIVITY:
+                        if performative == AgentPerformatives.REQUEST:
 
-                    data = jsonpickle.decode(msg.body)
-                    print(ontology_list)
-                    if ontology not in ontology_list:
-                        print(f"[EnvironmentAgent] Ontology desconhecida: {ontology}")
-                        # FAILURE
-                        failure = msg.make_reply()
-                        failure.set_metadata("performative", "failure")
-                        failure.set_metadata("ontology", ontology)
-                        failure.set_metadata("conversation-id", conv_id)
-                        failure.body = f"Ontology '{ontology}' não suportada"
-                        print(f"[EnvironmentAgent] FAILURE enviada (conv_id={conv_id})")
-                        await self.send(failure)
-                        return
-                    
-                    # AGREE
-                    agree = msg.make_reply()
-                    agree.set_metadata("performative", "agree")
-                    agree.set_metadata("ontology", ontology)
-                    agree.set_metadata("conversation-id", conv_id)
-                    
-                    print(f"[EnvironmentAgent] AGREE enviada (conv_id={conv_id})")
-                    
-                    await self.send(agree)
-                    await asyncio.sleep(0.5)  # simular processamento
-                    try:
+                            print("**********[EnvironmentAgent] A processar dados de atividade")
+                            try:
+                                await self.agent.forward_message(
+                                    behaviour=self,
+                                    payload=payload,
+                                    agent_to=AgentAddresses.DATABASE_AGENT,
+                                    performative=AgentPerformatives.REQUEST,
+                                    ontology=AgentOntologies.SENSOR_ACTIVITY,
+                                    conversation_id=conversation_id
+                                )
 
-                        # processamento
-                        result = {
-                            "status": "processed",
-                            "user": data.utilizador_id,
-                            "conv_id": conv_id,
-                            "environment_data": EnvironmentData(
-                                musica_id="1",
-                                musica_nome="1",
-                                musica_banda="1",
-                                musica_tipo_id="1",
-                                musica_tipo_nome="1",
-                                quantidade_pessoas_sala=1,
-                                quantidade_pessoas_sala_actividade=1,
-                                quantidade_pessoas_sala_paradas=1,
-                                atividade_media_sala=0.1,
-                                interesse_medio_sala=0.2,
-                                matching_list_sal=helper.generate_mock_matching_list(5)
-                            ).dict()
-                        }
+                                await self.agent.forward_message(
+                                    behaviour=self,
+                                    payload=payload,
+                                    agent_to=sender,
+                                    performative=AgentPerformatives.INFORM,
+                                    ontology=AgentOntologies.SENSOR_ACTIVITY,
+                                    conversation_id=conversation_id
+                                )           
+                            except Exception as e:
+                                print(f"[EnvironmentAgent] Erro ao enviar mensagem para EnvironmentAgent: {e}")
 
-                        # INFORM
-                        inform = msg.make_reply()
-                        inform.set_metadata("performative", "inform")
-                        inform.set_metadata("ontology", ontology)
-                        inform.set_metadata("conversation-id", conv_id)
-                        inform.body = jsonpickle.encode(result)
+                            print("**********[EnvironmentAgent] Forward concluído")
 
-                        if(ontology == "sensor_activity"):
-                            print("[EnvironmentAgent] Processar sensor_activity ontology", ontology)
-
-                        print(f"[EnvironmentAgent] INFORM enviada (conv_id={conv_id})")
-                        await self.send(inform)
-
-                    except Exception as e:
-                        # FAILURE
-                        failure = msg.make_reply()
-                        failure.set_metadata("performative", "failure")
-                        failure.set_metadata("ontology", ontology)
-                        failure.set_metadata("conversation-id", conv_id)
-                        failure.body = str(e)
-                        print(f"[EnvironmentAgent] FAILURE enviada (conv_id={conv_id}, exception={e})")
-                        await self.send(failure)
-
+                        elif performative == AgentPerformatives.INFORM:
+                            print("[EnvironmentAgent] INFORM recebido - dados de atividade processados") 
+ 
+                except Exception as e:
+                    print(f"[EnvironmentAgent] Erro ao processar mensagem: {e}")
+ 
+            else:
+                print("[EnvironmentAgent] Nenhuma mensagem recebida")
+ 
     async def setup(self):
-        print("EnvironmentAgent iniciado")
-        self.add_behaviour(self.ReceiveBehaviourEnvironmentAgent())
+        print(f"[EnvironmentAgent] {self.jid} iniciado - setup")
+        self.add_behaviour(self.EnvironmentDataBehaviour())
+ 

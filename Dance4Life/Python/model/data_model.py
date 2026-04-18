@@ -3,8 +3,7 @@ from typing import List, Optional
 
 
 class SensorActivityData(BaseModel):
-    utilizador_id: str  # obrigatório
-    utilizador_nome: Optional[str] = None
+    device_id: str  # obrigatório
     acc: Optional[float] = None
     hr: Optional[int] = None
     ritmo: Optional[float] = None
