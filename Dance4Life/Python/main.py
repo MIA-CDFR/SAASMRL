@@ -7,25 +7,25 @@ from agents.har_agent import HarAgent
 from api.server import start_api, stop_api
 from agents.sensor_agent import SensorAgent
 from agents.coordinator_agent import CoordinatorAgent
-from config.config import AgentAddresses
+from config.config import AgentAddresses, AGENT_PASSWORD
 
 import asyncio
 
 
 def start_spade_agents():
-    sensor_agent = SensorAgent(AgentAddresses.SENSOR_AGENT, "password")
+    sensor_agent = SensorAgent(AgentAddresses.SENSOR_AGENT, AGENT_PASSWORD)
     sensor_agent.start_background()
 
-    coordinator_agent = CoordinatorAgent(AgentAddresses.COORDINATOR_AGENT, "password")
+    coordinator_agent = CoordinatorAgent(AgentAddresses.COORDINATOR_AGENT, AGENT_PASSWORD)
     coordinator_agent.start_background()
 
-    environment_agent = EnvironmentAgent(AgentAddresses.ENVIRONMENT_AGENT, "password")
+    environment_agent = EnvironmentAgent(AgentAddresses.ENVIRONMENT_AGENT, AGENT_PASSWORD)
     environment_agent.start_background()
 
-    har_agent = HarAgent(AgentAddresses.HAR_AGENT, "password")
+    har_agent = HarAgent(AgentAddresses.HAR_AGENT, AGENT_PASSWORD)
     har_agent.start_background()
 
-    database_agent = DatabaseAgent(AgentAddresses.DATABASE_AGENT, "password")
+    database_agent = DatabaseAgent(AgentAddresses.DATABASE_AGENT, AGENT_PASSWORD)
     database_agent.start_background()
 
     print("SPADE agents iniciados")

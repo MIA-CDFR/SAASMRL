@@ -23,6 +23,17 @@ async def save_activity(data):
         print(f"---------------ERROR: {error}------------------")
         return False  # falha
 
+async def save_movement_recommendation(data):
+    try:
+        print("SAVE RECOMMENDATION:", data)
+        db.collection("movement_recommendations").add(data)
+        print(f"---------------SUCCESS: Movement recommendation saved------------------")
+        return True  # sucesso
+    except Exception as error:
+        print(f"---------------ERROR: {error}------------------")
+        return False  # falha
+    
+
 # # 🧠 dados inteligentes
 # def save_activity(data):
 #     print("🔥 SAVE ACTIVITY:", data)

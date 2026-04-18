@@ -21,9 +21,11 @@ COLLECTORS_AIR_QUALITY_COLLECTION_FIREBASE = "collectors_air_quality"
 COLLECTORS_TRAFFIC_COLLECTION_FIREBASE = "collectors_traffic"
 
 DANCE4LIFE_ACTIVITY_COLLECTION_FIREBASE = "dance4life_activity"
+DANCE4LIFE_ACTIVITY_COLLECTION_FIREBASE = "dance4life_movement_recommendation"
 
 
 AGENT_PASSWORD = "password"
+
 class AgentAddresses:
     API_AGENT = "api_agent@localhost"
     SENSOR_AGENT = "sensor_agent@localhost"
@@ -36,6 +38,7 @@ class AgentAddresses:
 
 class AgentOntologies:
     SENSOR_ACTIVITY = "sensor_activity"
+    MOVEMENT_RECOMMENDATION = "movement_recommendation"
 
 class AgentPerformatives:
     REQUEST = "request"

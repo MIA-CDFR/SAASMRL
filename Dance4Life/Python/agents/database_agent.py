@@ -55,6 +55,22 @@ class DatabaseAgent(BaseBackgroundAgent):
                         elif performative == AgentPerformatives.INFORM:
                             print("[DatabaseAgent] INFORM recebido - dados de atividade processados") 
  
+                    if ontology == AgentOntologies.MOVEMENT_RECOMMENDATION:
+                        if performative == AgentPerformatives.REQUEST:
+
+                            payload.pop("visited_agents", None)
+
+                            await save_movement_recommendation(payload)
+
+                            await self.agent.forward_message(
+                                behaviour=self,
+                                payload=payload,
+                                agent_to=sender,
+                                performative=AgentPerformatives.INFORM,
+                                ontology=AgentOntologies.MOVEMENT_RECOMMENDATION,
+                                conversation_id=conversation_id
+                            )
+                            
                 except Exception as e:
                     print(f"[DatabaseAgent] Erro ao processar mensagem: {e}")
  
