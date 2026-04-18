@@ -6,6 +6,7 @@ from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour, Message
 from agents.base_background_agent import BaseBackgroundAgent
 from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
+from services.firebase_service import save_activity
 
 class DatabaseAgent(BaseBackgroundAgent):
  
@@ -36,7 +37,9 @@ class DatabaseAgent(BaseBackgroundAgent):
 
                             print("**********[DatabaseAgent] A processar dados de atividade")
                             try:
-                                  await self.agent.forward_message(
+                                payload.pop("visited_agents", None) # Remove visited_agents antes de salvar no Firebase
+                                fire_base_result = await save_activity(payload)
+                                await self.agent.forward_message(
                                     behaviour=self,
                                     payload=payload,
                                     agent_to=sender,

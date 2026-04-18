@@ -14,12 +14,13 @@ def save_data_from_collectors(collection, data):
 
 async def save_activity(data):
     try:
-        data_dict = data.dict()
+        #data_dict = data.dict()
         print("SAVE RAW:", data)
-        await db.collection(DANCE4LIFE_ACTIVITY_COLLECTION_FIREBASE).add(data_dict)
+        db.collection(DANCE4LIFE_ACTIVITY_COLLECTION_FIREBASE).add(data)
+        print(f"---------------SUCCESS: Activity saved------------------")
         return True  # sucesso
     except Exception as error:
-        print(error)
+        print(f"---------------ERROR: {error}------------------")
         return False  # falha
 
 # # 🧠 dados inteligentes
