@@ -54,10 +54,7 @@ def collect_data_activities():
         }), 200
 
     except Exception as e:
-        return jsonify({
-            "status": "error",
-            "details": str(e)
-        }), 500
+        return jsonify({"status": "error", "details": str(e)}), 500
 
 @app.route('/movement_recommendation', methods=['POST'])
 def movement_recommendation():
@@ -82,6 +79,34 @@ def movement_recommendation():
         return jsonify({
             "status": "ok",
             "message": "Dados enviados para o Sensor Agent"
+        }), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "details": str(e)}), 500
+
+@app.route('/matching', methods=['POST'])
+def matching():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"status": "error"}), 400
+
+        future = asyncio.run_coroutine_threadsafe(
+            sender_agent.send_message(
+                payload=data,
+                agent_to=AgentAddresses.MATCHING_AGENT,
+                performative=AgentPerformatives.REQUEST,
+                ontology=AgentOntologies.MATCHING
+            ),
+            sender_agent.agent_loop
+        )
+
+        future.result()
+
+        return jsonify({
+            "status": "ok",
+            "message": "Dados enviados para o Matching Agent"
         }), 200
 
     except Exception as e:

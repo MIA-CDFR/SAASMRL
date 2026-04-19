@@ -6,6 +6,8 @@ from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour, Message
 from agents.base_background_agent import BaseBackgroundAgent
 from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
+from sensor.external_sensors import get_weather
+
 
 class EnvironmentAgent(BaseBackgroundAgent):
  
@@ -27,6 +29,11 @@ class EnvironmentAgent(BaseBackgroundAgent):
  
                 try:
                     payload = jsonpickle.decode(msg.body)
+
+                    # Enriquecer o payload com dados ambientais
+                    payload.update({
+                        "weather": get_weather(payload.get("latitude"), payload.get("longitude"))
+                    })
  
                     print("**********[EnvironmentAgent] Payload recebido:")
                     print(payload)
