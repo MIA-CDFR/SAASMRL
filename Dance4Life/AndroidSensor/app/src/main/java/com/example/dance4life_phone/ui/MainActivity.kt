@@ -196,9 +196,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
 
         // 🎵 RITMO → UI
-        // controller.setRitmoListener { ritmo ->
-        //    Toast.makeText(this, "Ritmo: $ritmo", Toast.LENGTH_SHORT).show()
-        //}
+        controller.setRitmoListener { ritmo ->
+            Toast.makeText(this, "Ritmo: $ritmo", Toast.LENGTH_SHORT).show()
+        }
 
         controller.setMovementRecommendationListener { recommendation ->
             Toast.makeText(
