@@ -1,25 +1,41 @@
-# Training hyperparameters for Dance4Life movement coach policy
+# Training hyperparameters for Dance4Life coaching policy
 ppo:
   learning_rate: 0.0003
-  n_steps: 2048
+  n_steps: 1024
   batch_size: 64
   n_epochs: 10
   gamma: 0.99
   gae_lambda: 0.95
   clip_range: 0.2
-  ent_coef: 0.01          # Encourages exploration
+  ent_coef: 0.01
   vf_coef: 0.5
   max_grad_norm: 0.5
 
+dqn:
+  learning_rate: 0.0005
+  buffer_size: 100000
+  learning_starts: 5000
+  batch_size: 128
+  tau: 1.0
+  gamma: 0.99
+  train_freq: 4
+  gradient_steps: 1
+  target_update_interval: 1000
+  exploration_fraction: 0.25
+  exploration_initial_eps: 1.0
+  exploration_final_eps: 0.05
+  max_grad_norm: 10.0
+
 training:
-  total_timesteps: 500_000
-  n_envs: 8               # Parallel env workers
+  algorithms: ["ppo", "dqn"]
+  total_timesteps: 400000
+  n_envs: 8
   eval_freq: 10_000
   n_eval_episodes: 20
   seed: 42
-  episode_length: 96      # 8-hour day at 5-min intervals
+  episode_length: 96
 
 output:
   model_dir: checkpoints
   log_dir: runs
-  model_name: dance4life_coach_v1
+  experiment_tag: dance4life_coach_v2

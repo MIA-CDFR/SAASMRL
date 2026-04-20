@@ -230,6 +230,169 @@
             app:layout_constraintTop_toTopOf="@id/hr_label"
             app:layout_constraintStart_toEndOf="@id/hr_label"/>
 
+        <!-- RL METRICS -->
+        <TextView
+            android:id="@+id/rl_title"
+            style="@style/TextTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/rl_metrics"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/hr_label" />
+
+        <TextView
+            android:id="@+id/rl_policy_label"
+            style="@style/TextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/rl_policy"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rl_title" />
+
+        <TextView
+            android:id="@+id/rl_policy_value"
+            style="@style/TextValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="@string/default_dash"
+            app:layout_constraintStart_toEndOf="@id/rl_policy_label"
+            app:layout_constraintTop_toTopOf="@id/rl_policy_label" />
+
+        <TextView
+            android:id="@+id/rl_steps_label"
+            style="@style/TextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/steps_last_hour"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rl_policy_label" />
+
+        <TextView
+            android:id="@+id/rl_steps_value"
+            style="@style/TextValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="@string/default_0"
+            app:layout_constraintStart_toEndOf="@id/rl_steps_label"
+            app:layout_constraintTop_toTopOf="@id/rl_steps_label" />
+
+        <TextView
+            android:id="@+id/rl_sedentary_label"
+            style="@style/TextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sedentary_minutes"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rl_steps_label" />
+
+        <TextView
+            android:id="@+id/rl_sedentary_value"
+            style="@style/TextValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="@string/default_0"
+            app:layout_constraintStart_toEndOf="@id/rl_sedentary_label"
+            app:layout_constraintTop_toTopOf="@id/rl_sedentary_label" />
+
+        <TextView
+            android:id="@+id/rl_energy_label"
+            style="@style/TextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/energy_level"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rl_sedentary_label" />
+
+        <TextView
+            android:id="@+id/rl_energy_value"
+            style="@style/TextValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="@string/default_0"
+            app:layout_constraintStart_toEndOf="@id/rl_energy_label"
+            app:layout_constraintTop_toTopOf="@id/rl_energy_label" />
+
+        <TextView
+            android:id="@+id/rl_mobility_label"
+            style="@style/TextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mobility_confidence"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rl_energy_label" />
+
+        <TextView
+            android:id="@+id/rl_mobility_value"
+            style="@style/TextValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="@string/default_0"
+            app:layout_constraintStart_toEndOf="@id/rl_mobility_label"
+            app:layout_constraintTop_toTopOf="@id/rl_mobility_label" />
+
+        <TextView
+            android:id="@+id/rl_action_label"
+            style="@style/TextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/last_action"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rl_mobility_label" />
+
+        <TextView
+            android:id="@+id/rl_action_value"
+            style="@style/TextValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="@string/default_dash"
+            app:layout_constraintStart_toEndOf="@id/rl_action_label"
+            app:layout_constraintTop_toTopOf="@id/rl_action_label" />
+
+        <TextView
+            android:id="@+id/rl_inference_count_label"
+            style="@style/TextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/inference_count"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rl_action_label" />
+
+        <TextView
+            android:id="@+id/rl_inference_count_value"
+            style="@style/TextValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="@string/default_0"
+            app:layout_constraintStart_toEndOf="@id/rl_inference_count_label"
+            app:layout_constraintTop_toTopOf="@id/rl_inference_count_label" />
+
+        <TextView
+            android:id="@+id/rl_source_label"
+            style="@style/TextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/last_source"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rl_inference_count_label" />
+
+        <TextView
+            android:id="@+id/rl_source_value"
+            style="@style/TextValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="@string/default_dash"
+            app:layout_constraintStart_toEndOf="@id/rl_source_label"
+            app:layout_constraintTop_toTopOf="@id/rl_source_label" />
+
         <!-- LOCATION -->
 
         <TextView
@@ -238,10 +401,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="108dp"
+            android:layout_marginTop="20dp"
             android:text="@string/location"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/hr_label" />
+            app:layout_constraintTop_toBottomOf="@id/rl_source_label" />
 
         <TextView
             style="@style/TextLabel"

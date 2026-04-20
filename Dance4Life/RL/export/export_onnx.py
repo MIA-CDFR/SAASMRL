@@ -1,69 +1,64 @@
-"""
-Dance4Life – ONNX export script
-==================================
-Extracts the trained PPO actor network and exports it as an ONNX model
-ready to be bundled in the Android app.
+"""Dance4Life ONNX export script.
 
-The ONNX model accepts one input tensor:
-    obs: float32 [1, 4]
-        [steps_last_hour / 1000, sedentary_minutes / 480,
-         energy_level / 10, mobility_confidence / 10]
-
-The ONNX model produces one output tensor:
-    action_logits: float32 [1, 4]
-        argmax → action index:  0=rest  1=stretch  2=walk  3=dance
-
-Usage:
-    python export_onnx.py
-    python export_onnx.py --model ../training/checkpoints/best/best_model \
-                          --output dance4life_coach_v1.onnx
-    python export_onnx.py --validate
+Exports either PPO or DQN policies trained in Stable-Baselines3.
+Input shape is always [batch, 3] for:
+    [activity_level, physical_fatigue, irritation_level]
 """
 
 from __future__ import annotations
 
 import argparse
 import shutil
-import sys
 from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
 import torch
-from stable_baselines3 import PPO
+from stable_baselines3 import DQN, PPO
 
 
-def export(model_path: str, output_path: str) -> None:
-    print(f"[dance4life] Loading SB3 model from {model_path} …")
-    sb3_model = PPO.load(model_path)
+def _load_model(algo: str, model_path: str):
+    if algo == "ppo":
+        return PPO.load(model_path)
+    if algo == "dqn":
+        return DQN.load(model_path)
+    raise ValueError(f"Unsupported algorithm: {algo}")
+
+
+def export(algo: str, model_path: str, output_path: str) -> None:
+    print(f"[dance4life] Loading {algo.upper()} model from {model_path}...")
+    sb3_model = _load_model(algo, model_path)
 
     policy = sb3_model.policy
     policy.eval()
 
-    # SB3 MlpPolicy actor: obs → latent features → action logits
-    class ActorOnly(torch.nn.Module):
+    class PolicyOnly(torch.nn.Module):
         def __init__(self, p: type(policy)) -> None:
             super().__init__()
             self._policy = p
 
         def forward(self, obs: torch.Tensor) -> torch.Tensor:
-            features = self._policy.extract_features(obs, self._policy.pi_features_extractor)
-            latent_pi, _ = self._policy.mlp_extractor(features)
-            return self._policy.action_net(latent_pi)
+            if algo == "ppo":
+                features = self._policy.extract_features(obs, self._policy.pi_features_extractor)
+                latent_pi, _ = self._policy.mlp_extractor(features)
+                return self._policy.action_net(latent_pi)
 
-    actor = ActorOnly(policy)
-    actor.eval()
+            # DQN exports Q-values for each action.
+            return self._policy.q_net(obs)
 
-    dummy_input = torch.zeros(1, 4, dtype=torch.float32)
+    model_for_export = PolicyOnly(policy)
+    model_for_export.eval()
 
-    print(f"[dance4life] Exporting to {output_path} …")
+    dummy_input = torch.zeros(1, 3, dtype=torch.float32)
+
+    print(f"[dance4life] Exporting to {output_path}...")
     torch.onnx.export(
-        actor,
+        model_for_export,
         dummy_input,
         output_path,
         input_names=["obs"],
-        output_names=["action_logits"],
-        dynamic_axes={"obs": {0: "batch_size"}, "action_logits": {0: "batch_size"}},
+        output_names=["action_scores"],
+        dynamic_axes={"obs": {0: "batch_size"}, "action_scores": {0: "batch_size"}},
         opset_version=17,
         do_constant_folding=True,
     )
@@ -71,38 +66,36 @@ def export(model_path: str, output_path: str) -> None:
 
 
 def validate(onnx_path: str) -> None:
-    print(f"[dance4life] Validating {onnx_path} with onnxruntime …")
+    print(f"[dance4life] Validating {onnx_path} with onnxruntime...")
     session = ort.InferenceSession(onnx_path, providers=["CPUExecutionProvider"])
     input_name = session.get_inputs()[0].name
 
     test_cases = [
-        # (steps_last_hour/1000, sedentary/480, energy/10, mobility/10)
-        [0.1, 0.8, 0.3, 0.4],   # very sedentary, low energy
-        [0.5, 0.2, 0.7, 0.8],   # active, good energy
-        [0.0, 1.0, 0.5, 0.5],   # maximum sedentary
-        [1.0, 0.0, 1.0, 1.0],   # very active, high energy
+        [1.0, 2.0, 1.0],
+        [5.0, 4.0, 3.0],
+        [7.0, 8.0, 6.0],
+        [2.0, 9.0, 9.0],
     ]
 
-    action_names = ["rest", "stretch", "walk", "dance"]
+    action_names = ["silence", "low", "medium", "high"]
     for obs in test_cases:
         x = np.array([obs], dtype=np.float32)
-        logits = session.run(None, {input_name: x})[0][0]
-        action = int(np.argmax(logits))
-        steps = int(obs[0] * 1000)
-        sed = int(obs[1] * 480)
-        energy = int(obs[2] * 10)
-        mob = int(obs[3] * 10)
+        scores = session.run(None, {input_name: x})[0][0]
+        action = int(np.argmax(scores))
+        activity = obs[0]
+        fatigue = obs[1]
+        irritation = obs[2]
         print(
-            f"  steps={steps:4d}  sed={sed:3d}min  energy={energy:2d}  mob={mob:2d}"
+            f"  activity={activity:4.1f}  fatigue={fatigue:4.1f}  irritation={irritation:4.1f}"
             f"  →  [{action}] {action_names[action]}"
-            f"  logits={[f'{v:.2f}' for v in logits]}"
+            f"  scores={[f'{v:.2f}' for v in scores]}"
         )
 
     print("[dance4life] Validation passed ✓")
 
 
 def copy_to_assets(onnx_path: str, workspace_root: Path) -> None:
-    dest = workspace_root / "apps/android/app/src/main/assets/models"
+    dest = workspace_root / "AndroidSensor/app/src/main/assets/models"
     dest.mkdir(parents=True, exist_ok=True)
     dest_file = dest / Path(onnx_path).name
     shutil.copy2(onnx_path, dest_file)
@@ -111,12 +104,18 @@ def copy_to_assets(onnx_path: str, workspace_root: Path) -> None:
 
 def main() -> None:
     here = Path(__file__).parent
-    workspace_root = here.parent.parent.parent.parent  # ml/export → ml → workspace root
+    workspace_root = here.parent.parent.parent.parent  # RL/export -> Dance4Life root
 
-    default_model = str(here.parent / "training/checkpoints/best/best_model")
-    default_output = str(here / "dance4life_coach_v1.onnx")
+    default_model = str(here.parent / "training/checkpoints/ppo/best/best_model")
+    default_output = str(here / "dance4life_coach_v2_ppo.onnx")
 
     parser = argparse.ArgumentParser(description="Export dance4life coach to ONNX")
+    parser.add_argument(
+        "--algo",
+        choices=["ppo", "dqn"],
+        default="ppo",
+        help="Algorithm used by the SB3 model",
+    )
     parser.add_argument("--model", default=default_model, help="Path to SB3 model (no .zip)")
     parser.add_argument("--output", default=default_output, help="Output ONNX file path")
     parser.add_argument("--validate", action="store_true", help="Run validation after export")
@@ -127,8 +126,12 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    export(args.model, args.output)
-    validate(args.output)
+    if args.algo == "dqn" and args.output == default_output:
+        args.output = str(here / "dance4life_coach_v2_dqn.onnx")
+
+    export(args.algo, args.model, args.output)
+    if args.validate:
+        validate(args.output)
 
     if not args.no_copy:
         copy_to_assets(args.output, workspace_root)
