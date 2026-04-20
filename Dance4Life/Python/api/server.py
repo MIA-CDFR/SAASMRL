@@ -1,129 +1,119 @@
-import random
-
 from flask import Flask, request, jsonify
 import asyncio
-from pydantic import ValidationError
-from agents.api_agent import ApiAgent
-from model.data_model import SensorActivityData
-from spade.template import Template
-from config.config import (
-    DANCE4LIFE_RL_METRICS_COLLECTION_FIREBASE,
-)
-from services.firebase_service import save_data_from_collectors
+
+from agents.base_sender_agent import BaseSenderAgent
+from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
 
 app = Flask(__name__)
 
-api_agent = None
-sensor_loop = None
 
-def init_agent(agent, loop):
-    global api_agent, sensor_loop
-    api_agent = agent
-    sensor_loop = loop
-    print("ApiAgent e sensor_loop inicializados")
+sender_agent = BaseSenderAgent(
+    AgentAddresses.API_AGENT,
+    AGENT_PASSWORD
+)
+
+def start_api():
+    sender_agent.start_background()
+    app.run(host="0.0.0.0", port=5000, use_reloader=False)
 
 
-def send_data_to_sensor_agent(data):
-    global api_agent, sensor_loop
+def stop_api():
+    sender_agent.stop_background()
 
-    if api_agent is None or sensor_loop is None:
-        print("ApiAgent ou sensor_loop não inicializados")
-        return False
 
-    async def run():
-        future = sensor_loop.create_future()
-
-        behaviour = api_agent.RequestBehaviourSendSensorActivityToSensor(
-            ontology="sensor_activity",
-            data=data,
-            receiver="sensor_agent@localhost",
-            future=future
-        )
-
-        template = Template()
-        template.set_metadata("conversation-id", behaviour.conversation_id)
-
-        api_agent.add_behaviour(behaviour, template)        
-
-        return await asyncio.wait_for(future, timeout=15)
-
-    try:
-        future = asyncio.run_coroutine_threadsafe(run(), sensor_loop)
-        return future.result(timeout=20)
-    except Exception as e:
-        print("Erro:", e)
-        return False
-    
 
 @app.route('/collect_data_activities', methods=['POST'])
 def collect_data_activities():
     try:
-        data = request.json or {}
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                "status": "error",
+                "details": "Body JSON inválido ou vazio"
+            }), 400
 
         print("\nDados recebidos:")
         print(data)
 
-        if data.get("eventType") == "rl_metric":
-            save_data_from_collectors(DANCE4LIFE_RL_METRICS_COLLECTION_FIREBASE, data)
-            return jsonify({"status": "ok", "stored": "rl_metric"}), 200
+        future = asyncio.run_coroutine_threadsafe(
+            sender_agent.send_message(
+                payload=data,
+                agent_to=AgentAddresses.SENSOR_AGENT,
+                performative=AgentPerformatives.REQUEST,
+                ontology=AgentOntologies.SENSOR_ACTIVITY
+            ),
+            sender_agent.agent_loop
+        )
 
-        if "utilizador_id" not in data and "userId" in data:
-            data["utilizador_id"] = data["userId"]
+        future.result()
 
-        sensor_data = SensorActivityData(**data)
-        print(sensor_data)
-        
-        sent = send_data_to_sensor_agent(sensor_data)
-        
-        if not sent:
-            return jsonify({"status": "agent_not_ready"}), 503
-
-        return jsonify({"status": "ok"}), 200
-
-    except ValidationError as e:
         return jsonify({
-            "status": "error",
-            "details": e.errors()
-        }), 400
+            "status": "ok",
+            "message": "Dados enviados para o Sensor Agent"
+        }), 200
 
-pending_messages = {}
+    except Exception as e:
+        return jsonify({"status": "error", "details": str(e)}), 500
 
+@app.route('/movement_recommendation', methods=['POST'])
+def movement_recommendation():
+    try:
+        data = request.get_json()
 
-def add_invite(user_id, invite_id, from_user):
-    if user_id not in pending_messages:
-        pending_messages[user_id] = []
+        if not data:
+            return jsonify({"status": "error"}), 400
 
-    pending_messages[user_id].append({
-        "type": "invite",
-        "id": invite_id,
-        "user": from_user
-    })
+        future = asyncio.run_coroutine_threadsafe(
+            sender_agent.send_message(
+                payload=data,
+                agent_to=AgentAddresses.SENSOR_AGENT,
+                performative=AgentPerformatives.REQUEST,
+                ontology=AgentOntologies.MOVEMENT_RECOMMENDATION
+            ),
+            sender_agent.agent_loop
+        )
 
-@app.route('/get_updates/<user_id>', methods=['GET'])
-def get_updates(user_id):
-    add_invite(user_id, f"invite{random.randint(1000, 9999)}", f"user{random.randint(1000, 9999)}")  # Exemplo de convite para teste
-    msgs = pending_messages.get(user_id, [])
+        future.result()
 
-    # limpar depois de enviar
-    pending_messages[user_id] = []
-    print(f"Enviando mensagens para {user_id}: {msgs}")
+        return jsonify({
+            "status": "ok",
+            "message": "Dados enviados para o Sensor Agent"
+        }), 200
 
-    return jsonify(msgs)
+    except Exception as e:
+        return jsonify({"status": "error", "details": str(e)}), 500
 
-@app.route('/accept_invite', methods=['POST'])
-def accept_invite():
-    data = request.json
-    invite_id = data.get("inviteId")
+@app.route('/matching', methods=['POST'])
+def matching():
+    try:
+        data = request.get_json()
 
-    print(f"Invite aceite: {invite_id}")
+        if not data:
+            return jsonify({"status": "error"}), 400
 
-    return jsonify({"status": "ok"})
+        future = asyncio.run_coroutine_threadsafe(
+            sender_agent.send_message(
+                payload=data,
+                agent_to=AgentAddresses.MATCHING_AGENT,
+                performative=AgentPerformatives.REQUEST,
+                ontology=AgentOntologies.MATCHING
+            ),
+            sender_agent.agent_loop
+        )
 
-@app.route('/reject_invite', methods=['POST'])
-def reject_invite():
-    data = request.json
-    invite_id = data.get("inviteId")
+        future.result()
 
-    print(f"Invite rejeitado: {invite_id}")
+        return jsonify({
+            "status": "ok",
+            "message": "Dados enviados para o Matching Agent"
+        }), 200
 
-    return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"status": "error", "details": str(e)}), 500
+    
+if __name__ == '__main__':
+    try:
+        app.run(host='0.0.0.0', port=5000, debug=True)
+    finally:
+        sender_agent.stop_background()

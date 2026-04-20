@@ -37,6 +37,8 @@ import com.dance4life.wear.R
 import kotlinx.coroutines.delay
 import com.dance4life.wear.presentation.notifier.InviteNotifier
 import androidx.compose.ui.platform.LocalContext
+import com.dance4life.core.data.model.MovementRecommendation
+import com.dance4life.core.rlinference.RlCoachPolicyFactory
 
 class MainActivity : ComponentActivity() {
 
@@ -52,7 +54,8 @@ class MainActivity : ComponentActivity() {
             locationProvider = WearLocationProvider(this), // ✅ REAL
             repository = DataRepository(),
             ritmoCalculator = RitmoCalculator(),
-            deviceProvider = WearDeviceProvider(this)
+            deviceProvider = WearDeviceProvider(this),
+            rlCoachPolicy = RlCoachPolicyFactory.create(this)
         )
 
         setContent {
@@ -169,6 +172,7 @@ fun MainScreen(controller: DanceController) {
     var sensorData by remember { mutableStateOf<SensorData?>(null) }
     var locationData by remember { mutableStateOf<LocationData?>(null) }
     var ritmo by remember { mutableStateOf<Double?>(null) }
+    var recommendation by remember { mutableStateOf<MovementRecommendation?>(null) }
 
     val context = LocalContext.current
     /*
@@ -195,6 +199,10 @@ fun MainScreen(controller: DanceController) {
         controller.setLocationListener { location ->
             Log.d("WEAR", "LOCATION: ${location.latitude}, ${location.longitude}")
             locationData = location
+        }
+
+        controller.setMovementRecommendationListener {
+            recommendation = it
         }
 
         /*
@@ -338,6 +346,24 @@ fun MainScreen(controller: DanceController) {
                     text = "💃 Ritmo: ${"%.1f".format(ritmo)}",
                     color = Color.White,
                     fontSize = 14.sp
+                )
+            }
+
+            if (recommendation != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = recommendation!!.title,
+                    color = Color.Yellow,
+                    fontSize = 12.sp
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = recommendation!!.encouragementMessage,
+                    color = Color.White,
+                    fontSize = 10.sp
                 )
             }
         }

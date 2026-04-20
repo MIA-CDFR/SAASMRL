@@ -1,91 +1,101 @@
 import asyncio
-import time
-
+import threading
 import jsonpickle
-from pydantic import BaseModel
-from spade.agent import Agent, Message
-from spade.behaviour import CyclicBehaviour, OneShotBehaviour, Template
-from model.data_model import CalculatedActivityData
-from utilities import helper
-from services.firebase_service import save_activity
+ 
+from spade.agent import Agent
+from spade.behaviour import CyclicBehaviour, Message
+from agents.base_background_agent import BaseBackgroundAgent
+from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
+from services.firebase_service import save_activity, save_matching, save_movement_recommendation
 
-
-ontology_list = ["sensor_activity"]
-
-class DatabaseAgent(Agent):
-
-    class ReceiveBehaviourDatabaseAgent(CyclicBehaviour):
-        global ontology_list
+class DatabaseAgent(BaseBackgroundAgent):
+ 
+    class ReceiveDatabaseDataBehaviour(CyclicBehaviour):
         async def run(self):
             msg = await self.receive(timeout=10)
-
+ 
             if msg:
-                conv_id = msg.get_metadata("conversation-id")
-                perf = msg.get_metadata("performative")
+                print("\n[DatabaseAgent] Mensagem recebida")
+ 
+                sender = msg.sender
+                performative = msg.get_metadata("performative")
                 ontology = msg.get_metadata("ontology")
+                conversation_id = msg.get_metadata("conversation-id")
                 
-                print(f"[DatabaseAgent] Mensagem recebida: : perf={perf}, ontology={ontology}, conv_id={conv_id}")
-                
-                if perf == "request":
-                    print(f"[DatabaseAgent] REQUEST recebida (conv_id={conv_id})")
+                print(f"[DatabaseAgent] Performative: {performative}")
+                print(f"[DatabaseAgent] Ontology: {ontology}")
+                print(f"[DatabaseAgent] Conversation ID: {conversation_id}")
+ 
+                try:
+                    payload = jsonpickle.decode(msg.body)
+ 
+                    print("**********[DatabaseAgent] Payload recebido:")
+                    print(payload)
+ 
+                    if ontology == AgentOntologies.SENSOR_ACTIVITY:
+                        if performative == AgentPerformatives.REQUEST:
 
-                    data = jsonpickle.decode(msg.body)
-                    print(ontology_list)
-                    if ontology not in ontology_list:
-                        print(f"[DatabaseAgent] Ontology desconhecida: {ontology}")
-                        
-                        # FAILURE
-                        failure = msg.make_reply()
-                        failure.set_metadata("performative", "failure")
-                        failure.set_metadata("ontology", ontology)
-                        failure.set_metadata("conversation-id", conv_id)
-                        failure.body = f"Ontology '{ontology}' não suportada"
-                        print(f"[DatabaseAgent] FAILURE enviada (conv_id={conv_id})")
-                        await self.send(failure)
-                        return
-                    
-                    # AGREE
-                    agree = msg.make_reply()
-                    agree.set_metadata("performative", "agree")
-                    agree.set_metadata("ontology", ontology)
-                    agree.set_metadata("conversation-id", conv_id)
-                    
-                    print(f"[DatabaseAgent] AGREE enviada (conv_id={conv_id})")
-                    print(data)
-                    await self.send(agree)
-                    await asyncio.sleep(0.5)  # simular processamento
-                    try:
-                        # processamento
-                        fire_base_result = await save_activity(data)
-                        result = {
-                            "status": fire_base_result and "processed" or "failed",
-                            "user": data.utilizador_id,
-                            "conv_id": conv_id
-                        }
+                            print("**********[DatabaseAgent] A processar dados de atividade")
+                            try:
+                                payload.pop("visited_agents", None) # Remove visited_agents antes de salvar no Firebase
 
-                        # INFORM
-                        inform = msg.make_reply()
-                        inform.set_metadata("performative", "inform")
-                        inform.set_metadata("ontology", ontology)
-                        inform.set_metadata("conversation-id", conv_id)
-                        inform.body = jsonpickle.encode(result)
+                                await save_activity(payload)
 
-                        if(ontology == "sensor_activity"):
-                            print("[DatabaseAgent] Processar sensor_activity ontology", ontology)
+                                await self.agent.forward_message(
+                                    behaviour=self,
+                                    payload=payload,
+                                    agent_to=sender,
+                                    performative=AgentPerformatives.INFORM,
+                                    ontology=AgentOntologies.SENSOR_ACTIVITY,
+                                    conversation_id=conversation_id
+                                )           
+                            except Exception as e:
+                                print(f"[DatabaseAgent] Erro ao enviar mensagem para DatabaseAgent: {e}")
 
-                        print(f"[DatabaseAgent] INFORM enviada (conv_id={conv_id})")
-                        await self.send(inform)
+                            print("**********[DatabaseAgent] Forward concluído")
 
-                    except Exception as e:
-                        # FAILURE
-                        failure = msg.make_reply()
-                        failure.set_metadata("performative", "failure")
-                        failure.set_metadata("ontology", ontology)
-                        failure.set_metadata("conversation-id", conv_id)
-                        failure.body = str(e)
-                        print(f"[DatabaseAgent] FAILURE enviada (conv_id={conv_id}, exception={e})")
-                        await self.send(failure)
+                        elif performative == AgentPerformatives.INFORM:
+                            print("[DatabaseAgent] INFORM recebido - dados de atividade processados") 
+ 
+                    if ontology == AgentOntologies.MOVEMENT_RECOMMENDATION:
+                        if performative == AgentPerformatives.REQUEST:
 
+                            payload.pop("visited_agents", None)
+
+                            await save_movement_recommendation(payload)
+
+                            await self.agent.forward_message(
+                                behaviour=self,
+                                payload=payload,
+                                agent_to=sender,
+                                performative=AgentPerformatives.INFORM,
+                                ontology=AgentOntologies.MOVEMENT_RECOMMENDATION,
+                                conversation_id=conversation_id
+                            ) 
+ 
+                    if ontology == AgentOntologies.MATCHING:
+                        if performative == AgentPerformatives.REQUEST:
+
+                            payload.pop("visited_agents", None)
+
+                            await save_matching(payload)
+
+                            await self.agent.forward_message(
+                                behaviour=self,
+                                payload=payload,
+                                agent_to=sender,
+                                performative=AgentPerformatives.INFORM,
+                                ontology=AgentOntologies.MATCHING,
+                                conversation_id=conversation_id
+                            )
+                            
+                except Exception as e:
+                    print(f"[DatabaseAgent] Erro ao processar mensagem: {e}")
+ 
+            else:
+                print("[DatabaseAgent] Nenhuma mensagem recebida")
+ 
     async def setup(self):
-        print("DatabaseAgent iniciado")
-        self.add_behaviour(self.ReceiveBehaviourDatabaseAgent())
+        print(f"[DatabaseAgent] {self.jid} iniciado - setup")
+        self.add_behaviour(self.ReceiveDatabaseDataBehaviour())
+ 

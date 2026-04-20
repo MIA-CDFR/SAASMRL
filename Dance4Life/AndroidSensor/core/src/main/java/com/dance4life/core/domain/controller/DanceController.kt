@@ -11,16 +11,22 @@ import com.dance4life.core.domain.location.LocationProvider
 import com.dance4life.core.domain.sensor.SensorProvider
 import com.dance4life.core.utils.Constants.SEND_ACTIVITY_DELAY
 import com.dance4life.core.utils.RitmoCalculator
+import com.dance4life.core.data.model.MovementObservation
+import com.dance4life.core.data.model.MovementRecommendation
+import com.dance4life.core.rlinference.RlCoachPolicy
 
 class DanceController(
     private val sensorProvider: SensorProvider,
     private val locationProvider: LocationProvider,
     private val repository: DataRepository,
     private val ritmoCalculator: RitmoCalculator,
-    private val deviceProvider: DeviceProvider
+    private val deviceProvider: DeviceProvider,
+    private val rlCoachPolicy: RlCoachPolicy
 ) {
 
+
     private var onLocationUpdate: ((LocationData) -> Unit)? = null
+    private var onMovementRecommendation: ((MovementRecommendation) -> Unit)? = null
 
     private val accData = mutableListOf<Float>()
     private val gyroData = mutableListOf<Float>()
@@ -52,6 +58,12 @@ class DanceController(
 
     fun setRitmoListener(listener: (Double) -> Unit) {
         onRitmoCalculated = listener
+    }
+
+    fun setMovementRecommendationListener(
+        listener: (MovementRecommendation) -> Unit
+    ) {
+        onMovementRecommendation = listener
     }
 
     fun start() {
@@ -156,13 +168,55 @@ class DanceController(
 
     // Calcula apenas (sem enviar)
     private fun calcularRitmoLocal() {
+        //val result = ritmoCalculator.calcular(accData, gyroData, hrData)
+
+        //lastResult = result
+
+        //onRitmoCalculated?.invoke(result.ritmo)
+
+
+
         val result = ritmoCalculator.calcular(accData, gyroData, hrData)
 
         lastResult = result
 
         onRitmoCalculated?.invoke(result.ritmo)
+
+        val observation = MovementObservation(
+            stepsLastHour = estimateSteps(accData),
+            sedentaryMinutesToday = estimateSedentaryMinutes(result.avgAcc),
+            energyLevel = estimateEnergyLevel(result.avgHR),
+            mobilityConfidence = estimateMobility(result.avgGyro)
+        )
+
+        val recommendation = rlCoachPolicy.recommend(observation)
+        onMovementRecommendation?.invoke(recommendation)
     }
 
+    private fun estimateSteps(accData: List<Float>): Int {
+        return (accData.sum() * 8).toInt().coerceAtLeast(0)
+    }
+
+    private fun estimateSedentaryMinutes(avgAcc: Double): Int {
+        return if (avgAcc < 1.2) 240 else 60
+    }
+
+    private fun estimateEnergyLevel(avgHr: Double): Int {
+        return when {
+            avgHr < 75 -> 3
+            avgHr < 100 -> 6
+            else -> 9
+        }
+    }
+
+    private fun estimateMobility(avgGyro: Double): Int {
+        return when {
+            avgGyro < 0.5 -> 2
+            avgGyro < 1.5 -> 5
+            else -> 8
+        }
+    }
+    
     // Envia apenas (usa último cálculo)
     private fun enviarDados() {
 

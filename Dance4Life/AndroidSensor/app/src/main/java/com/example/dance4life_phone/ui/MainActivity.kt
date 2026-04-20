@@ -157,7 +157,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             locationProvider,
             DataRepository(),
             RitmoCalculator(),
-            deviceProvider
+            deviceProvider,
+            RlCoachPolicyFactory.create(this)
         )
 
         controller.setInviteListener { id, user ->
@@ -198,6 +199,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         // controller.setRitmoListener { ritmo ->
         //    Toast.makeText(this, "Ritmo: $ritmo", Toast.LENGTH_SHORT).show()
         //}
+
+        controller.setMovementRecommendationListener { recommendation ->
+            Toast.makeText(
+                this,
+                "${recommendation.title}\n${recommendation.encouragementMessage}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
 
         // Permissões
         if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)

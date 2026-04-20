@@ -1,101 +1,73 @@
 import asyncio
-import time
-
+import threading
 import jsonpickle
-from pydantic import BaseModel
-from spade.agent import Agent, Message
-from spade.behaviour import CyclicBehaviour, OneShotBehaviour, Template
-from model.data_model import CalculatedActivityData
-from utilities import helper
+ 
+from spade.agent import Agent
+from spade.behaviour import CyclicBehaviour, Message
+from agents.base_background_agent import BaseBackgroundAgent
+from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
 
-
-ontology_list = ["sensor_activity"]
-
-class HARAgent(Agent):
-
-    class ReceiveBehaviourHARAgent(CyclicBehaviour):
-        global ontology_list
+class HarAgent(BaseBackgroundAgent):
+ 
+    class ReceiveHarDataBehaviour(CyclicBehaviour):
         async def run(self):
             msg = await self.receive(timeout=10)
-
+ 
             if msg:
-                conv_id = msg.get_metadata("conversation-id")
-                perf = msg.get_metadata("performative")
+                print("\n[HarAgent] Mensagem recebida")
+ 
+                sender = msg.sender
+                performative = msg.get_metadata("performative")
                 ontology = msg.get_metadata("ontology")
+                conversation_id = msg.get_metadata("conversation-id")
                 
-                print(f"[HARAgent] Mensagem recebida: : perf={perf}, ontology={ontology}, conv_id={conv_id}")
-                
-                if perf == "request":
-                    print(f"[HARAgent] REQUEST recebida (conv_id={conv_id})")
+                print(f"[HarAgent] Performative: {performative}")
+                print(f"[HarAgent] Ontology: {ontology}")
+                print(f"[HarAgent] Conversation ID: {conversation_id}")
+ 
+                try:
+                    payload = jsonpickle.decode(msg.body)
+ 
+                    print("**********[HarAgent] Payload recebido:")
+                    print(payload)
+ 
+                    if ontology == AgentOntologies.SENSOR_ACTIVITY:
+                        if performative == AgentPerformatives.REQUEST:
 
-                    data = jsonpickle.decode(msg.body)
-                    print(ontology_list)
-                    if ontology not in ontology_list:
-                        print(f"[HARAgent] Ontology desconhecida: {ontology}")
-                        # FAILURE
-                        failure = msg.make_reply()
-                        failure.set_metadata("performative", "failure")
-                        failure.set_metadata("ontology", ontology)
-                        failure.set_metadata("conversation-id", conv_id)
-                        failure.body = f"Ontology '{ontology}' não suportada"
-                        print(f"[HARAgent] FAILURE enviada (conv_id={conv_id})")
-                        await self.send(failure)
-                        return
-                    
-                    # AGREE
-                    agree = msg.make_reply()
-                    agree.set_metadata("performative", "agree")
-                    agree.set_metadata("ontology", ontology)
-                    agree.set_metadata("conversation-id", conv_id)
-                    
-                    print(f"[HARAgent] AGREE enviada (conv_id={conv_id})")
-                    
-                    await self.send(agree)
-                    await asyncio.sleep(0.5)  # simular processamento
-                    try:
+                            print("**********[HarAgent] A processar dados de atividade")
+                            try:
+                                await self.agent.forward_message(
+                                    behaviour=self,
+                                    payload=payload,
+                                    agent_to=AgentAddresses.ENVIRONMENT_AGENT,
+                                    performative=AgentPerformatives.REQUEST,
+                                    ontology=AgentOntologies.SENSOR_ACTIVITY,
+                                    conversation_id=conversation_id
+                                )
 
-                        # processamento
-                        result = {
-                            "status": "processed",
-                            "user": data.utilizador_id,
-                            "conv_id": conv_id,
-                            "calculated_activity_data": CalculatedActivityData(
-                                actividade="1",
-                                interesse="2",
-                                timestamp="3",
-                                timestamp_dia_semana="4",
-                                timestamp_dia_periodo="5",
-                                timestamp_hora="6",
-                                timestamp_dia="7",
-                                timestamp_mes="8",
-                                timestamp_ano="9",
-                            ).dict()
-                        }
+                                await self.agent.forward_message(
+                                    behaviour=self,
+                                    payload=payload,
+                                    agent_to=sender,
+                                    performative=AgentPerformatives.INFORM,
+                                    ontology=AgentOntologies.SENSOR_ACTIVITY,
+                                    conversation_id=conversation_id
+                                )           
+                            except Exception as e:
+                                print(f"[HarAgent] Erro ao enviar mensagem para HarAgent: {e}")
 
+                            print("**********[HarAgent] Forward concluído")
 
-                        # INFORM
-                        inform = msg.make_reply()
-                        inform.set_metadata("performative", "inform")
-                        inform.set_metadata("ontology", ontology)
-                        inform.set_metadata("conversation-id", conv_id)
-                        inform.body = jsonpickle.encode(result)
-
-                        if(ontology == "sensor_activity"):
-                            print("[HARAgent] Processar sensor_activity ontology", ontology)
-
-                        print(f"[HARAgent] INFORM enviada (conv_id={conv_id})")
-                        await self.send(inform)
-
-                    except Exception as e:
-                        # FAILURE
-                        failure = msg.make_reply()
-                        failure.set_metadata("performative", "failure")
-                        failure.set_metadata("ontology", ontology)
-                        failure.set_metadata("conversation-id", conv_id)
-                        failure.body = str(e)
-                        print(f"[HARAgent] FAILURE enviada (conv_id={conv_id}, exception={e})")
-                        await self.send(failure)
-
+                        elif performative == AgentPerformatives.INFORM:
+                            print("[HarAgent] INFORM recebido - dados de atividade processados") 
+ 
+                except Exception as e:
+                    print(f"[HarAgent] Erro ao processar mensagem: {e}")
+ 
+            else:
+                print("[HarAgent] Nenhuma mensagem recebida")
+ 
     async def setup(self):
-        print("HARAgent iniciado")
-        self.add_behaviour(self.ReceiveBehaviourHARAgent())
+        print(f"[HarAgent] {self.jid} iniciado - setup")
+        self.add_behaviour(self.ReceiveHarDataBehaviour())
+ 
