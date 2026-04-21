@@ -1,7 +1,7 @@
 package com.dance4life.core.utils
 
 import android.content.Context
-
+/*
 object RejectManager {
 
     private const val PREF = "reject_prefs"
@@ -31,4 +31,4 @@ object RejectManager {
         return if (raw.isEmpty()) emptyList()
         else raw.split(",").map { it.toLong() }
     }
-}
+}*/

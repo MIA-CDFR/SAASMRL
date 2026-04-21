@@ -2,6 +2,8 @@ package com.dance4life.core.domain.controller
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import com.dance4life.core.data.model.EnvironmentData
 import com.dance4life.core.data.model.LocationData
 import com.dance4life.core.data.model.RitmoResult
 import com.dance4life.core.data.model.SensorData
@@ -14,6 +16,7 @@ import com.dance4life.core.utils.RitmoCalculator
 import com.dance4life.core.data.model.MovementObservation
 import com.dance4life.core.data.model.MovementRecommendation
 import com.dance4life.core.rlinference.RlCoachPolicy
+import kotlin.math.log
 
 class DanceController(
     private val sensorProvider: SensorProvider,
@@ -25,6 +28,7 @@ class DanceController(
 ) {
 
 
+
     private var onLocationUpdate: ((LocationData) -> Unit)? = null
     private var onMovementRecommendation: ((MovementRecommendation) -> Unit)? = null
 
@@ -34,6 +38,8 @@ class DanceController(
 
     private var currentLat: Double = 0.0
     private var currentLon: Double = 0.0
+
+    private var currentCity: String? = null
 
     private var onSensorUpdate: ((SensorData) -> Unit)? = null
     private var onRitmoCalculated: ((Double) -> Unit)? = null
@@ -49,6 +55,8 @@ class DanceController(
     private lateinit var updatesRunnable: Runnable
 
     private var onInviteReceived: ((String, String) -> Unit)? = null
+
+    private var onEnvironmentUpdate: ((EnvironmentData) -> Unit)? = null
 
     private var started = false
 
@@ -71,15 +79,36 @@ class DanceController(
         if (started) return
         started = true
 
-        // 📍 Localização
+        //Localização
         locationProvider.start { location ->
             currentLat = location.latitude
             currentLon = location.longitude
+            currentCity = location.city
 
             onLocationUpdate?.invoke(location)
+
+            repository.getEnvironmentData(
+                userId = deviceProvider.getUserId(),
+                latitude = currentLat,
+                longitude = currentLon,
+                city = currentCity ?: ""
+            ) { body ->
+
+                if (!body.isNullOrEmpty()) {
+
+                    val obj = org.json.JSONObject(body)
+
+                    onEnvironmentUpdate?.invoke(
+                        EnvironmentData(
+                            temperature = obj.getDouble("temperatura"),
+                            humidity = obj.getDouble("humidade")
+                        )
+                    )
+                }
+            }
         }
 
-        // 📡 Sensores (tempo real)
+        //Sensores (tempo real)
         sensorProvider.setListener { data ->
 
             accData.add(data.accMagnitude.toFloat())
@@ -94,7 +123,7 @@ class DanceController(
                 hrData.removeAt(0)
             }
 
-            // 🔥 CALCULA SEMPRE
+            //CALCULA SEMPRE
             if (accData.isNotEmpty()) {
                 calcularRitmoLocal()
             }
@@ -105,7 +134,7 @@ class DanceController(
         // ENVIO DE 30 EM 30 SEGUNDOS
         runnable = object : Runnable {
             override fun run() {
-                enviarDados()
+                sendDActivityData()
                 handler.postDelayed(this, SEND_ACTIVITY_DELAY)
             }
         }
@@ -117,10 +146,10 @@ class DanceController(
 
                 val userId = deviceProvider.getUserId()
 
-                repository.obterUpdates(userId) { body ->
+                repository.getUserMatch(userId) { body ->
 
                     if (!body.isNullOrEmpty()) {
-
+                        Log.d("MatchData:", body)
                         val jsonArray = org.json.JSONArray(body)
 
                         for (i in 0 until jsonArray.length()) {
@@ -129,10 +158,11 @@ class DanceController(
                             when (obj.getString("type")) {
 
                                 "invite" -> {
-                                    val id = obj.getString("id")
-                                    val user = obj.getString("user")
 
-                                    onInviteReceived?.invoke(id, user)
+                                    val id = obj.getString("id")
+                                    val cluster = obj.getString("cluster")
+
+                                    onInviteReceived?.invoke(id, cluster)
                                 }
 
                                 "match" -> {
@@ -142,6 +172,30 @@ class DanceController(
                                     onMatchReceived?.invoke(user, score)
                                 }
                             }
+                        }
+                    }
+                }
+
+                if (currentLat != 0.0 && currentLon != 0.0) {
+                    repository.getEnvironmentData(
+                        userId = userId,
+                        latitude = currentLat,
+                        longitude = currentLon,
+                        city = currentCity ?: ""
+                    ) { body ->
+
+                        if (!body.isNullOrEmpty()) {
+
+                            val obj = org.json.JSONObject(body)
+
+                            onEnvironmentUpdate?.invoke(
+                                EnvironmentData(
+                                    temperature = obj.getDouble("temperatura"),
+                                    humidity = obj.getDouble("humidade")
+                                )
+                            )
+
+
                         }
                     }
                 }
@@ -168,13 +222,6 @@ class DanceController(
 
     // Calcula apenas (sem enviar)
     private fun calcularRitmoLocal() {
-        //val result = ritmoCalculator.calcular(accData, gyroData, hrData)
-
-        //lastResult = result
-
-        //onRitmoCalculated?.invoke(result.ritmo)
-
-
 
         val result = ritmoCalculator.calcular(accData, gyroData, hrData)
 
@@ -187,10 +234,19 @@ class DanceController(
             sedentaryMinutesToday = estimateSedentaryMinutes(result.avgAcc),
             energyLevel = estimateEnergyLevel(result.avgHR),
             mobilityConfidence = estimateMobility(result.avgGyro)
+            //irritationLevel = getIrritationLevel()
         )
+
+        Log.d("IRRITATION_LEVEL_1", getIrritationLevel().toString())
 
         val recommendation = rlCoachPolicy.recommend(observation)
         onMovementRecommendation?.invoke(recommendation)
+
+
+        sendMovementRecommendation(
+            userId = deviceProvider.getUserId(),
+            recommendation = recommendation
+        )
     }
 
     private fun estimateSteps(accData: List<Float>): Int {
@@ -218,11 +274,11 @@ class DanceController(
     }
     
     // Envia apenas (usa último cálculo)
-    private fun enviarDados() {
+    private fun sendDActivityData() {
 
         val result = lastResult ?: return
 
-        repository.enviarDados(
+        repository.sendDActivityData(
             deviceProvider.getUserId(),
             result.ritmo,
             result.avgAcc,
@@ -238,6 +294,13 @@ class DanceController(
         hrData.clear()
     }
 
+    fun sendMovementRecommendation(
+        userId: String,
+        recommendation: MovementRecommendation
+    ) {
+        repository.sendMovementRecommendation(userId, recommendation)
+    }
+
     fun setLocationListener(listener: (LocationData) -> Unit) {
         onLocationUpdate = listener
     }
@@ -245,5 +308,46 @@ class DanceController(
 
     fun setInviteListener(listener: (inviteId: String, user: String) -> Unit) {
         onInviteReceived = listener
+    }
+
+    fun setEnvironmentListener(listener: (EnvironmentData) -> Unit) {
+        onEnvironmentUpdate = listener
+    }
+
+    companion object {
+
+        private var irritationLevel: Int = 0
+        private var irritationLCounter: Int = 0
+        private var lastIrritationLevel: Long = System.currentTimeMillis()
+
+        fun increaseIrritationLevel() {
+            Log.d("IRRITATION_LEVEL_3", irritationLevel.toString())
+            verifyIrritationLevel()
+            irritationLevel+=15
+            irritationLCounter++
+            Log.d("IRRITATION_LEVEL_3", irritationLevel.toString())
+        }
+
+        fun decreaseIrritationLevel() {
+            verifyIrritationLevel()
+            if(irritationLevel>0)
+                irritationLevel-=15
+        }
+
+        fun verifyIrritationLevel() {
+            val nowTime = System.currentTimeMillis()
+            val resetInterval = 5 * 60 * 1000L // 5 minutos
+
+            if (nowTime - lastIrritationLevel >= resetInterval) {
+                irritationLevel = 0
+                irritationLCounter = 0
+                lastIrritationLevel = System.currentTimeMillis()
+            }
+            Log.d("IRRITATION_LEVEL_2", irritationLevel.toString())
+        }
+
+        fun getIrritationLevel(): Int {
+            return irritationLevel
+        }
     }
 }

@@ -6,16 +6,22 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import com.dance4life.core.data.network.ApiService
-import com.dance4life.core.utils.RejectManager
+import com.dance4life.core.domain.controller.DanceController
+//import com.dance4life.core.utils.RejectManager
 
 class NotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
 
         val inviteId = intent.getStringExtra("inviteId") ?: return
-        Log.d("Convite", "Recebeu $inviteId")
+        //Log.d("Convite", "Recebeu $inviteId")
 
         when (intent.action) {
+
+
+            "ACTION_TIMEOUT" -> {
+                DanceController.increaseIrritationLevel()
+            }
 
 
             "ACCEPT" -> {
@@ -25,7 +31,8 @@ class NotificationReceiver : BroadcastReceiver() {
                 Log.d("INVITE", "Aceitou $inviteId")
 
                 // 2. chamar API (já é async internamente)
-                ApiService.acceptInvite(inviteId)
+                ApiService.acceptInvite(inviteId, true)
+                DanceController.decreaseIrritationLevel()
             }
 
             "REJECT" -> {
@@ -33,7 +40,10 @@ class NotificationReceiver : BroadcastReceiver() {
                 NotificationManagerCompat.from(context)
                     .cancel(inviteId.hashCode())
 
-                RejectManager.registerReject(context)
+                ApiService.acceptInvite(inviteId, false)
+
+                DanceController.increaseIrritationLevel()
+                //RejectManager.registerReject(context)
             }
         }
     }

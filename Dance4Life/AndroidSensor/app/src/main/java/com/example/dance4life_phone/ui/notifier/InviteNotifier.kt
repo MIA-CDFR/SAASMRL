@@ -11,12 +11,12 @@ import androidx.core.app.NotificationManagerCompat
 
 object InviteNotifier {
 
-    fun show(context: Context, inviteId: String, user: String) {
+    fun show(context: Context, inviteId: String, cluster: String) {
 
         val acceptIntent = Intent(context, NotificationReceiver::class.java).apply {
             action = "ACCEPT"
             putExtra("inviteId", inviteId)
-            setPackage(context.packageName) // 🔥 FIX IMPORTANTE
+            setPackage(context.packageName)
         }
 
         val rejectIntent = Intent(context, NotificationReceiver::class.java).apply {
@@ -41,12 +41,12 @@ object InviteNotifier {
 
         val notification = NotificationCompat.Builder(context, "invite_channel")
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Novo convite!")
-            .setContentText("Convite de $user")
-            .addAction(0, "Aceitar", acceptPending)
-            .addAction(0, "Rejeitar", rejectPending)
-            .setAutoCancel(true) // 🔥 UX melhor
+            .setContentTitle("💃 Convite de Dança💃")
+            .setContentText("Aceita pertencer ao grupo $cluster?")
+            .addAction(0, "Aceitar ✔", acceptPending)
+            .addAction(0, "Rejeitar ✖", rejectPending)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
             .build()
 
         // ✅ Android 13+ permission

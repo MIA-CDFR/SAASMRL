@@ -2,18 +2,18 @@
 <resources>
 
     <style name="TextTitle">
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColor">#111111</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">18sp</item>
     </style>
 
     <style name="TextLabel">
-        <item name="android:textColor">#DDFFFFFF</item>
+        <item name="android:textColor">#111111</item>
         <item name="android:textSize">14sp</item>
     </style>
 
     <style name="TextValue">
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColor">#111111</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">16sp</item>
     </style>

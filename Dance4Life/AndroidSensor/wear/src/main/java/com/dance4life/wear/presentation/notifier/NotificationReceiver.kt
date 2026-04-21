@@ -5,7 +5,8 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import com.dance4life.core.data.network.ApiService
-import com.dance4life.core.utils.RejectManager
+import com.dance4life.core.domain.controller.DanceController
+//import com.dance4life.core.utils.RejectManager
 
 class NotificationReceiver : BroadcastReceiver() {
 
@@ -15,18 +16,26 @@ class NotificationReceiver : BroadcastReceiver() {
 
         when (intent.action) {
 
+            "ACTION_TIMEOUT" -> {
+                DanceController.increaseIrritationLevel()
+            }
+
+
             "ACCEPT" -> {
                 NotificationManagerCompat.from(context)
                     .cancel(inviteId.hashCode())
 
-                ApiService.acceptInvite(inviteId)
+                ApiService.acceptInvite(inviteId, true)
+                DanceController.decreaseIrritationLevel()
             }
 
             "REJECT" -> {
                 NotificationManagerCompat.from(context)
                     .cancel(inviteId.hashCode())
 
-                RejectManager.registerReject(context)
+                ApiService.acceptInvite(inviteId, false)
+
+                DanceController.increaseIrritationLevel()
             }
         }
     }

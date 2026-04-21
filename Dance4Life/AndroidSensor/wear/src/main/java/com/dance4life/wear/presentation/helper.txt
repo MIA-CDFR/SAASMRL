@@ -1,4 +1,12 @@
-C:\Users\TEU_USER\AppData\Local\Android\Sdk\platform-tools
+Alterar o IP Address em: Constants
+Ver pastas infividuais
+D:\GIT\MIA\SAASMRL\Dance4Life\AndroidSensor\core\src\main\java\com\dance4life\core\utils
+
+Permissões
+cd C:\Users\TEU_USER\AppData\Local\Android\Sdk\platform-tools
 .\adb shell pm grant com.dance4life.wear android.permission.BODY_SENSORS
 .\adb shell pm grant com.dance4life.wear android.permission.BODY_SENSORS_BACKGROUND
 .\adb shell pm grant com.dance4life.wear android.permission.ACCESS_FINE_LOCATION
+.\adb shell pm grant com.dance4life.wear android.permission.ACTIVITY_RECOGNITION
+
+

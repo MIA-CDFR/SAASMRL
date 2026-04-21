@@ -8,7 +8,7 @@ class StubRlCoachPolicy : RlCoachPolicy {
         val title = if (observation.sedentaryMinutesToday > 180) {
             "Gentle 5-minute walk"
         } else {
-            "2-minute stretch break"
+            "2-minutos stretch break"
         }
 
         val duration = if (title.contains("5-minute")) 5 else 2

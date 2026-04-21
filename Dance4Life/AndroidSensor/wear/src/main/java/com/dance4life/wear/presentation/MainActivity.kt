@@ -3,7 +3,6 @@ package com.dance4life.wear.presentation
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -39,6 +38,37 @@ import com.dance4life.wear.presentation.notifier.InviteNotifier
 import androidx.compose.ui.platform.LocalContext
 import com.dance4life.core.data.model.MovementRecommendation
 import com.dance4life.core.rlinference.RlCoachPolicyFactory
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.pager.HorizontalPager
+import com.dance4life.core.data.model.EnvironmentData
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.wear.compose.material.Card
+import androidx.wear.compose.material.CircularProgressIndicator
+import androidx.wear.compose.material.MaterialTheme
+
+
+import androidx.compose.runtime.Composable
+
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 class MainActivity : ComponentActivity() {
 
@@ -103,14 +133,6 @@ class MainActivity : ComponentActivity() {
                     }
 
                     permissionLauncher.launch(permissions.toTypedArray())
-
-                    /*permissionLauncher.launch(
-                        arrayOf(
-                            Manifest.permission.BODY_SENSORS,
-                            Manifest.permission.ACTIVITY_RECOGNITION,
-                            Manifest.permission.ACCESS_FINE_LOCATION // 🔥 IMPORTANTE
-                        )
-                    )*/
                 }
             )
         }
@@ -137,7 +159,79 @@ fun WearApp(
     if (!hasPermission) {
         PermissionScreen(onRequestPermission)
     } else {
-        MainScreen(controller)
+
+        var sensorData by remember { mutableStateOf<SensorData?>(null) }
+        var locationData by remember { mutableStateOf<LocationData?>(null) }
+        var rhythm by remember { mutableStateOf<Double?>(null) }
+        var recommendation by remember { mutableStateOf<MovementRecommendation?>(null) }
+        var environmentData by remember { mutableStateOf<EnvironmentData?>(null) }
+
+        val context = LocalContext.current
+        val pagerState = rememberPagerState(pageCount = { 2 })
+
+        LaunchedEffect(Unit) {
+
+            controller.setSensorListener { data ->
+                sensorData = data
+            }
+
+            controller.setLocationListener { location ->
+                locationData = location
+            }
+
+            controller.setMovementRecommendationListener {
+                recommendation = it
+            }
+
+            controller.setRitmoListener { ritmoValue ->
+                rhythm = ritmoValue
+            }
+
+            controller.setInviteListener { id, user ->
+                InviteNotifier.show(context, id, user)
+            }
+
+            controller.setEnvironmentListener { data ->
+                environmentData = data
+            }
+
+            controller.start()
+        }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                controller.stop()
+            }
+        }
+
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+
+            when (page) {
+                0 -> {
+                    MainScreen(
+                        sensorData = sensorData,
+                        locationData = locationData,
+                        rhythm = rhythm,
+                        recommendation = recommendation,
+                        environmentData = environmentData
+                    )
+                }
+
+                1 -> {
+                    StatsScreen(
+                        sensorData = sensorData,
+                        locationData = locationData,
+                        rhythm = rhythm,
+                        recommendation = recommendation,
+                        environmentData = environmentData
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -167,82 +261,19 @@ fun PermissionScreen(onRequestPermission: () -> Unit) {
 }
 
 @Composable
-fun MainScreen(controller: DanceController) {
-
-    var sensorData by remember { mutableStateOf<SensorData?>(null) }
-    var locationData by remember { mutableStateOf<LocationData?>(null) }
-    var ritmo by remember { mutableStateOf<Double?>(null) }
-    var recommendation by remember { mutableStateOf<MovementRecommendation?>(null) }
-
-    val context = LocalContext.current
-    /*
-    LaunchedEffect(Unit) {
-
-        controller.setSensorListener { data ->
-            sensorData = data
-        }
-
-        controller.setLocationListener { location ->
-            Log.d("WEAR", "LOCATION: ${location.latitude}, ${location.longitude}")
-            locationData = location
-        }
-
-        controller.start()
-    }*/
-
-    LaunchedEffect(Unit) {
-
-        controller.setSensorListener { data ->
-            sensorData = data
-        }
-
-        controller.setLocationListener { location ->
-            Log.d("WEAR", "LOCATION: ${location.latitude}, ${location.longitude}")
-            locationData = location
-        }
-
-        controller.setMovementRecommendationListener {
-            recommendation = it
-        }
-
-        /*
-        // 🔥 OPCIONAL: ouvir ritmo
-        controller.setRitmoListener { ritmoValue ->
-            Log.d("WEAR", "RITMO: $ritmoValue")
-        }*/
-
-        controller.setRitmoListener { ritmoValue ->
-            ritmo = ritmoValue
-        }
-
-
-
-        controller.setInviteListener { id, user ->
-            InviteNotifier.show(context, id, user)
-        }
-
-
-        controller.start()
-
-        // 🔥 LOOP PARA CALCULAR RITMO (igual ao mobile)
-        /*while (true) {
-            delay(10000) // 10 segundos
-            controller.calcularRitmo()
-        }*/
-        //controller.calcularRitmo()
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            controller.stop()
-        }
-    }
+fun MainScreen2(
+    sensorData: SensorData?,
+    locationData: LocationData?,
+    rhythm: Double?,
+    recommendation: MovementRecommendation?,
+    environmentData: EnvironmentData?
+) {
 
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
 
-        // 🖼️ BACKGROUND
+        // BACKGROUND
         Image(
             painter = painterResource(id = R.drawable.dace4life_android_wear_background),
             contentDescription = null,
@@ -250,7 +281,7 @@ fun MainScreen(controller: DanceController) {
             contentScale = ContentScale.Crop
         )
 
-        // 🔳 OVERLAY
+        // OVERLAY
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -259,81 +290,36 @@ fun MainScreen(controller: DanceController) {
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
+                .fillMaxSize(),
+                //.padding(8.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // 📍 LOCALIZAÇÃO
-            if (locationData != null) {
-                Text(
-                    text = "📍 ${locationData!!.city ?: "Desconhecido"}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
+            Spacer(modifier = Modifier.height(60.dp))
 
-                Text(
-                    text = "${locationData!!.latitude}, ${locationData!!.longitude}",
-                    color = Color.LightGray,
-                    fontSize = 10.sp
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-            } else {
-                Text("Sem localização...", color = Color.Gray, fontSize = 10.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            // ❤️ SENSORES
+            // SENSORES
             if (sensorData != null) {
-                val d = sensorData!!
+                val d = sensorData
 
                 Text(
-                    text = "❤️ ${if (d.heartRate > 0) d.heartRate else "--"}",
+                    text = "\u2764\uFE0F️ ${if (d.heartRate > 0) d.heartRate else "--"} bpm",
                     color = Color.White,
-                    fontSize = 16.sp
+                    fontSize = 14.sp
                 )
 
+                Spacer(modifier = Modifier.height(6.dp))
+
                 Text(
-                    text = "\uD83D\uDCC8 ACC:: ${"%.1f".format(d.accMagnitude)}",
+                    text = "\uD83D\uDCC8 ACC: ${"%.1f".format(d.accMagnitude)}",
                     color = Color.White,
                     fontSize = 12.sp
                 )
 
-                Text(
-                    text = "X: ${"%.1f".format(d.accX)}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "Y: ${"%.1f".format(d.accY)}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "Z: ${"%.1f".format(d.accZ)}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
                     text = "\uD83D\uDD04 GYRO: ${"%.1f".format(d.gyroMagnitude)}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "X: ${"%.1f".format(d.gyroX)}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "Y: ${"%.1f".format(d.gyroY)}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "Z: ${"%.1f".format(d.gyroZ)}",
                     color = Color.White,
                     fontSize = 12.sp
                 )
@@ -341,100 +327,254 @@ fun MainScreen(controller: DanceController) {
                 Text("A aguardar sensores...", color = Color.White)
             }
 
-            if (ritmo != null) {
+            if (rhythm != null) {
+                Spacer(modifier = Modifier.height(6.dp))
+
                 Text(
-                    text = "💃 Ritmo: ${"%.1f".format(ritmo)}",
+                    text = "\uD83D\uDC83 Ritmo: ${"%.1f".format(rhythm)}",
                     color = Color.White,
-                    fontSize = 14.sp
+                    fontSize = 12.sp
                 )
             }
 
-            if (recommendation != null) {
-                Spacer(modifier = Modifier.height(8.dp))
+            // LOCALIZAÇÃO
+            if (locationData != null) {
+
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = recommendation!!.title,
-                    color = Color.Yellow,
+                    text = "\uD83D\uDCCD ${locationData.city ?: "Desconhecido"}",
+                    color = Color.White,
                     fontSize = 12.sp
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+            } /*else {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Sem localização...", color = Color.Gray, fontSize = 12.sp)
+            }*/
+
+            // AMBIENTE
+            if (environmentData != null) {
+
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = recommendation!!.encouragementMessage,
+                    text = "\uD83C\uDF21\uFE0F ${environmentData.temperature ?: "--"}°C",
                     color = Color.White,
-                    fontSize = 10.sp
+                    fontSize = 12.sp
+                )
+
+            } /*else {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Sem dados temp...", color = Color.Gray, fontSize = 12.sp)
+            }*/
+
+            if (recommendation != null) {
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = recommendation.title,
+                    color = Color.Blue,
+                    fontSize = 9.sp
                 )
             }
         }
     }
 }
-/*
 @Composable
-fun MainScreen(controller: DanceController) {
+fun MainScreen(
+    sensorData: SensorData?,
+    locationData: LocationData?,
+    rhythm: Double?,
+    recommendation: MovementRecommendation?,
+    environmentData: EnvironmentData?
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
-    var sensorData by remember { mutableStateOf<SensorData?>(null) }
-    var locationData by remember { mutableStateOf< LocationData?>(null) }
+        Image(
+            painter = painterResource(id = R.drawable.dace4life_android_wear_background),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
 
-    LaunchedEffect(Unit) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.45f))
+        )
 
-        // 🔥 ligar ao controller (já funciona com o teu código)
-        controller.setSensorListener { data ->
-            sensorData = data
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                  .padding(horizontal = 40.dp, vertical = 40.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+
+            Spacer(modifier = Modifier.height(38.dp))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 2.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF10182A).copy(alpha = 0.65f)
+                ),
+                border = BorderStroke(
+                    1.dp,
+                    Color.White.copy(alpha = 0.08f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "❤️ ${sensorData?.heartRate ?: "--"} bpm",
+                            color = Color.White,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Text(
+                            text = "💃 ${rhythm?.let { "%.1f".format(it) } ?: "--"}",
+                            color = Color(0xFFD7B4FF),
+                            fontSize = 9.sp
+                        )
+
+                        Text(
+                            text = "📍 ${locationData?.city ?: "--"}",
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontSize = 9.sp
+                        )
+                    }
+
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.size(50.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            progress = ((sensorData?.heartRate ?: 0) / 120f).coerceIn(0f, 1f),
+                            modifier = Modifier.size(45.dp),
+                            strokeWidth = 5.dp,
+                            indicatorColor = Color(0xFFC86BFF),
+                            trackColor = Color.White.copy(alpha = 0.12f)
+                        )
+
+                        Text(
+                            text = "${sensorData?.heartRate ?: "--"}",
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                MiniGlassCard(
+                    modifier = Modifier.weight(1f),
+                    title = "ACC",
+                    value = sensorData?.accMagnitude?.let { "%.1f".format(it) } ?: "--",
+                    accent = Color(0xFF7EB6FF)
+                )
+
+                MiniGlassCard(
+                    modifier = Modifier.weight(1f),
+                    title = "GYRO",
+                    value = sensorData?.gyroMagnitude?.let { "%.1f".format(it) } ?: "--",
+                    accent = Color(0xFFA8F0B3)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp),
+                shape = RoundedCornerShape(12.dp),
+
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF10182A).copy(alpha = 0.55f)
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 5.dp),
+                    verticalArrangement = Arrangement.spacedBy(1.dp)
+                ) {
+                    Text(
+                        text = "🌡️ ${environmentData?.temperature ?: "--"}°C",
+                        color = Color.White,
+                        fontSize = 9.sp
+                    )
+
+                    if (recommendation != null) {
+                        Text(
+                            text = recommendation.title,
+                            color = Color(0xFFE8E6A7),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
         }
-
-        controller.setLocationListener { location ->
-            locationData = location
-        }
-
-        controller.start()
     }
+}
 
-    DisposableEffect(Unit) {
-        onDispose {
-            controller.stop()
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
+@Composable
+fun MiniGlassCard(
+    modifier: Modifier = Modifier,
+    title: String,
+    value: String,
+    accent: Color
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF10182A).copy(alpha = 0.55f)
+        ),
+        border = BorderStroke(
+            1.dp,
+            Color.White.copy(alpha = 0.06f)
+        )
     ) {
-
-        if (sensorData == null) {
-
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 2.dp, horizontal = 2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
-                text = "A aguardar dados...",
-                color = Color.Gray
+                text = title,
+                color = accent,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold
             )
 
-        } else {
-
-            val d = sensorData!!
+            Spacer(modifier = Modifier.height(2.dp))
 
             Text(
-                text = """
-                    ❤️ HR: ${d.heartRate}
-
-                    📈 ACC:
-                    X: ${"%.2f".format(d.accX)}
-                    Y: ${"%.2f".format(d.accY)}
-                    Z: ${"%.2f".format(d.accZ)}
-
-                    🔄 GYRO:
-                    X: ${"%.2f".format(d.gyroX)}
-                    Y: ${"%.2f".format(d.gyroY)}
-                    Z: ${"%.2f".format(d.gyroZ)}
-
-                    ⚡ ACC: ${"%.2f".format(d.accMagnitude)}
-                    ⚡ GYRO: ${"%.2f".format(d.gyroMagnitude)}
-                """.trimIndent(),
+                text = value,
                 color = Color.White,
-                fontSize = 10.sp
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }
-}*/
+}
+

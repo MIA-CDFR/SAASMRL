@@ -8,10 +8,11 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import android.app.AlarmManager
 
 object InviteNotifier {
 
-    fun show(context: Context, inviteId: String, user: String) {
+    fun show(context: Context, inviteId: String, cluster: String) {
 
         val acceptIntent = Intent(context, NotificationReceiver::class.java).apply {
             action = "ACCEPT"
@@ -21,6 +22,12 @@ object InviteNotifier {
 
         val rejectIntent = Intent(context, NotificationReceiver::class.java).apply {
             action = "REJECT"
+            putExtra("inviteId", inviteId)
+            setPackage(context.packageName)
+        }
+
+        val timeoutIntent = Intent(context, NotificationReceiver::class.java).apply {
+            action = "ACTION_TIMEOUT"
             putExtra("inviteId", inviteId)
             setPackage(context.packageName)
         }
@@ -39,12 +46,19 @@ object InviteNotifier {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val timeoutPendingIntent = PendingIntent.getBroadcast(
+            context,
+            inviteId.hashCode(),
+            timeoutIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(context, "invite_channel")
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Convite 💃")
-            .setContentText(user)
-            .addAction(0, "✔", acceptPending)
-            .addAction(0, "✖", rejectPending)
+            .setContentTitle("💃 Convite de Dança💃")
+            .setContentText("Aceita pertencer ao grupo $cluster?")
+            .addAction(0, "Aceitar ✔", acceptPending)
+            .addAction(0, "Rejeitar ✖", rejectPending)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
@@ -61,5 +75,18 @@ object InviteNotifier {
 
         NotificationManagerCompat.from(context)
             .notify(inviteId.hashCode(), notification)
+
+
+
+        //NotificationManagerCompat.from(context)
+          //  .notify(inviteId.hashCode(), builder.build())
+
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        alarmManager.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + 2 * 60 * 1000L,
+            timeoutPendingIntent
+        )
     }
 }
