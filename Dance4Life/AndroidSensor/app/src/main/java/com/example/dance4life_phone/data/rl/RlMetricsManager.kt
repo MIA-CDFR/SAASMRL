@@ -86,7 +86,7 @@ class RlMetricsManager(
 
         if (next == null) return
 
-        repository.enviarMetricaRl(next) { success ->
+        /*repository.enviarMetricaRl(next) { success ->
             if (success) {
                 synchronized(this) {
                     dequeueFirst()
@@ -98,7 +98,7 @@ class RlMetricsManager(
                 }
                 Log.w(TAG, "RL metrics flush failed. Keeping data in local queue.")
             }
-        }
+        }*/
     }
 
     private fun enqueue(item: JSONObject) {

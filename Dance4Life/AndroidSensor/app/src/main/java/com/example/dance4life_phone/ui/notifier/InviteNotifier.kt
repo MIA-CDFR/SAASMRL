@@ -1,6 +1,7 @@
 package com.example.dance4life_phone.ui.notifier
 
 import android.Manifest
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -22,7 +23,13 @@ object InviteNotifier {
         val rejectIntent = Intent(context, NotificationReceiver::class.java).apply {
             action = "REJECT"
             putExtra("inviteId", inviteId)
-            setPackage(context.packageName) // 🔥 FIX IMPORTANTE
+            setPackage(context.packageName)
+        }
+
+        val timeoutIntent = Intent(context, NotificationReceiver::class.java).apply {
+            action = "ACTION_TIMEOUT"
+            putExtra("inviteId", inviteId)
+            setPackage(context.packageName)
         }
 
         val acceptPending = PendingIntent.getBroadcast(
@@ -36,6 +43,13 @@ object InviteNotifier {
             context,
             inviteId.hashCode() + 1,
             rejectIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val timeoutPendingIntent = PendingIntent.getBroadcast(
+            context,
+            inviteId.hashCode(),
+            timeoutIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -62,5 +76,13 @@ object InviteNotifier {
 
         NotificationManagerCompat.from(context)
             .notify(inviteId.hashCode(), notification)
+
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        alarmManager.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + 1000L,
+            timeoutPendingIntent
+        )
     }
 }

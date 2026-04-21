@@ -56,8 +56,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationProvider: LocationProvider
     private lateinit var deviceProvider: DeviceProvider
     private lateinit var controller: DanceController
-    private lateinit var rlPolicy: RlCoachPolicy
-    private lateinit var rlMetricsManager: RlMetricsManager
+    //private lateinit var rlPolicy: RlCoachPolicy
+    //private lateinit var rlMetricsManager: RlMetricsManager
 
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 environmentData = environmentData
             )
         }
-
+        /*
         rl_policy_value = findViewById(R.id.rl_policy_value)
         rl_steps_value = findViewById(R.id.rl_steps_value)
         rl_sedentary_value = findViewById(R.id.rl_sedentary_value)
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         rl_mobility_value = findViewById(R.id.rl_mobility_value)
         rl_action_value = findViewById(R.id.rl_action_value)
         rl_inference_count_value = findViewById(R.id.rl_inference_count_value)
-        rl_source_value = findViewById(R.id.rl_source_value)
+        rl_source_value = findViewById(R.id.rl_source_value)*/
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(

@@ -59,8 +59,9 @@ object InviteNotifier {
             .setContentText("Aceita pertencer ao grupo $cluster?")
             .addAction(0, "Aceitar ✔", acceptPending)
             .addAction(0, "Rejeitar ✖", rejectPending)
+            .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
+            .setAutoCancel(false)
             .build()
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
@@ -85,7 +86,7 @@ object InviteNotifier {
 
         alarmManager.setAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + 2 * 60 * 1000L,
+            System.currentTimeMillis() + 1000L,
             timeoutPendingIntent
         )
     }

@@ -3,6 +3,7 @@ package com.dance4life.wear.presentation.notifier
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import com.dance4life.core.data.network.ApiService
 import com.dance4life.core.domain.controller.DanceController
@@ -18,6 +19,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
             "ACTION_TIMEOUT" -> {
                 DanceController.increaseIrritationLevel()
+                Log.d("IRRITATION_LEVEL_4", DanceController.getIrritationLevel().toString())
             }
 
 
