@@ -229,12 +229,20 @@ class DanceController(
 
         onRitmoCalculated?.invoke(result.ritmo)
 
+        val sedentaryMinutesToday = estimateSedentaryMinutes(result.avgAcc)
+        val energyLevel = estimateEnergyLevel(result.avgHR)
+        val mobilityConfidence = estimateMobility(result.avgGyro)
+
+        val activityLevel = (result.ritmo / RITMO_ACTIVITY_SCALE).toFloat().coerceIn(0f, 10f)
+        val physicalFatigue =
+            ((sedentaryMinutesToday.coerceIn(0, 480) / 480f) * 5f +
+                ((10 - energyLevel.coerceIn(0, 10)) / 10f) * 5f)
+                .coerceIn(0f, 10f)
+
         val observation = MovementObservation(
-            stepsLastHour = estimateSteps(accData),
-            sedentaryMinutesToday = estimateSedentaryMinutes(result.avgAcc),
-            energyLevel = estimateEnergyLevel(result.avgHR),
-            mobilityConfidence = estimateMobility(result.avgGyro)
-            //irritationLevel = getIrritationLevel()
+            activityLevel = activityLevel,
+            physicalFatigue = physicalFatigue,
+            irritationLevel = getIrritationLevel().toFloat().coerceIn(0f, 10f),
         )
 
         Log.d("IRRITATION_LEVEL_1", getIrritationLevel().toString())
@@ -315,6 +323,7 @@ class DanceController(
     }
 
     companion object {
+        private const val RITMO_ACTIVITY_SCALE = 2.0
 
         private var irritationLevel: Int = 0
         private var irritationLCounter: Int = 0

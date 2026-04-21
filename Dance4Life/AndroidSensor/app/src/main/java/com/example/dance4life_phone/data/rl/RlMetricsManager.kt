@@ -38,10 +38,9 @@ class RlMetricsManager(
             put(
                 "observation",
                 JSONObject().apply {
-                    put("stepsLastHour", observation.stepsLastHour)
-                    put("sedentaryMinutesToday", observation.sedentaryMinutesToday)
-                    put("energyLevel", observation.energyLevel)
-                    put("mobilityConfidence", observation.mobilityConfidence)
+                    put("activityLevel", observation.activityLevel)
+                    put("physicalFatigue", observation.physicalFatigue)
+                    put("irritationLevel", observation.irritationLevel)
                 }
             )
 

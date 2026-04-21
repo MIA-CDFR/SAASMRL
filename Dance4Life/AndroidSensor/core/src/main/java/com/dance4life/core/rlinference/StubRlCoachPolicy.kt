@@ -5,7 +5,7 @@ import com.dance4life.core.data.model.MovementRecommendation
 
 class StubRlCoachPolicy : RlCoachPolicy {
     override fun recommend(observation: MovementObservation): MovementRecommendation {
-        val (actionId, title, duration, message) = if (observation.sedentaryMinutesToday > 180) {
+        val (actionId, title, duration, message) = if (observation.physicalFatigue > 6.0f) {
             Quad(
                 "medium_intensity",
                 "Moderate coaching suggestion",

@@ -26,9 +26,9 @@ class OnnxRlCoachPolicy(
 
     override fun recommend(observation: MovementObservation): MovementRecommendation {
         val input = floatArrayOf(
-            toActivityLevel(observation),
-            toPhysicalFatigue(observation),
-            toIrritationLevel(observation),
+            observation.activityLevel.coerceIn(0f, 10f),
+            observation.physicalFatigue.coerceIn(0f, 10f),
+            observation.irritationLevel.coerceIn(0f, 10f),
         )
 
         val action = inferAction(input)
@@ -78,25 +78,6 @@ class OnnxRlCoachPolicy(
                 encouragementMessage = "Strong push detected. Keep it brief and controlled.",
             )
         }
-    }
-
-    // Model expects state features in [0, 10] ordered as
-    // [activity_level, physical_fatigue, irritation_level].
-    private fun toActivityLevel(observation: MovementObservation): Float {
-        val steps = observation.stepsLastHour.coerceIn(0, 1000)
-        return (steps / 100f).coerceIn(0f, 10f)
-    }
-
-    private fun toPhysicalFatigue(observation: MovementObservation): Float {
-        val sedentaryPressure = (observation.sedentaryMinutesToday.coerceIn(0, 480) / 480f) * 5f
-        val lowEnergyPressure = ((10 - observation.energyLevel.coerceIn(0, 10)) / 10f) * 5f
-        return (sedentaryPressure + lowEnergyPressure).coerceIn(0f, 10f)
-    }
-
-    private fun toIrritationLevel(observation: MovementObservation): Float {
-        val sedentaryBurden = (observation.sedentaryMinutesToday.coerceIn(0, 480) / 480f) * 6f
-        val lowConfidenceBurden = ((10 - observation.mobilityConfidence.coerceIn(0, 10)) / 10f) * 4f
-        return (sedentaryBurden + lowConfidenceBurden).coerceIn(0f, 10f)
     }
 
     private fun copyAssetToCache(context: Context, assetPath: String): File {
