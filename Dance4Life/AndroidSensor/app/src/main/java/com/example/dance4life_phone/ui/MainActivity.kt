@@ -2,6 +2,10 @@ package com.example.dance4life_phone.ui
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -52,6 +56,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationProvider: LocationProvider
     private lateinit var deviceProvider: DeviceProvider
     private lateinit var controller: DanceController
+    private lateinit var rlPolicy: RlCoachPolicy
+    private lateinit var rlMetricsManager: RlMetricsManager
 
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
@@ -76,6 +82,15 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
+        rl_policy_value = findViewById(R.id.rl_policy_value)
+        rl_steps_value = findViewById(R.id.rl_steps_value)
+        rl_sedentary_value = findViewById(R.id.rl_sedentary_value)
+        rl_energy_value = findViewById(R.id.rl_energy_value)
+        rl_mobility_value = findViewById(R.id.rl_mobility_value)
+        rl_action_value = findViewById(R.id.rl_action_value)
+        rl_inference_count_value = findViewById(R.id.rl_inference_count_value)
+        rl_source_value = findViewById(R.id.rl_source_value)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "invite_channel",
@@ -86,7 +101,6 @@ class MainActivity : AppCompatActivity() {
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
-
         deviceProvider = PhoneDeviceProvider(this)
         sensorProvider = PhoneSensorProvider(this)
         locationProvider = PhoneLocationProvider(this)

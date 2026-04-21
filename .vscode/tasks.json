@@ -1,0 +1,24 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Android: Assemble Debug (Dance4Life)",
+			"type": "shell",
+			"command": "cd Dance4Life/AndroidSensor && bash ./gradlew assembleDebug",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Android: Run on Emulator (Dance4Life)",
+			"type": "shell",
+			"command": "cd Dance4Life/AndroidSensor && bash ./gradlew assembleDebug && AVD_NAME=${D4L_AVD:-$(emulator -list-avds | head -n 1)} && if [ -z \"dance4life_api35\" ]; then echo 'No emulator AVD found. Create one in Android Studio Device Manager or set D4L_AVD.'; exit 1; fi && adb start-server && if ! adb devices | awk 'NR>1 && $2==\"device\" {print $1}' | grep -q .; then nohup emulator -avd \"$AVD_NAME\" -netdelay none -netspeed full >/tmp/dance4life-emulator.log 2>&1 & fi && adb wait-for-device && until [ \"$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r')\" = \"1\" ]; do echo 'Waiting for emulator boot...'; sleep 2; done && adb install -r app/build/outputs/apk/debug/app-debug.apk && adb shell am start -n com.example.dance4life_phone/.ui.MainActivity",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"problemMatcher": []
+		}
+	]
+}

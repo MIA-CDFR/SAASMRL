@@ -6,7 +6,7 @@ from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour, Message
 from agents.base_background_agent import BaseBackgroundAgent
 from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
-from services.firebase_service import save_activity
+from services.firebase_service import save_activity, save_matching, save_movement_recommendation
 
 class DatabaseAgent(BaseBackgroundAgent):
  
@@ -38,7 +38,9 @@ class DatabaseAgent(BaseBackgroundAgent):
                             print("**********[DatabaseAgent] A processar dados de atividade")
                             try:
                                 payload.pop("visited_agents", None) # Remove visited_agents antes de salvar no Firebase
-                                fire_base_result = await save_activity(payload)
+
+                                await save_activity(payload)
+
                                 await self.agent.forward_message(
                                     behaviour=self,
                                     payload=payload,
@@ -55,6 +57,38 @@ class DatabaseAgent(BaseBackgroundAgent):
                         elif performative == AgentPerformatives.INFORM:
                             print("[DatabaseAgent] INFORM recebido - dados de atividade processados") 
  
+                    if ontology == AgentOntologies.MOVEMENT_RECOMMENDATION:
+                        if performative == AgentPerformatives.REQUEST:
+
+                            payload.pop("visited_agents", None)
+
+                            await save_movement_recommendation(payload)
+
+                            await self.agent.forward_message(
+                                behaviour=self,
+                                payload=payload,
+                                agent_to=sender,
+                                performative=AgentPerformatives.INFORM,
+                                ontology=AgentOntologies.MOVEMENT_RECOMMENDATION,
+                                conversation_id=conversation_id
+                            ) 
+ 
+                    if ontology == AgentOntologies.MATCHING:
+                        if performative == AgentPerformatives.REQUEST:
+
+                            payload.pop("visited_agents", None)
+
+                            await save_matching(payload)
+
+                            await self.agent.forward_message(
+                                behaviour=self,
+                                payload=payload,
+                                agent_to=sender,
+                                performative=AgentPerformatives.INFORM,
+                                ontology=AgentOntologies.MATCHING,
+                                conversation_id=conversation_id
+                            )
+                            
                 except Exception as e:
                     print(f"[DatabaseAgent] Erro ao processar mensagem: {e}")
  

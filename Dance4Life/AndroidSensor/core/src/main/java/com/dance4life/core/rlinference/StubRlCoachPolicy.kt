@@ -5,19 +5,34 @@ import com.dance4life.core.data.model.MovementRecommendation
 
 class StubRlCoachPolicy : RlCoachPolicy {
     override fun recommend(observation: MovementObservation): MovementRecommendation {
-        val title = if (observation.sedentaryMinutesToday > 180) {
-            "Gentle 5-minute walk"
+        val (actionId, title, duration, message) = if (observation.sedentaryMinutesToday > 180) {
+            Quad(
+                "medium_intensity",
+                "Moderate coaching suggestion",
+                5,
+                "Great balance: this intensity supports healthy activity.",
+            )
         } else {
-            "2-minutos stretch break"
+            Quad(
+                "low_intensity",
+                "Low-intensity movement cue",
+                2,
+                "A gentle move keeps momentum without overload.",
+            )
         }
 
-        val duration = if (title.contains("5-minute")) 5 else 2
-
         return MovementRecommendation(
-            actionId = "move_break",
+            actionId = actionId,
             title = title,
             durationMinutes = duration,
-            encouragementMessage = "Great job taking care of your health. Small movements matter.",
+            encouragementMessage = message,
         )
     }
+
+    private data class Quad(
+        val actionId: String,
+        val title: String,
+        val durationMinutes: Int,
+        val encouragementMessage: String,
+    )
 }

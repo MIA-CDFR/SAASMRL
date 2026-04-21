@@ -62,7 +62,38 @@ class CoordinatorAgent(BaseBackgroundAgent):
                             print("**********[CoordinatorAgent] Forward concluído")
 
                         elif performative == AgentPerformatives.INFORM:
-                            print("[CoordinatorAgent] INFORM recebido - dados de atividade processados") 
+                            print("[CoordinatorAgent] INFORM recebido - dados de atividade processados")
+
+                    if ontology == AgentOntologies.MOVEMENT_RECOMMENDATION:
+                        if performative == AgentPerformatives.REQUEST:
+
+                            # 👉 aqui integras o modelo RL -@TODO: COMO ASSIM?????
+                            # exemplo simples:
+                            payload["recommendation"] = True  # ou resultado do modelo
+
+                            await self.agent.forward_message(
+                                behaviour=self,
+                                payload=payload,
+                                agent_to=AgentAddresses.DATABASE_AGENT,
+                                performative=AgentPerformatives.REQUEST,
+                                ontology=AgentOntologies.MOVEMENT_RECOMMENDATION,
+                                conversation_id=conversation_id
+                            )
+
+                    if ontology == AgentOntologies.MATCHING:
+                        if performative == AgentPerformatives.REQUEST:
+
+                            # exemplo simples:
+                            payload["recommendation"] = True  # ou resultado do modelo
+
+                            await self.agent.forward_message(
+                                behaviour=self,
+                                payload=payload,
+                                agent_to=AgentAddresses.DATABASE_AGENT,
+                                performative=AgentPerformatives.REQUEST,
+                                ontology=AgentOntologies.MATCHING,
+                                conversation_id=conversation_id
+                            )
  
                 except Exception as e:
                     print(f"[CoordinatorAgent] Erro ao processar mensagem: {e}")

@@ -35,7 +35,8 @@ class SensorAgent(BaseBackgroundAgent):
                     if ontology == AgentOntologies.SENSOR_ACTIVITY:
                         if performative == AgentPerformatives.REQUEST:
 
-                            print("**********[SensorAgent] A processar dados de atividade")
+                            # LIXO   ***   print("**********[SensorAgent] A processar dados de atividade")
+                            print(f"**********[SensorAgent] A processar dados {AgentOntologies.SENSOR_ACTIVITY}")
                             try:
                                 await self.agent.forward_message(
                                     behaviour=self,
@@ -45,17 +46,6 @@ class SensorAgent(BaseBackgroundAgent):
                                     ontology=AgentOntologies.SENSOR_ACTIVITY,
                                     conversation_id=conversation_id
                                 )
-                                # forward_msg = Message(to=AgentAddresses.COORDINATOR_AGENT)
-                                # forward_msg.set_metadata("performative", AgentPerformatives.REQUEST)
-                                # forward_msg.set_metadata("ontology", AgentOntologies.SENSOR_ACTIVITY)
-                                # forward_msg.set_metadata("conversation-id", conversation_id)
-
-                                # payload.setdefault("visited_agents", [])
-                                # payload["visited_agents"].append(str(self.agent.jid))
-
-                                # forward_msg.body = jsonpickle.encode(payload)
-
-                                # await self.send(forward_msg)
 
                                 print("[SensorAgent] Forward concluído")
                             except Exception as e:
@@ -64,7 +54,21 @@ class SensorAgent(BaseBackgroundAgent):
                             print("**********[SensorAgent] Forward concluído")
 
                         elif performative == AgentPerformatives.INFORM:
-                            print("[SensorAgent] INFORM recebido - dados de atividade processados") 
+                            print("[SensorAgent] INFORM recebido - dados de atividade processados")
+                    
+                    if ontology == AgentOntologies.MOVEMENT_RECOMMENDATION:
+                        if performative == AgentPerformatives.REQUEST:
+
+                            print(f"**********[SensorAgent] A processar dados {AgentOntologies.MOVEMENT_RECOMMENDATION}")
+
+                            await self.agent.forward_message(
+                                behaviour=self,
+                                payload=payload,
+                                agent_to=AgentAddresses.COORDINATOR_AGENT,
+                                performative=AgentPerformatives.REQUEST,
+                                ontology=AgentOntologies.MOVEMENT_RECOMMENDATION,
+                                conversation_id=conversation_id
+                            )
  
                 except Exception as e:
                     print(f"[SensorAgent] Erro ao processar mensagem: {e}")

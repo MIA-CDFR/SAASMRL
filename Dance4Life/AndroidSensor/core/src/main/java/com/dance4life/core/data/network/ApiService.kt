@@ -23,6 +23,7 @@ object ApiService {
     ) {
         val json = JSONObject().apply {
             put("userId", userId)
+            put("utilizador_id", userId)
             put("ritmo", ritmo)
             put("acc", acc)
             put("gyro", gyro)
@@ -30,25 +31,31 @@ object ApiService {
             put("latitude", lat)
             put("longitude", lon)
             put("timestamp", System.currentTimeMillis())
+            put("eventType", "activity")
         }
 
-        val body = json.toString()
-            .toRequestBody("application/json".toMediaType())
+        postJson(
+            url = Constants.BASE_URL + Constants.COLLECT_DATA,
+            json = json,
+            callback = null,
+        )
+    }
 
-        val request = Request.Builder()
-            .url(Constants.BASE_URL + Constants.COLLECT_DATA)
-            .post(body)
-            .build()
-        Log.d("REQUEST", "REQUEST: $request")
-        Thread {
-            try {
-                val response = ApiClient.client.newCall(request).execute()
-                Log.d("API", "Code: ${response.code}")
-                Log.d("API", "Response: ${response.body?.string()}")
-            } catch (e: Exception) {
-                e.printStackTrace()
+    fun sendRlMetric(payload: JSONObject, callback: (Boolean) -> Unit) {
+        val json = JSONObject(payload.toString()).apply {
+            if (!has("timestamp")) {
+                put("timestamp", System.currentTimeMillis())
             }
-        }.start()
+            if (!has("eventType")) {
+                put("eventType", "rl_metric")
+            }
+        }
+
+        postJson(
+            url = Constants.BASE_URL + Constants.COLLECT_DATA,
+            json = json,
+            callback = callback,
+        )
     }
 
     fun getUserMatch(userId: String, callback: (String?) -> Unit) {
