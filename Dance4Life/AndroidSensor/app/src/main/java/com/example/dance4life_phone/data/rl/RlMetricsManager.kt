@@ -30,7 +30,7 @@ class RlMetricsManager(
             put("eventType", "rl_metric")
             put("timestamp", System.currentTimeMillis())
             put("userId", userId)
-            put("utilizador_id", userId)
+
             put("policy", policyName)
             put("recommendationActionId", recommendation.actionId)
             put("recommendationDurationMinutes", recommendation.durationMinutes)
@@ -38,10 +38,11 @@ class RlMetricsManager(
             put(
                 "observation",
                 JSONObject().apply {
-                    put("stepsLastHour", observation.stepsLastHour)
-                    put("sedentaryMinutesToday", observation.sedentaryMinutesToday)
-                    put("energyLevel", observation.energyLevel)
-                    put("mobilityConfidence", observation.mobilityConfidence)
+                    put("activityLevel", observation.activityLevel)
+                    put("physicalFatigue", observation.physicalFatigue)
+                    put("irritationLevel", observation.irritationLevel)
+                    //put("mobilityConfidence", observation.mobilityConfidence)
+
                 }
             )
 

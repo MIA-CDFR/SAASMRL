@@ -41,6 +41,7 @@ class DanceController(
 
     private var currentCity: String? = null
 
+    private var lastActionId: String? = null
     private var onSensorUpdate: ((SensorData) -> Unit)? = null
     private var onRitmoCalculated: ((Double) -> Unit)? = null
 
@@ -229,24 +230,44 @@ class DanceController(
 
         onRitmoCalculated?.invoke(result.ritmo)
 
+        val sedentaryMinutesToday = estimateSedentaryMinutes(result.avgAcc)
+        val energyLevel = estimateEnergyLevel(result.avgHR)
+        val mobilityConfidence = estimateMobility(result.avgGyro)
+
+        val activityLevel = (result.ritmo / RITMO_ACTIVITY_SCALE).toFloat().coerceIn(0f, 10f)
+        val physicalFatigue =
+            ((sedentaryMinutesToday.coerceIn(0, 480) / 480f) * 5f +
+                    ((10 - energyLevel.coerceIn(0, 10)) / 10f) * 5f)
+                .coerceIn(0f, 10f)
+
         val observation = MovementObservation(
-            stepsLastHour = estimateSteps(accData),
+           /* stepsLastHour = estimateSteps(accData),
             sedentaryMinutesToday = estimateSedentaryMinutes(result.avgAcc),
             energyLevel = estimateEnergyLevel(result.avgHR),
-            mobilityConfidence = estimateMobility(result.avgGyro)
+            mobilityConfidence = estimateMobility(result.avgGyro)*/
             //irritationLevel = getIrritationLevel()
+            activityLevel = activityLevel,
+            physicalFatigue = physicalFatigue,
+            irritationLevel = getIrritationLevel().toFloat().coerceIn(0f, 10f),
         )
 
-        Log.d("IRRITATION_LEVEL_1", getIrritationLevel().toString())
+
 
         val recommendation = rlCoachPolicy.recommend(observation)
         onMovementRecommendation?.invoke(recommendation)
 
 
-        sendMovementRecommendation(
-            userId = deviceProvider.getUserId(),
-            recommendation = recommendation
-        )
+        Log.d("RECOMMENDATION", recommendation.actionId)
+        Log.d("IRRITATION_LEVEL_0", physicalFatigue.toString())
+
+        if(lastActionId != recommendation.actionId) {
+
+            lastActionId = recommendation.actionId
+            sendMovementRecommendation(
+                userId = deviceProvider.getUserId(),
+                recommendation = recommendation
+            )
+        }
     }
 
     private fun estimateSteps(accData: List<Float>): Int {
@@ -315,7 +336,7 @@ class DanceController(
     }
 
     companion object {
-
+        private const val RITMO_ACTIVITY_SCALE = 2.0
         private var irritationLevel: Int = 0
         private var irritationLCounter: Int = 0
         private var lastIrritationLevel: Long = System.currentTimeMillis()

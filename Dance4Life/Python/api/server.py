@@ -67,20 +67,21 @@ def movement_recommendation():
     try:
         data = request.get_json()
 
+        print(f"set_movement_recommendation {data}")
         if not data:
             return jsonify({"status": "error"}), 400
 
-        # future = asyncio.run_coroutine_threadsafe(
-        #     sender_agent.send_message(
-        #         payload=data,
-        #         agent_to=AgentAddresses.SENSOR_AGENT,
-        #         performative=AgentPerformatives.REQUEST,
-        #         ontology=AgentOntologies.MOVEMENT_RECOMMENDATION
-        #     ),
-        #     sender_agent.agent_loop
-        # )
+        future = asyncio.run_coroutine_threadsafe(
+            sender_agent.send_message(
+                payload=data,
+                agent_to=AgentAddresses.SENSOR_AGENT,
+                performative=AgentPerformatives.REQUEST,
+                ontology=AgentOntologies.MOVEMENT_RECOMMENDATION
+            ),
+            sender_agent.agent_loop
+        )
 
-        # future.result()
+        future.result()
 
         return jsonify({
             "status": "ok",

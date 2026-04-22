@@ -5,19 +5,28 @@ import com.dance4life.core.data.model.MovementRecommendation
 
 class StubRlCoachPolicy : RlCoachPolicy {
     override fun recommend(observation: MovementObservation): MovementRecommendation {
-        val (actionId, title, duration, message) = if (observation.sedentaryMinutesToday > 180) {
-            Quad(
-                "medium_intensity",
-                "Moderate coaching suggestion",
-                5,
-                "Great balance: this intensity supports healthy activity.",
-            )
-        } else {
+        //val (actionId, title, duration, message) = if (observation.sedentaryMinutesToday > 180) {
+        val (actionId, title, duration, message) = if (observation.physicalFatigue > 8.0f) {
             Quad(
                 "low_intensity",
-                "Low-intensity movement cue",
+                "Ritmo Baixo",
                 2,
-                "A gentle move keeps momentum without overload.",
+                "Um ritmo mais leve será benéfico para o seu bem-estar.",
+
+            )
+        } else if (observation.physicalFatigue > 6.0f){
+            Quad(
+                "medium_intensity",
+                "Ritmo Saudável",
+                5,
+                "Este nível de atividade é ideal para o seu bem-estar.",
+            )
+        }else{
+            Quad(
+                "high_intensity",
+                "Ritmo Elevado",
+                2,
+                "Aumentar o nível de atividade será benéfico para o seu bem-estar.",
             )
         }
 

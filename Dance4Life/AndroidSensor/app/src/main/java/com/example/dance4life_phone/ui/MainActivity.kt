@@ -270,7 +270,7 @@ fun DashboardScreen(
 
                             if (recommendation != null) {
                                 Text(
-                                    text = "✨ ${recommendation.title}",
+                                    text = "✨ ${recommendation.encouragementMessage}",
                                     color = Color(0xFFE8E6A7),
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Medium

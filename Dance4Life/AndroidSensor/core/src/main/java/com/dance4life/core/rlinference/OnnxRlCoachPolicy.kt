@@ -26,9 +26,13 @@ class OnnxRlCoachPolicy(
 
     override fun recommend(observation: MovementObservation): MovementRecommendation {
         val input = floatArrayOf(
-            toActivityLevel(observation),
+           /* toActivityLevel(observation),
             toPhysicalFatigue(observation),
-            toIrritationLevel(observation),
+            toIrritationLevel(observation),*/
+
+            observation.activityLevel.coerceIn(0f, 10f),
+            observation.physicalFatigue.coerceIn(0f, 10f),
+            observation.irritationLevel.coerceIn(0f, 10f),
         )
 
         val action = inferAction(input)
@@ -79,7 +83,7 @@ class OnnxRlCoachPolicy(
             )
         }
     }
-
+/*
     // Model expects state features in [0, 10] ordered as
     // [activity_level, physical_fatigue, irritation_level].
     private fun toActivityLevel(observation: MovementObservation): Float {
@@ -98,7 +102,7 @@ class OnnxRlCoachPolicy(
         val lowConfidenceBurden = ((10 - observation.mobilityConfidence.coerceIn(0, 10)) / 10f) * 4f
         return (sedentaryBurden + lowConfidenceBurden).coerceIn(0f, 10f)
     }
-
+*/
     private fun copyAssetToCache(context: Context, assetPath: String): File {
         val outFile = File(context.cacheDir, assetPath.substringAfterLast('/'))
         if (outFile.exists() && outFile.length() > 0L) {

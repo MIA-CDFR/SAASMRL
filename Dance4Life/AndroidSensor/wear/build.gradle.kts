@@ -57,6 +57,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.wear.compose:compose-navigation:1.4.0")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.foundation:foundation")
     implementation(project(":core"))
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

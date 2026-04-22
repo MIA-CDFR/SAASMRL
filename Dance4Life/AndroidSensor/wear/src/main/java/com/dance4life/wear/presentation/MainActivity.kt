@@ -6,14 +6,12 @@ import android.app.NotificationManager
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,8 +40,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.pager.HorizontalPager
 import com.dance4life.core.data.model.EnvironmentData
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,21 +50,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.CircularProgressIndicator
-import androidx.wear.compose.material.MaterialTheme
-
-
 import androidx.compose.runtime.Composable
-
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.animation.core.tween
 
 class MainActivity : ComponentActivity() {
 
@@ -169,6 +159,7 @@ fun WearApp(
         val context = LocalContext.current
         val pagerState = rememberPagerState(pageCount = { 2 })
 
+
         LaunchedEffect(Unit) {
 
             controller.setSensorListener { data ->
@@ -260,127 +251,7 @@ fun PermissionScreen(onRequestPermission: () -> Unit) {
     }
 }
 
-@Composable
-fun MainScreen2(
-    sensorData: SensorData?,
-    locationData: LocationData?,
-    rhythm: Double?,
-    recommendation: MovementRecommendation?,
-    environmentData: EnvironmentData?
-) {
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-
-        // BACKGROUND
-        Image(
-            painter = painterResource(id = R.drawable.dace4life_android_wear_background),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-
-        // OVERLAY
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.4f))
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-                //.padding(8.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            Spacer(modifier = Modifier.height(60.dp))
-
-            // SENSORES
-            if (sensorData != null) {
-                val d = sensorData
-
-                Text(
-                    text = "\u2764\uFE0F️ ${if (d.heartRate > 0) d.heartRate else "--"} bpm",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = "\uD83D\uDCC8 ACC: ${"%.1f".format(d.accMagnitude)}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = "\uD83D\uDD04 GYRO: ${"%.1f".format(d.gyroMagnitude)}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-            } else {
-                Text("A aguardar sensores...", color = Color.White)
-            }
-
-            if (rhythm != null) {
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = "\uD83D\uDC83 Ritmo: ${"%.1f".format(rhythm)}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-            }
-
-            // LOCALIZAÇÃO
-            if (locationData != null) {
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = "\uD83D\uDCCD ${locationData.city ?: "Desconhecido"}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-
-            } /*else {
-                Spacer(modifier = Modifier.height(6.dp))
-                Text("Sem localização...", color = Color.Gray, fontSize = 12.sp)
-            }*/
-
-            // AMBIENTE
-            if (environmentData != null) {
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = "\uD83C\uDF21\uFE0F ${environmentData.temperature ?: "--"}°C",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-
-            } /*else {
-                Spacer(modifier = Modifier.height(6.dp))
-                Text("Sem dados temp...", color = Color.Gray, fontSize = 12.sp)
-            }*/
-
-            if (recommendation != null) {
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = recommendation.title,
-                    color = Color.Blue,
-                    fontSize = 9.sp
-                )
-            }
-        }
-    }
-}
 @Composable
 fun MainScreen(
     sensorData: SensorData?,
@@ -521,13 +392,49 @@ fun MainScreen(
                         fontSize = 9.sp
                     )
 
-                    if (recommendation != null) {
+                    /*if (recommendation != null) {
                         Text(
-                            text = recommendation.title,
+                            text = recommendation.encouragementMessage,
                             color = Color(0xFFE8E6A7),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Medium
                         )
+                    }*/
+                    if (recommendation != null) {
+
+                        val scrollState = rememberScrollState()
+
+                        LaunchedEffect(recommendation.encouragementMessage) {
+
+                            if (scrollState.maxValue == 0) return@LaunchedEffect
+
+                            while (true) {
+                                delay(500)
+
+                                if (scrollState.maxValue > 0) {
+                                    scrollState.animateScrollTo(
+                                        scrollState.maxValue,
+                                        animationSpec = tween(5000)
+                                    )
+                                }
+
+                                delay(500)
+                                scrollState.scrollTo(0)
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(scrollState)
+                        ) {
+                            Text(
+                                text = recommendation.encouragementMessage,
+                                color = Color(0xFFE8E6A7),
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
             }
