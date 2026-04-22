@@ -103,5 +103,6 @@ class CoordinatorAgent(BaseBackgroundAgent):
  
     async def setup(self):
         print(f"[CoordinatorAgent] {self.jid} iniciado - setup")
+        await super().setup()
         self.add_behaviour(self.ReceiveCoordinatorDataBehaviour())
  

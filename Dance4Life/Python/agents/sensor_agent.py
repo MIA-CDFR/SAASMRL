@@ -7,6 +7,7 @@ from spade.behaviour import CyclicBehaviour
 from agents.base_background_agent import BaseBackgroundAgent
 from agents.base_sender_agent import BaseSenderAgent
 from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
+from spade.presence import PresenceType, PresenceShow
 
 class SensorAgent(BaseBackgroundAgent):
          
@@ -78,4 +79,6 @@ class SensorAgent(BaseBackgroundAgent):
  
     async def setup(self):
         print(f"[SensorAgent] {self.jid} iniciado - setup")
+        await super().setup()
         self.add_behaviour(self.ReceiveSensorDataBehaviour())
+

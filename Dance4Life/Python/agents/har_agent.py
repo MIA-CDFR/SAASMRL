@@ -68,6 +68,7 @@ class HarAgent(BaseBackgroundAgent):
                 print("[HarAgent] Nenhuma mensagem recebida")
  
     async def setup(self):
-        print(f"[HarAgent] {self.jid} iniciado - setup")
+        print(f"[HARAgent] {self.jid} iniciado - setup")
+        await super().setup()
         self.add_behaviour(self.ReceiveHarDataBehaviour())
  

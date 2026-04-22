@@ -1,8 +1,10 @@
+import threading
+
 from flask import Flask, request, jsonify
 import asyncio
-
+import time
 from agents.base_sender_agent import BaseSenderAgent
-from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
+from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives, SeververConfig
 
 app = Flask(__name__)
 
@@ -13,10 +15,15 @@ sender_agent = BaseSenderAgent(
 )
 
 
+##Registo Agentes
+registered_agents = {}
+HEARTBEAT_TIMEOUT = 30  
+lock = threading.Lock()
 
 def start_api():
     sender_agent.start_background()
-    app.run(host="0.0.0.0", port=5000, use_reloader=False)
+    start_cleanup_thread()
+    app.run(host="0.0.0.0", port=SeververConfig.SERVER_PORT, use_reloader=False)
 
 
 def stop_api():
@@ -24,7 +31,49 @@ def stop_api():
 
 pending_match_messages = {}
 
+@app.route('/register_agent', methods=['POST'])
+def register_agent():
+    data = request.get_json()
+    jid = data.get("jid")
 
+    with lock:
+        registered_agents[jid] = {
+            "last_seen": time.time()
+        }
+
+    print(f"[SERVER] Agent registado: {jid}")
+
+    print("Todos os Agentes", registered_agents)
+    return jsonify({"status": "registered"})
+
+@app.route('/heartbeat', methods=['POST'])
+def heartbeat():
+    data = request.get_json()
+    jid = data.get("jid")
+
+    with lock:
+        if jid in registered_agents:
+            registered_agents[jid]["last_seen"] = time.time()
+            print("Todos os Agentes", registered_agents)
+            return jsonify({"status": "alive"})
+        else:
+            return jsonify({"status": "not_registered"}), 404
+        
+   
+
+@app.route('/unregister_agent', methods=['POST'])
+def unregister_agent():
+    data = request.get_json()
+    jid = data.get("jid")
+
+    with lock:
+        if jid in registered_agents:
+            del registered_agents[jid]
+            print(f"[SERVER] Agent removido: {jid}")
+
+    print("Todos os Agentes", registered_agents)
+
+    return jsonify({"status": "unregistered"})
 
 #OK
 @app.route('/collect_data_activities', methods=['POST'])
@@ -41,17 +90,18 @@ def collect_data_activities():
         print("\nDados recebidos:")
         print(data)
 
-        future = asyncio.run_coroutine_threadsafe(
-            sender_agent.send_message(
-                payload=data,
-                agent_to=AgentAddresses.SENSOR_AGENT,
-                performative=AgentPerformatives.REQUEST,
-                ontology=AgentOntologies.SENSOR_ACTIVITY
-            ),
-            sender_agent.agent_loop
-        )
+        if AgentAddresses.SENSOR_AGENT in registered_agents:
+            future = asyncio.run_coroutine_threadsafe(
+                sender_agent.send_message(
+                    payload=data,
+                    agent_to=AgentAddresses.SENSOR_AGENT,
+                    performative=AgentPerformatives.REQUEST,
+                    ontology=AgentOntologies.SENSOR_ACTIVITY
+                ),
+                sender_agent.agent_loop
+            )
 
-        future.result()
+            future.result()
 
         return jsonify({
             "status": "ok",
@@ -71,17 +121,18 @@ def movement_recommendation():
         if not data:
             return jsonify({"status": "error"}), 400
 
-        future = asyncio.run_coroutine_threadsafe(
-            sender_agent.send_message(
-                payload=data,
-                agent_to=AgentAddresses.SENSOR_AGENT,
-                performative=AgentPerformatives.REQUEST,
-                ontology=AgentOntologies.MOVEMENT_RECOMMENDATION
-            ),
-            sender_agent.agent_loop
-        )
+        if AgentAddresses.SENSOR_AGENT in registered_agents:
+            future = asyncio.run_coroutine_threadsafe(
+                sender_agent.send_message(
+                    payload=data,
+                    agent_to=AgentAddresses.SENSOR_AGENT,
+                    performative=AgentPerformatives.REQUEST,
+                    ontology=AgentOntologies.MOVEMENT_RECOMMENDATION
+                ),
+                sender_agent.agent_loop
+            )
 
-        future.result()
+            future.result()
 
         return jsonify({
             "status": "ok",
@@ -142,9 +193,33 @@ def add_invite(user_id, data):
 
     pending_match_messages[user_id].append(data)
 
+def start_cleanup_thread():
+    thread = threading.Thread(target=cleanup_agents, daemon=True)
+    thread.start()
+    print("[SERVER] Cleanup thread iniciada")
+    
+def cleanup_agents():
+    while True:
+        now = time.time()
+        to_remove = []
+
+        with lock:
+            for jid, info in registered_agents.items():
+                if now - info["last_seen"] > HEARTBEAT_TIMEOUT:
+                    to_remove.append(jid)
+
+            for jid in to_remove:
+                print(f"[SERVER] Agent expirado: {jid}")
+                del registered_agents[jid]
+
+        time.sleep(10)
 
 if __name__ == '__main__':
+    # try:
+    #     app.run(host='0.0.0.0', port=5000, debug=True)
+    # finally:
+    #     sender_agent.stop_background()
     try:
-        app.run(host='0.0.0.0', port=5000, debug=True)
+        start_api()
     finally:
-        sender_agent.stop_background()
+        stop_api()

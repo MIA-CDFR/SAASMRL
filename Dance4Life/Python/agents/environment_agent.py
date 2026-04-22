@@ -76,5 +76,6 @@ class EnvironmentAgent(BaseBackgroundAgent):
  
     async def setup(self):
         print(f"[EnvironmentAgent] {self.jid} iniciado - setup")
+        await super().setup()
         self.add_behaviour(self.EnvironmentDataBehaviour())
  

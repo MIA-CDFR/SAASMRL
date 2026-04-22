@@ -32,3 +32,7 @@ class AgentPerformatives:
     AGREE = "agree"
     INFORM = "inform"
     FAILURE = "failure"
+
+class SeververConfig:
+    SERVER_HOSTNAME = "localhost"
+    SERVER_PORT = "5000" 

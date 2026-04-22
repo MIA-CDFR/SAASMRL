@@ -97,5 +97,5 @@ class DatabaseAgent(BaseBackgroundAgent):
  
     async def setup(self):
         print(f"[DatabaseAgent] {self.jid} iniciado - setup")
+        await super().setup()
         self.add_behaviour(self.ReceiveDatabaseDataBehaviour())
- 

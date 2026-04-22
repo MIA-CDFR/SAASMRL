@@ -1,16 +1,16 @@
 import signal
 import sys
+import threading
+import time
 
 from agents.database_agent import DatabaseAgent
 from agents.environment_agent import EnvironmentAgent
 from agents.har_agent import HarAgent
-from api.server import start_api, stop_api
+from api.server import start_api
 from agents.sensor_agent import SensorAgent
 from agents.coordinator_agent import CoordinatorAgent
 from agents.matching_agent import MatchingAgent
 from config.config import AgentAddresses, AGENT_PASSWORD
-
-import asyncio
 
 
 def start_spade_agents():
@@ -32,6 +32,7 @@ def start_spade_agents():
     matching_agent = MatchingAgent(AgentAddresses.MATCHING_AGENT, AGENT_PASSWORD)
     matching_agent.start_background()
 
+
     print("SPADE agents iniciados")
 
     return sensor_agent, coordinator_agent, environment_agent, har_agent, database_agent, matching_agent
@@ -49,12 +50,32 @@ def stop_spade_agents(sensor_agent, coordinator_agent, environment_agent, har_ag
 
 
 def main():
+    api_thread = threading.Thread(target=start_api, daemon=True)
+    api_thread.start()
+    print("[MAIN] A aguardar server arrancar...")
+    time.sleep(3)
+    print("[MAIN] Arrancar agentes...")
     sensor_agent, coordinator_agent, environment_agent, har_agent, database_agent, matching_agent = start_spade_agents()
 
+
     try:
-        start_api()
-    finally:
-        stop_spade_agents(sensor_agent, coordinator_agent, environment_agent, har_agent, database_agent, matching_agent)
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n[MAIN] A desligar...")
+
+        stop_spade_agents(
+            sensor_agent,
+            coordinator_agent,
+            environment_agent,
+            har_agent,
+            database_agent,
+            matching_agent
+        )
+    # try:
+    #     start_api()
+    # finally:
+    #     stop_spade_agents(sensor_agent, coordinator_agent, environment_agent, har_agent, database_agent, matching_agent)
 
 if __name__ == '__main__':
     main()
