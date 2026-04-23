@@ -45,8 +45,6 @@ def get_weather(latitude=None, longitude=None, cidade=None):
     data = response.json()
 
 
-    print(f" ------------------------------------------------------ Dados recebidos da API de clima: {data}")
-
     return {
         "city_name": data.get("name"), # Útil para confirmar que cidade a API encontrou
         "temperature": data["main"]["temp"],

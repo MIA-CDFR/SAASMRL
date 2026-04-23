@@ -77,7 +77,6 @@ def unregister_agent():
 
     return jsonify({"status": "unregistered"})
 
-#OK
 @app.route('/collect_data_activities', methods=['POST'])
 def collect_data_activities():
     try:
@@ -105,6 +104,20 @@ def collect_data_activities():
 
             future.result()
 
+        asyncio.sleep(4)
+        if AgentAddresses.MATCHING_AGENT in registered_agents:
+                future = asyncio.run_coroutine_threadsafe(
+                    sender_agent.send_message(
+                        payload=data,
+                        agent_to=AgentAddresses.MATCHING_AGENT,
+                        performative=AgentPerformatives.REQUEST,
+                        ontology=AgentOntologies.MATCHING
+                    ),
+                    sender_agent.agent_loop
+                )
+
+                future.result()
+
         return jsonify({
             "status": "ok",
             "message": "Dados enviados para o Sensor Agent"
@@ -113,7 +126,6 @@ def collect_data_activities():
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
     
-#TODO Falta implemtação em Android
 @app.route('/set_movement_recommendation', methods=['POST'])
 def movement_recommendation():
     try:
@@ -135,6 +147,7 @@ def movement_recommendation():
             )
 
             future.result()
+
 
         return jsonify({
             "status": "ok",
@@ -195,20 +208,30 @@ def matching():
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
     
-#@TODO alimentar atraves agente APP Cluster->Agente->API
 @app.route('/set_user_match/<user_id>', methods=['POST'])
 def set_user_match(user_id):
     data = request.get_json()
-
+    
     add_invite(user_id, data)  # Exemplo de convite para teste
 
     return jsonify({"status": "ok"})
+#@TODO RR
+# [user,invite_id,cluster,aceitou]
+# A,1,Moderado,Data,null
+# A,1,Moderado,24-04-2026,1->ok
+# A,1,Moderado,24-04-2026,0->ok
+# A,1,Baixo,Data,null
+# A,2,Baixo,Data,null
+# A,3,Baixo,Data,null
+#cluster_id, 0
+#Cluster 0 sem convite, recebe notificação verifica
 
-#@TODO vai consultar a API
+
+
 @app.route('/get_environment_data/<user_id>/<latitude>/<longitude>/<cidade>', methods=['GET'])
 def get_environment_data(user_id, latitude, longitude, cidade):
 
-    weather = get_weather(latitude, longitude)
+    weather = get_weather(latitude, longitude, cidade)
     
     data = {
         "temperatura": weather["temperature"],
@@ -222,10 +245,9 @@ def get_environment_data(user_id, latitude, longitude, cidade):
 
     return jsonify(data)
 
-#@TODO: ver se a gravação na base de dados está bem assim 
 @app.route('/set_invite_status/<invite_id>/<status_id>', methods=['POST'])
 def set_invite_status(invite_id, status_id):
-
+    #@TODO RR data, cluster, 
     print(f"Invite {('aceite' if status_id else 'recusado')}: {invite_id}")
 
     asyncio.run(save_invitation({

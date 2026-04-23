@@ -977,7 +977,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="7xKXfPi3WmGEBrK_d-iQ" name="Page-11">
-    <mxGraphModel dx="2096" dy="1165" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="3296" dy="1165" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1452,7 +1452,7 @@
           <mxGeometry x="-673" y="5120" width="30" height="60" as="geometry" />
         </mxCell>
         <mxCell id="45Ca0YVfS4DGI9anTOyF-24" value="Moderado" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="-776" y="4915" width="60" height="30" as="geometry" />
+          <mxGeometry x="-761" y="4937" width="60" height="30" as="geometry" />
         </mxCell>
         <mxCell id="45Ca0YVfS4DGI9anTOyF-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="45Ca0YVfS4DGI9anTOyF-21" target="45Ca0YVfS4DGI9anTOyF-20" edge="1">
           <mxGeometry relative="1" as="geometry">
@@ -1704,8 +1704,86 @@
         <mxCell id="hTctbgIlnj0VYs30yzS9-1" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Cluster&lt;/h1&gt;&lt;p&gt;A Cluster Moderado&lt;/p&gt;&lt;p&gt;Todos Moderados&lt;/p&gt;&lt;p&gt;Fazem Match com A&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;A-&amp;gt;Moderado&lt;/p&gt;&lt;p&gt;Mensagem para A&lt;/p&gt;&lt;p&gt;Para A Aceitar o Moderado&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="-494" y="4227" width="373" height="243" as="geometry" />
         </mxCell>
-        <mxCell id="etyd3xRezQMo8wkvmvXu-1" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Agentes&amp;nbsp;&lt;/span&gt;&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;ao arrancar vao escrever na api, se registar&lt;/span&gt;&lt;/h1&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;de X em X tempo o angent informa que esta vivo&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;o agente quando termina informa informa que ja nmao esta ativo&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;A api quando recebe um pedido, verifica qual o agente que pode receber o pedido&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
+        <mxCell id="etyd3xRezQMo8wkvmvXu-1" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Agentes&amp;nbsp;&lt;/span&gt;&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;ao arrancar vao escrever na api, se registar&lt;/span&gt;&lt;/h1&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;de X em X tempo o angent informa que esta vivo&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;o agente quando termina informa informa que ja nmao esta ativo&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;A api quando recebe um pedido, verifica qual o agente que pode receber o pedido&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="133" y="-298" width="383" height="211" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-1" value="Cluster B" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1000" y="4730" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="7tSFrwFybNjdn5pkwUJk-2" target="7tSFrwFybNjdn5pkwUJk-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-2" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1317" y="4730" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-3" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1410" y="5237" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-4" value="Cluster B" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1405" y="5160" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-6" value="Cluster A" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1359" y="5249" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-7" value="Cluster A" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1194" y="4904" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-8" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1264" y="4895" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-9" value="Cluster A" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1194" y="4904" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-10" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1264" y="4895" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-11" value="Cluster A" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1194" y="4904" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-12" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1264" y="4895" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-13" value="Cluster A" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1194" y="4904" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-14" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1264" y="4895" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-15" value="Cluster A" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1138" y="5011" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-16" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1208" y="5002" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-17" value="Cluster A" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1103" y="5120.5" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-18" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1173" y="5111.5" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="7tSFrwFybNjdn5pkwUJk-19" target="7tSFrwFybNjdn5pkwUJk-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-19" value="Actividade Z+1" style="whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="-1188" y="4730" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-22" value="" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1419" y="4946" width="86" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-23" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="-1728" y="4893.5" width="233" height="233" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-24" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1604" y="4904" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-25" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1705" y="4980" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-26" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="-1610" y="5160" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7tSFrwFybNjdn5pkwUJk-27" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="-1622" y="5008" width="21" height="21" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

@@ -20,6 +20,33 @@ class MatchingAgent(BaseBackgroundAgent):
         matching_result = payload.get("matching_result", {})
         requester = payload.get("user_id") or payload.get("device_id")
 
+        try:
+            #@TODO DS rever a claculo para o cluster ritmo, 4 Clusters cluster_id, 0,1,2,3
+            invite_data = {
+                "type": "invite",
+                "invite_id": 111,
+                "from_user_id": "requester",
+                "to_user_id": "matched_user_id",
+                "cluster_id": "matching_result",
+                "cluster": "Moderado",
+                "compatibility_score": "score",
+                "distance_km": "distance_km",
+            }
+
+            requests.post(
+                f"{SERVER_URL}/set_user_match/9d789fd91804129f",
+                json=invite_data,
+                timeout=3,
+            )
+
+            requests.post(
+                f"{SERVER_URL}/set_user_match/bb80f878cef35322",
+                json=invite_data,
+                timeout=3,
+            )            
+        except Exception as e:
+            print(f"[MatchingAgent] Erro ao publicar convite para API: {e}")
+
         for match in matching_result.get("matches", []):
             matched_user_id = match.get("user_id")
             if not matched_user_id:
