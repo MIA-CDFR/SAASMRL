@@ -152,6 +152,46 @@ def get_user_match(user_id):
 
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
+
+
+@app.route('/matching', methods=['POST'])
+def matching():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                "status": "error",
+                "details": "Body JSON inválido ou vazio"
+            }), 400
+
+        print(f"matching {data}")
+
+        if AgentAddresses.MATCHING_AGENT in registered_agents:
+            future = asyncio.run_coroutine_threadsafe(
+                sender_agent.send_message(
+                    payload=data,
+                    agent_to=AgentAddresses.MATCHING_AGENT,
+                    performative=AgentPerformatives.REQUEST,
+                    ontology=AgentOntologies.MATCHING
+                ),
+                sender_agent.agent_loop
+            )
+
+            future.result()
+
+            return jsonify({
+                "status": "ok",
+                "message": "Dados enviados para o Matching Agent"
+            }), 200
+
+        return jsonify({
+            "status": "error",
+            "details": "Matching Agent não está registado"
+        }), 503
+
+    except Exception as e:
+        return jsonify({"status": "error", "details": str(e)}), 500
     
 #@TODO alimentar atraves agente APP Cluster->Agente->API
 @app.route('/set_user_match/<user_id>', methods=['POST'])
