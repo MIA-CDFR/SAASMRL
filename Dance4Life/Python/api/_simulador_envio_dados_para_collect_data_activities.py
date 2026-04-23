@@ -82,8 +82,8 @@ def main():
     args = parser.parse_args()
 
     url_collect = f"{BASE_URL}/collect_data_activities"
-    url_movement = f"{BASE_URL}/movement_recommendation"
-    url_matching = f"{BASE_URL}/matching"
+    url_movement = f"{BASE_URL}/set_movement_recommendation"
+    url_matching = f"{BASE_URL}/set_user_match/10101"           # @TODO: usar user_id real
 
     print(f"Simulador iniciado (modo: {args.modo})")
     print("Ctrl+C para parar.\n")

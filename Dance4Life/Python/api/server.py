@@ -3,6 +3,8 @@ import threading
 from flask import Flask, request, jsonify
 import asyncio
 import time
+from sensor.external_sensors import get_weather
+from services.firebase_service import save_invitation
 from agents.base_sender_agent import BaseSenderAgent
 from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives, SeververConfig
 
@@ -165,9 +167,12 @@ def set_user_match(user_id):
 #@TODO vai consultar a API
 @app.route('/get_environment_data/<user_id>/<latitude>/<longitude>/<cidade>', methods=['GET'])
 def get_environment_data(user_id, latitude, longitude, cidade):
+
+    weather = get_weather(latitude, longitude)
+    
     data = {
-        "temperatura": 25.5,
-        "humidade": 68,
+        "temperatura": weather["temperature"],
+        "humidade": weather["humidity"],
         "cidade": cidade,
         "latitude": latitude,
         "longitude": longitude
@@ -177,11 +182,16 @@ def get_environment_data(user_id, latitude, longitude, cidade):
 
     return jsonify(data)
 
-#@TODO falta guardar no firebase
+#@TODO: ver se a gravação na base de dados está bem assim 
 @app.route('/set_invite_status/<invite_id>/<status_id>', methods=['POST'])
 def set_invite_status(invite_id, status_id):
 
     print(f"Invite {('aceite' if status_id else 'recusado')}: {invite_id}")
+
+    asyncio.run(save_invitation({
+        "invite_id": invite_id,
+        "status": status_id
+    }))
 
     return jsonify({"status": "ok"})
 
