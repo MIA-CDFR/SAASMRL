@@ -1,15 +1,47 @@
-import asyncio
-import threading
 import jsonpickle
+import requests
  
-from spade.agent import Agent, Message
-from spade.behaviour import CyclicBehaviour, PeriodicBehaviour
+from spade.behaviour import CyclicBehaviour
 from agents.base_background_agent import BaseBackgroundAgent
-from agents.base_sender_agent import BaseSenderAgent
-from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
+from config.config import AgentAddresses, AgentOntologies, AgentPerformatives, SeververConfig
+from model.user_matching_cluster import UserMatchingClusterModel
+
+
+SERVER_URL = f"http://{SeververConfig.SERVER_HOSTNAME}:{SeververConfig.SERVER_PORT}"
 
 
 class MatchingAgent(BaseBackgroundAgent):
+
+    def __init__(self, jid, password):
+        super().__init__(jid, password)
+        self.cluster_model = UserMatchingClusterModel()
+
+    def _notify_invites(self, payload):
+        matching_result = payload.get("matching_result", {})
+        requester = payload.get("user_id") or payload.get("device_id")
+
+        for match in matching_result.get("matches", []):
+            matched_user_id = match.get("user_id")
+            if not matched_user_id:
+                continue
+
+            invite_data = {
+                "type": "invite",
+                "from_user_id": requester,
+                "to_user_id": matched_user_id,
+                "cluster_id": matching_result.get("cluster_id"),
+                "compatibility_score": match.get("score"),
+                "distance_km": match.get("distance_km"),
+            }
+
+            try:
+                requests.post(
+                    f"{SERVER_URL}/set_user_match/{matched_user_id}",
+                    json=invite_data,
+                    timeout=3,
+                )
+            except Exception as e:
+                print(f"[MatchingAgent] Erro ao publicar convite para API: {e}")
          
     class ReceiveMatchingDataBehaviour(CyclicBehaviour):
     # class ReceiveMatchingDataBehaviour(PeriodicBehaviour):
@@ -39,6 +71,9 @@ class MatchingAgent(BaseBackgroundAgent):
                             
                             print(f"**********[MatchingAgent] A processar dados {AgentOntologies.MATCHING}")
                             try:
+                                payload = self.agent.cluster_model.process_matching_request(payload)
+                                self.agent._notify_invites(payload)
+
                                 await self.agent.forward_message(
                                     behaviour=self,
                                     payload=payload,
