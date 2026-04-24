@@ -1,7 +1,7 @@
 package com.dance4life.core.utils
 
 object Constants {
-    const val BASE_URL = "http://localhost:5000"
+    const val BASE_URL = "http://localhost:5000" //@TODO: Alterar IP
 
     const val COLLECT_DATA = "/collect_data_activities"
 
