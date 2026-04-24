@@ -18,60 +18,52 @@ class MatchingAgent(BaseBackgroundAgent):
 
     def _notify_invites(self, payload):
         matching_result = payload.get("matching_result", {})
-        requester = payload.get("user_id") or payload.get("device_id")
+        invites = matching_result.get("invites", [])
 
-        try:
-            #@TODO DS rever a claculo para o cluster ritmo, 4 Clusters cluster_id, 0,1,2,3
-            invite_data = {
-                "type": "invite",
-                "invite_id": 111,
-                "from_user_id": "requester",
-                "to_user_id": "matched_user_id",
-                "cluster_id": "matching_result",
-                "cluster": "Moderado",
-                "compatibility_score": "score",
-                "distance_km": "distance_km",
+        print(f"[MatchingAgent] Notificando convites para API: {invites}")
+
+        for invite in invites:
+            target_user_id = invite.get("to_user_id")
+            from_user_id = invite.get("from_user_id")
+            solo = invite.get("solo_mode", False)
+
+            # Build the base invite payload
+            base = {
+                "type": invite.get("type", "invite"),
+                "id": invite.get("invite_id"),
+                "cluster": invite.get("cluster", matching_result.get("cluster", "Iniciante")),
+                "from_user_id": from_user_id,
+                "to_user_id": target_user_id,
+                "distance_km": invite.get("distance_km"),
+                "same_city": invite.get("same_city"),
+                "city": invite.get("city"),
             }
 
-            requests.post(
-                f"{SERVER_URL}/set_user_match/9d789fd91804129f",
-                json=invite_data,
-                timeout=3,
-            )
+            # Notify the target user
+            if target_user_id:
+                try:
+                    requests.post(
+                        f"{SERVER_URL}/set_user_match/{target_user_id}",
+                        json=base,
+                        timeout=3,
+                    )
+                except Exception as e:
+                    print(f"[MatchingAgent] Erro ao publicar convite para {target_user_id}: {e}")
 
-            requests.post(
-                f"{SERVER_URL}/set_user_match/bb80f878cef35322",
-                json=invite_data,
-                timeout=3,
-            )            
-        except Exception as e:
-            print(f"[MatchingAgent] Erro ao publicar convite para API: {e}")
-
-        for match in matching_result.get("matches", []):
-            matched_user_id = match.get("user_id")
-            if not matched_user_id:
-                continue
-
-            invite_data = {
-                "type": "invite",
-                "from_user_id": requester,
-                "to_user_id": matched_user_id,
-                "cluster_id": matching_result.get("cluster_id"),
-                "compatibility_score": match.get("score"),
-                "distance_km": match.get("distance_km"),
-            }
-
-            try:
-                requests.post(
-                    f"{SERVER_URL}/set_user_match/{matched_user_id}",
-                    json=invite_data,
-                    timeout=3,
-                )
-            except Exception as e:
-                print(f"[MatchingAgent] Erro ao publicar convite para API: {e}")
+            # Also notify the source (from) user with a mirrored invite,
+            # unless it is a solo event (from == to already handled above)
+            if from_user_id and from_user_id != target_user_id and not solo:
+                mirrored = {**base, "to_user_id": from_user_id, "from_user_id": target_user_id}
+                try:
+                    requests.post(
+                        f"{SERVER_URL}/set_user_match/{from_user_id}",
+                        json=mirrored,
+                        timeout=3,
+                    )
+                except Exception as e:
+                    print(f"[MatchingAgent] Erro ao publicar convite espelhado para {from_user_id}: {e}")
          
     class ReceiveMatchingDataBehaviour(CyclicBehaviour):
-    # class ReceiveMatchingDataBehaviour(PeriodicBehaviour):
         async def run(self):
             msg = await self.receive(timeout=10)
  
@@ -83,14 +75,14 @@ class MatchingAgent(BaseBackgroundAgent):
                 ontology = msg.get_metadata("ontology")
                 conversation_id = msg.get_metadata("conversation-id")
  
-                print(f"[SensorAgent] Performative: {performative}")
-                print(f"[SensorAgent] Ontology: {ontology}")
-                print(f"[SensorAgent] Conversation ID: {conversation_id}")
+                print(f"[MatchingAgent] Performative: {performative}")
+                print(f"[MatchingAgent] Ontology: {ontology}")
+                print(f"[MatchingAgent] Conversation ID: {conversation_id}")
  
                 try:
                     payload = jsonpickle.decode(msg.body)
  
-                    print("**********[SensorAgent] Payload recebido:")
+                    print("**********[MatchingAgent] Payload recebido:")
                     print(payload)
  
                     if ontology == AgentOntologies.MATCHING:

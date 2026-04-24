@@ -22,6 +22,7 @@ registered_agents = {}
 HEARTBEAT_TIMEOUT = 30  
 lock = threading.Lock()
 
+
 def start_api():
     sender_agent.start_background()
     start_cleanup_thread()
@@ -31,7 +32,9 @@ def start_api():
 def stop_api():
     sender_agent.stop_background()
 
+users = {}
 pending_match_messages = {}
+
 
 @app.route('/register_agent', methods=['POST'])
 def register_agent():
@@ -48,6 +51,7 @@ def register_agent():
     print("Todos os Agentes", registered_agents)
     return jsonify({"status": "registered"})
 
+
 @app.route('/heartbeat', methods=['POST'])
 def heartbeat():
     data = request.get_json()
@@ -60,8 +64,7 @@ def heartbeat():
             return jsonify({"status": "alive"})
         else:
             return jsonify({"status": "not_registered"}), 404
-        
-   
+
 
 @app.route('/unregister_agent', methods=['POST'])
 def unregister_agent():
@@ -76,6 +79,7 @@ def unregister_agent():
     print("Todos os Agentes", registered_agents)
 
     return jsonify({"status": "unregistered"})
+
 
 @app.route('/collect_data_activities', methods=['POST'])
 def collect_data_activities():
@@ -104,11 +108,10 @@ def collect_data_activities():
 
             future.result()
 
-        asyncio.sleep(4)
         if AgentAddresses.MATCHING_AGENT in registered_agents:
                 future = asyncio.run_coroutine_threadsafe(
                     sender_agent.send_message(
-                        payload=data,
+                        payload={"new_data": data, "users": users},
                         agent_to=AgentAddresses.MATCHING_AGENT,
                         performative=AgentPerformatives.REQUEST,
                         ontology=AgentOntologies.MATCHING
@@ -125,7 +128,8 @@ def collect_data_activities():
 
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
-    
+
+
 @app.route('/set_movement_recommendation', methods=['POST'])
 def movement_recommendation():
     try:
@@ -161,53 +165,18 @@ def movement_recommendation():
 @app.route('/get_user_match/<user_id>', methods=['GET'])
 def get_user_match(user_id):
     try:
+        print(f"get_user_match {user_id}")
 
         msgs = pending_match_messages.get(user_id, [])
+
+        print(f"Mensagens pendentes para {user_id}: {msgs}")
+
         return jsonify(msgs)
 
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
 
 
-@app.route('/matching', methods=['POST'])
-def matching():
-    try:
-        data = request.get_json()
-
-        if not data:
-            return jsonify({
-                "status": "error",
-                "details": "Body JSON inválido ou vazio"
-            }), 400
-
-        print(f"matching {data}")
-
-        if AgentAddresses.MATCHING_AGENT in registered_agents:
-            future = asyncio.run_coroutine_threadsafe(
-                sender_agent.send_message(
-                    payload=data,
-                    agent_to=AgentAddresses.MATCHING_AGENT,
-                    performative=AgentPerformatives.REQUEST,
-                    ontology=AgentOntologies.MATCHING
-                ),
-                sender_agent.agent_loop
-            )
-
-            future.result()
-
-            return jsonify({
-                "status": "ok",
-                "message": "Dados enviados para o Matching Agent"
-            }), 200
-
-        return jsonify({
-            "status": "error",
-            "details": "Matching Agent não está registado"
-        }), 503
-
-    except Exception as e:
-        return jsonify({"status": "error", "details": str(e)}), 500
-    
 @app.route('/set_user_match/<user_id>', methods=['POST'])
 def set_user_match(user_id):
     data = request.get_json()
@@ -227,9 +196,10 @@ def set_user_match(user_id):
 #Cluster 0 sem convite, recebe notificação verifica
 
 
-
 @app.route('/get_environment_data/<user_id>/<latitude>/<longitude>/<cidade>', methods=['GET'])
 def get_environment_data(user_id, latitude, longitude, cidade):
+
+    add_user_profile(user_id, latitude, longitude, cidade)
 
     weather = get_weather(latitude, longitude, cidade)
     
@@ -245,6 +215,7 @@ def get_environment_data(user_id, latitude, longitude, cidade):
 
     return jsonify(data)
 
+
 @app.route('/set_invite_status/<invite_id>/<status_id>', methods=['POST'])
 def set_invite_status(invite_id, status_id):
     #@TODO RR data, cluster, 
@@ -258,6 +229,14 @@ def set_invite_status(invite_id, status_id):
     return jsonify({"status": "ok"})
 
 
+def add_user_profile(user_id, latitude, longitude, cidade):
+    users[user_id] = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "cidade": cidade
+    }
+
+
 def add_invite(user_id, data):
     print(f"userID {user_id} data {data}")
     if user_id not in pending_match_messages:
@@ -265,11 +244,13 @@ def add_invite(user_id, data):
 
     pending_match_messages[user_id].append(data)
 
+
 def start_cleanup_thread():
     thread = threading.Thread(target=cleanup_agents, daemon=True)
     thread.start()
     print("[SERVER] Cleanup thread iniciada")
-    
+
+
 def cleanup_agents():
     while True:
         now = time.time()
@@ -285,6 +266,7 @@ def cleanup_agents():
                 del registered_agents[jid]
 
         time.sleep(10)
+
 
 if __name__ == '__main__':
     # try:
