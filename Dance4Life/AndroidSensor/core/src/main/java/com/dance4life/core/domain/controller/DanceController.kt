@@ -48,6 +48,10 @@ class DanceController(
     // 🔥 Guarda o último resultado calculado
     private var lastResult: RitmoResult? = null
 
+    // Rolling buffer of (timestampMs, ritmo) for 1-min average
+    private val ritmoBuffer = mutableListOf<Pair<Long, Double>>()
+    private val RITMO_WINDOW_MS = 1 * 60 * 1000L
+
     // ⏱️ Timer para envio
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var runnable: Runnable
@@ -60,6 +64,10 @@ class DanceController(
     private var onEnvironmentUpdate: ((EnvironmentData) -> Unit)? = null
 
     private var started = false
+    private var sessionStartMs: Long = 0L
+
+    // 1 real second = SIM_MINUTES_PER_SECOND simulated minutes (increase to simulate faster)
+    private val SIM_MINUTES_PER_SECOND = 0.5f
 
     fun setSensorListener(listener: (SensorData) -> Unit) {
         onSensorUpdate = listener
@@ -79,6 +87,7 @@ class DanceController(
 
         if (started) return
         started = true
+        sessionStartMs = System.currentTimeMillis()
 
         //Localização
         locationProvider.start { location ->
@@ -230,15 +239,28 @@ class DanceController(
 
         onRitmoCalculated?.invoke(result.ritmo)
 
+        // Update rolling 1-min ritmo buffer
+        val now = System.currentTimeMillis()
+        ritmoBuffer.add(Pair(now, result.ritmo))
+        ritmoBuffer.removeAll { now - it.first > RITMO_WINDOW_MS }
+        val avgRitmo = if (ritmoBuffer.isNotEmpty()) ritmoBuffer.map { it.second }.average() else result.ritmo
+
         val sedentaryMinutesToday = estimateSedentaryMinutes(result.avgAcc)
         val energyLevel = estimateEnergyLevel(result.avgHR)
+        val elapsedSimMinutes = ((System.currentTimeMillis() - sessionStartMs) / 1000f * SIM_MINUTES_PER_SECOND).toInt()
         val mobilityConfidence = estimateMobility(result.avgGyro)
 
-        val activityLevel = (result.ritmo / RITMO_ACTIVITY_SCALE).toFloat().coerceIn(0f, 10f)
-        val physicalFatigue =
-            ((sedentaryMinutesToday.coerceIn(0, 480) / 480f) * 5f +
+        // Grow irritation only if ritmo stays above threshold long enough.
+        tickIrritationGrowthByRitmo(result.ritmo)
+
+        val activityLevel = (avgRitmo / RITMO_ACTIVITY_SCALE).toFloat().coerceIn(0f, 10f)
+        val simSedentary = (sedentaryMinutesToday + elapsedSimMinutes).coerceIn(0, 480)
+        val baselinePhysicalFatigue =
+            ((simSedentary / 480f) * 5f +
                     ((10 - energyLevel.coerceIn(0, 10)) / 10f) * 5f)
                 .coerceIn(0f, 10f)
+        val irritationMetric = getIrritationLevel().toFloat().coerceIn(0f, 10f)
+        val physicalFatigue = maxOf(baselinePhysicalFatigue, irritationMetric)
 
         val observation = MovementObservation(
            /* stepsLastHour = estimateSteps(accData),
@@ -248,7 +270,7 @@ class DanceController(
             //irritationLevel = getIrritationLevel()
             activityLevel = activityLevel,
             physicalFatigue = physicalFatigue,
-            irritationLevel = getIrritationLevel().toFloat().coerceIn(0f, 10f),
+            irritationLevel = irritationMetric,
         )
 
 
@@ -338,21 +360,77 @@ class DanceController(
     companion object {
         private const val RITMO_ACTIVITY_SCALE = 2.0
         private var irritationLevel: Int = 0
-        private var irritationLCounter: Int = 0
         private var lastIrritationLevel: Long = System.currentTimeMillis()
+        private var highRitmoStartMs: Long = 0L
+        private var lastRitmoGrowthTick: Long = System.currentTimeMillis()
+        private var lastRitmoForGrowth: Double? = null
+
+        private const val IRRITATION_MAX = 10
+        private const val STRESS_START = 1
+        private const val RELIEF_BUMP = 3
+        private const val RITMO_STRESS_THRESHOLD = 20.0
+        private const val RITMO_STRESS_HOLD_MS = 3_000L
+        private const val RITMO_GROWTH_STEP = 2
+        private const val RITMO_GROWTH_INTERVAL_MS = 500L
 
         fun increaseIrritationLevel() {
             Log.d("IRRITATION_LEVEL_3", irritationLevel.toString())
             verifyIrritationLevel()
-            irritationLevel+=15
-            irritationLCounter++
+            irritationLevel = if (irritationLevel <= 0) STRESS_START else (irritationLevel + 1).coerceAtMost(IRRITATION_MAX)
             Log.d("IRRITATION_LEVEL_3", irritationLevel.toString())
         }
 
         fun decreaseIrritationLevel() {
             verifyIrritationLevel()
-            if(irritationLevel>0)
-                irritationLevel-=15
+            if (irritationLevel > 0) {
+                irritationLevel = (irritationLevel - RELIEF_BUMP).coerceAtLeast(0)
+            }
+        }
+
+        fun tickIrritationGrowthByRitmo(currentRitmo: Double) {
+            verifyIrritationLevel()
+
+            val now = System.currentTimeMillis()
+            val previousRitmo = lastRitmoForGrowth
+            val isRitmoGrowing = previousRitmo != null && currentRitmo > (previousRitmo + 0.1)
+            lastRitmoForGrowth = currentRitmo
+
+            if (currentRitmo <= RITMO_STRESS_THRESHOLD) {
+                highRitmoStartMs = 0L
+                lastRitmoGrowthTick = now
+                return
+            }
+
+            // Only grow irritation when ritmo is actually trending up.
+            if (!isRitmoGrowing) {
+                return
+            }
+
+            if (highRitmoStartMs == 0L) {
+                highRitmoStartMs = now
+                lastRitmoGrowthTick = now
+                return
+            }
+
+            val sustainedMs = now - highRitmoStartMs
+            if (sustainedMs < RITMO_STRESS_HOLD_MS || irritationLevel >= IRRITATION_MAX) {
+                return
+            }
+
+            if (irritationLevel <= 0) {
+                irritationLevel = STRESS_START
+                lastRitmoGrowthTick = now
+                return
+            }
+
+            val elapsedGrowthMs = now - lastRitmoGrowthTick
+            if (elapsedGrowthMs < RITMO_GROWTH_INTERVAL_MS) {
+                return
+            }
+
+            val steps = (elapsedGrowthMs / RITMO_GROWTH_INTERVAL_MS).toInt().coerceAtLeast(1)
+            irritationLevel = (irritationLevel + steps * RITMO_GROWTH_STEP).coerceAtMost(IRRITATION_MAX)
+            lastRitmoGrowthTick += steps * RITMO_GROWTH_INTERVAL_MS
         }
 
         fun verifyIrritationLevel() {
@@ -361,8 +439,10 @@ class DanceController(
 
             if (nowTime - lastIrritationLevel >= resetInterval) {
                 irritationLevel = 0
-                irritationLCounter = 0
+                highRitmoStartMs = 0L
                 lastIrritationLevel = System.currentTimeMillis()
+                lastRitmoGrowthTick = lastIrritationLevel
+                lastRitmoForGrowth = null
             }
             Log.d("IRRITATION_LEVEL_2", irritationLevel.toString())
         }

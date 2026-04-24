@@ -1,4 +1,5 @@
 import math
+import uuid
 from typing import Any, Dict, List, Optional, Tuple
 
 
@@ -23,34 +24,93 @@ class UserMatchingClusterModel:
         self.user_profiles: Dict[str, Dict[str, Any]] = {}
 
     def process_matching_request(self, payload: Dict[str, Any], top_k: int = 3) -> Dict[str, Any]:
-        user_id = self._extract_user_id(payload)
-        if not user_id:
+        new_data = payload.get("new_data") if isinstance(payload.get("new_data"), dict) else payload
+        users_payload = payload.get("users", [])
+
+        # Keep all known users up to date from the request payload.
+        for user_item in self._normalize_users(users_payload):
+            uid = self._extract_user_id(user_item)
+            if uid:
+                self._upsert_profile(uid, user_item)
+
+        source_user_id = self._extract_user_id(new_data)
+        if not source_user_id:
             enriched = payload.copy()
             enriched["matching_result"] = {
                 "status": "error",
-                "message": "Missing user identifier (user_id or device_id).",
-                "matches": [],
+                "message": "Missing source user identifier inside payload.new_data.",
+                "invites": [],
             }
             return enriched
 
-        self._upsert_profile(user_id, payload)
+        # Upsert source user using the freshest activity payload.
+        self._upsert_profile(source_user_id, new_data)
 
-        cluster_assignments = self._cluster_assignments()
-        cluster_id = cluster_assignments.get(user_id, 0)
-        matches = self._rank_candidates(user_id, cluster_assignments, top_k=top_k)
+        source_profile = self.user_profiles[source_user_id]
+        source_cluster = self._cluster_from_ritmo(source_profile.get("ritmo"))
+
+        # Build invite events for every user in the payload (except source user).
+        invites: List[Dict[str, Any]] = []
+        target_users = self._normalize_users(users_payload)
+
+        for target in target_users:
+            target_user_id = self._extract_user_id(target)
+            if not target_user_id or target_user_id == source_user_id:
+                continue
+
+            self._upsert_profile(target_user_id, target)
+            target_profile = self.user_profiles[target_user_id]
+
+            city_source = (source_profile.get("city") or "").strip().lower()
+            city_target = (target_profile.get("city") or "").strip().lower()
+            same_city = bool(city_source and city_target and city_source == city_target)
+            distance_km = self._distance_km(source_profile, target_profile)
+
+            invites.append(
+                {
+                    "type": "invite",
+                    "invite_id": str(uuid.uuid4()),
+                    "cluster": source_cluster,
+                    "from_user_id": source_user_id,
+                    "to_user_id": target_user_id,
+                    "distance_km": round(distance_km, 3),
+                    "same_city": same_city,
+                    "city": target_profile.get("city"),
+                    "target_cluster": self._cluster_from_ritmo(target_profile.get("ritmo")),
+                }
+            )
+
+        # If there is no other user to match, still emit one event for the source user.
+        if not invites:
+            invites.append(
+                {
+                    "type": "invite",
+                    "invite_id": str(uuid.uuid4()),
+                    "cluster": source_cluster,
+                    "from_user_id": source_user_id,
+                    "to_user_id": source_user_id,
+                    "distance_km": 0.0,
+                    "same_city": True,
+                    "city": source_profile.get("city"),
+                    "target_cluster": source_cluster,
+                    "solo_mode": True,
+                }
+            )
+
+        invites.sort(key=lambda item: (not item.get("same_city", False), item.get("distance_km", self.max_distance_km)))
 
         enriched_payload = payload.copy()
         enriched_payload["matching_result"] = {
             "status": "ok",
-            "cluster_id": f"cluster_{cluster_id}",
+            "cluster": source_cluster,
+            "source_user_id": source_user_id,
             "total_known_users": len(self.user_profiles),
-            "matches": matches,
+            "invites": invites,
         }
 
-        if matches:
-            enriched_payload["matched_user_id"] = matches[0]["user_id"]
-        else:
-            enriched_payload["matched_user_id"] = None
+        # Backward-compatibility shape used by existing logs/UI paths.
+        enriched_payload["matched_user_id"] = invites[0]["to_user_id"] if invites else None
+        enriched_payload["cluster"] = source_cluster
 
         return enriched_payload
 
@@ -59,6 +119,7 @@ class UserMatchingClusterModel:
             "user_id": user_id,
             "latitude": self._to_float(payload.get("latitude")),
             "longitude": self._to_float(payload.get("longitude")),
+            "city": self._get_music_value(payload, ["city", "cidade"]),
             "hr": self._to_float(payload.get("hr")),
             "ritmo": self._to_float(payload.get("ritmo")),
             "music_genre": self._get_music_value(payload, ["music_genre", "musica_tipo_nome", "musica_tipo_id"]),
@@ -210,11 +271,43 @@ class UserMatchingClusterModel:
         return best_idx
 
     def _extract_user_id(self, payload: Dict[str, Any]) -> Optional[str]:
-        for key in ("user_id", "device_id", "id"):
+        for key in ("user_id", "userId", "device_id", "deviceId", "id"):
             value = payload.get(key)
             if value:
                 return str(value)
         return None
+
+    def _normalize_users(self, users_payload: Any) -> List[Dict[str, Any]]:
+        if isinstance(users_payload, list):
+            return [u for u in users_payload if isinstance(u, dict)]
+
+        if isinstance(users_payload, dict):
+            # Accept both map-of-users and direct user dict.
+            if any(key in users_payload for key in ("user_id", "userId", "device_id", "deviceId", "id")):
+                return [users_payload]
+
+            normalized: List[Dict[str, Any]] = []
+            for user_id, user_data in users_payload.items():
+                if not isinstance(user_data, dict):
+                    continue
+                merged = user_data.copy()
+                merged.setdefault("user_id", str(user_id))
+                normalized.append(merged)
+            return normalized
+
+        return []
+
+    def _cluster_from_ritmo(self, ritmo: Optional[float]) -> str:
+        # All users start in Iniciante; progression depends only on ritmo.
+        if ritmo is None:
+            return "Iniciante"
+        if ritmo < 17:
+            return "Iniciante"
+        if ritmo < 18.5:
+            return "Moderado"
+        if ritmo < 20:
+            return "Avançado"
+        return "Expert"
 
     def _to_float(self, value: Any) -> Optional[float]:
         if value is None:

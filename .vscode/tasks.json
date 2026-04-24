@@ -13,10 +13,30 @@
 		{
 			"label": "Android: Run on Emulator (Dance4Life)",
 			"type": "shell",
-			"command": "cd Dance4Life/AndroidSensor && bash ./gradlew assembleDebug && AVD_NAME=${D4L_AVD:-$(emulator -list-avds | head -n 1)} && if [ -z \"dance4life_api35\" ]; then echo 'No emulator AVD found. Create one in Android Studio Device Manager or set D4L_AVD.'; exit 1; fi && adb start-server && if ! adb devices | awk 'NR>1 && $2==\"device\" {print $1}' | grep -q .; then nohup emulator -avd \"$AVD_NAME\" -netdelay none -netspeed full >/tmp/dance4life-emulator.log 2>&1 & fi && adb wait-for-device && until [ \"$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r')\" = \"1\" ]; do echo 'Waiting for emulator boot...'; sleep 2; done && adb install -r app/build/outputs/apk/debug/app-debug.apk && adb shell am start -n com.example.dance4life_phone/.ui.MainActivity",
+			"command": "cd Dance4Life/AndroidSensor && bash ./gradlew assembleDebug && EMULATOR=$HOME/Library/Android/sdk/emulator/emulator && AVD_NAME=${D4L_AVD:-dance4life_api35} && PHONE_SERIAL=emulator-5554 && if [ -z \"$AVD_NAME\" ]; then echo 'No phone AVD found. Set D4L_AVD or create dance4life_api35.'; exit 1; fi && adb start-server && if ! adb -s \"$PHONE_SERIAL\" get-state >/dev/null 2>&1; then nohup \"$EMULATOR\" -avd \"$AVD_NAME\" -port 5554 -netdelay none -netspeed full >/tmp/dance4life-emulator.log 2>&1 & fi && adb -s \"$PHONE_SERIAL\" wait-for-device && until [ \"$(adb -s \"$PHONE_SERIAL\" shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r')\" = \"1\" ]; do echo 'Waiting for phone emulator boot...'; sleep 2; done && adb -s \"$PHONE_SERIAL\" reverse tcp:5000 tcp:5000 && adb -s \"$PHONE_SERIAL\" install -r app/build/outputs/apk/debug/app-debug.apk && adb -s \"$PHONE_SERIAL\" shell am start -n com.example.dance4life_phone/.ui.MainActivity",
 			"group": {
 				"kind": "test",
 				"isDefault": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Wear: Run on Emulator (Dance4Life)",
+			"type": "shell",
+			"command": "cd Dance4Life/AndroidSensor && bash ./gradlew :wear:assembleDebug && EMULATOR=$HOME/Library/Android/sdk/emulator/emulator && AVD_NAME=${D4L_WEAR_AVD:-dance4life_wear_api35} && WEAR_SERIAL=emulator-5556 && if [ -z \"$AVD_NAME\" ]; then echo 'No Wear AVD found. Set D4L_WEAR_AVD or create dance4life_wear_api35.'; exit 1; fi && adb start-server && if ! adb -s \"$WEAR_SERIAL\" get-state >/dev/null 2>&1; then nohup \"$EMULATOR\" -avd \"$AVD_NAME\" -port 5556 -netdelay none -netspeed full >/tmp/dance4life-wear-emulator.log 2>&1 & fi && adb -s \"$WEAR_SERIAL\" wait-for-device && until [ \"$(adb -s \"$WEAR_SERIAL\" shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r')\" = \"1\" ]; do echo 'Waiting for wear emulator boot...'; sleep 2; done && adb -s \"$WEAR_SERIAL\" reverse tcp:5000 tcp:5000 && adb -s \"$WEAR_SERIAL\" install -r wear/build/outputs/apk/debug/wear-debug.apk && adb -s \"$WEAR_SERIAL\" shell am start -n com.dance4life.wear/.presentation.MainActivity",
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Android+Wear: Run Both Emulators (Dance4Life)",
+			"type": "shell",
+			"command": "cd Dance4Life/AndroidSensor && bash ./gradlew :app:assembleDebug :wear:assembleDebug && EMULATOR=$HOME/Library/Android/sdk/emulator/emulator && PHONE_AVD=${D4L_PHONE_AVD:-dance4life_api35} && WEAR_AVD=${D4L_WEAR_AVD:-dance4life_wear_api35} && if [ -z \"$PHONE_AVD\" ]; then echo 'No phone AVD found. Set D4L_PHONE_AVD or D4L_AVD.'; exit 1; fi && if [ -z \"$WEAR_AVD\" ]; then echo 'No Wear AVD found. Set D4L_WEAR_AVD.'; exit 1; fi && adb start-server && PHONE_SERIAL=emulator-5554 && WEAR_SERIAL=emulator-5560 && if ! adb -s \"$PHONE_SERIAL\" get-state >/dev/null 2>&1; then nohup emulator -avd \"$PHONE_AVD\" -port 5554 -netdelay none -netspeed full >/tmp/dance4life-phone-emulator.log 2>&1 & fi && if ! adb -s \"$WEAR_SERIAL\" get-state >/dev/null 2>&1; then nohup emulator -avd \"$WEAR_AVD\" -port 5560 -netdelay none -netspeed full >/tmp/dance4life-wear-emulator.log 2>&1 & fi && adb -s \"$PHONE_SERIAL\" wait-for-device && until [ \"$(adb -s \"$PHONE_SERIAL\" shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r')\" = \"1\" ]; do echo 'Waiting for phone emulator boot...'; sleep 2; done && adb -s \"$WEAR_SERIAL\" wait-for-device && until [ \"$(adb -s \"$WEAR_SERIAL\" shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r')\" = \"1\" ]; do echo 'Waiting for wear emulator boot...'; sleep 2; done && adb -s \"$PHONE_SERIAL\" install -r app/build/outputs/apk/debug/app-debug.apk && adb -s \"$PHONE_SERIAL\" shell am start -n com.example.dance4life_phone/.ui.MainActivity && adb -s \"$WEAR_SERIAL\" install -r wear/build/outputs/apk/debug/wear-debug.apk && adb -s \"$WEAR_SERIAL\" shell am start -n com.dance4life.wear/.presentation.MainActivity",
+			"group": {
+				"kind": "test",
+				"isDefault": false
 			},
 			"problemMatcher": []
 		}
