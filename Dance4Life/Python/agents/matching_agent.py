@@ -38,7 +38,7 @@ class MatchingAgent(BaseBackgroundAgent):
                 "same_city": invite.get("same_city"),
                 "city": invite.get("city"),
             }
-
+            #@TODO Verificar quando e quem deve receber as mensagens
             # Notify the target user
             if target_user_id:
                 try:
