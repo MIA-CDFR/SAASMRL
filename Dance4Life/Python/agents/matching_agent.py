@@ -31,7 +31,6 @@ class ClusteringAgent(BaseBackgroundAgent):
                 "mode": invite.get("mode", "cluster_progression"),
                 "id": invite.get("invite_id"),
                 "cluster": invite.get("next_cluster", cluster_progression.get("next_cluster")),
-                "from_user_id": invite.get("from_user_id"),
                 "to_user_id": target_user_id,
                 "city": invite.get("city"),
                 "ritmo": invite.get("ritmo"),
