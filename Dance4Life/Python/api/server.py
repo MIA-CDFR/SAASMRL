@@ -1,3 +1,4 @@
+import datetime
 import threading
 
 from flask import Flask, request, jsonify
@@ -107,7 +108,10 @@ def collect_data_activities():
             )
 
             future.result()
-
+        print("\nAgentAddresses.SENSOR_AGENT:")
+        
+        asyncio.sleep(5)
+        
         if AgentAddresses.MATCHING_AGENT in registered_agents:
                 future = asyncio.run_coroutine_threadsafe(
                     sender_agent.send_message(
@@ -120,7 +124,7 @@ def collect_data_activities():
                 )
 
                 future.result()
-
+        print("\nAgentAddresses.MATCHING_AGENT:")
         return jsonify({
             "status": "ok",
             "message": "Dados enviados para o Sensor Agent"
@@ -161,7 +165,6 @@ def movement_recommendation():
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
 
-#OK
 @app.route('/get_user_match/<user_id>', methods=['GET'])
 def get_user_match(user_id):
     try:
@@ -171,30 +174,27 @@ def get_user_match(user_id):
 
         print(f"Mensagens pendentes para {user_id}: {msgs}")
 
-        return jsonify(msgs)
+        if not msgs:
+            return jsonify([]), 200
+
+        invite = msgs[0]
+
+        # só retorna dados se status for None
+        if invite.get("status") is None:
+            return jsonify([invite]), 200
+
+        return jsonify([]), 200
 
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
-
 
 @app.route('/set_user_match/<user_id>', methods=['POST'])
 def set_user_match(user_id):
     data = request.get_json()
     
-    add_invite(user_id, data)  # Exemplo de convite para teste
+    add_invite(user_id, data)
 
     return jsonify({"status": "ok"})
-#@TODO RR
-# [user,invite_id,cluster,aceitou]
-# A,1,Moderado,Data,null
-# A,1,Moderado,24-04-2026,1->ok
-# A,1,Moderado,24-04-2026,0->ok
-# A,1,Baixo,Data,null
-# A,2,Baixo,Data,null
-# A,3,Baixo,Data,null
-#cluster_id, 0
-#Cluster 0 sem convite, recebe notificação verifica
-
 
 @app.route('/get_environment_data/<user_id>/<latitude>/<longitude>/<cidade>', methods=['GET'])
 def get_environment_data(user_id, latitude, longitude, cidade):
@@ -215,19 +215,47 @@ def get_environment_data(user_id, latitude, longitude, cidade):
 
     return jsonify(data)
 
-
 @app.route('/set_invite_status/<invite_id>/<status_id>', methods=['POST'])
 def set_invite_status(invite_id, status_id):
-    #@TODO RR data, cluster, 
-    print(f"Invite {('aceite' if status_id else 'recusado')}: {invite_id}")
+    try:
+        status = status_id == "true"
+        user_found = None
 
-    asyncio.run(save_invitation({
-        "invite_id": invite_id,
-        "status": status_id
-    }))
+        print(f"Invite {'aceite' if status else 'recusado'}: {invite_id}")
 
-    return jsonify({"status": "ok"})
+        # procurar invite
+        for user_id, invite_list in pending_match_messages.items():
 
+            if not invite_list:
+                continue
+
+            invite = invite_list[0]
+
+            if (
+                invite.get("id") == invite_id and
+                invite.get("status") is None
+            ):
+                invite["status"] = status
+                user_found = user_id
+
+                print(f"[UPDATE] {user_id} → {invite}")
+                break
+
+        now = datetime.datetime.now()
+
+        # async save
+        asyncio.run(save_invitation({
+            "invite_id": invite_id,
+            "user_id": user_found,
+            "status": status,
+            "date": now
+        }))
+
+        return jsonify({"status": "ok"})
+
+    except Exception as e:
+        print(f"[ERROR] {e}")
+        return jsonify({"status": "error"}), 500
 
 def add_user_profile(user_id, latitude, longitude, cidade):
     users[user_id] = {
@@ -236,14 +264,38 @@ def add_user_profile(user_id, latitude, longitude, cidade):
         "cidade": cidade
     }
 
-
 def add_invite(user_id, data):
-    print(f"userID {user_id} data {data}")
-    if user_id not in pending_match_messages:
-        pending_match_messages[user_id] = []
+    print(f"add_invite userID {user_id} data {data}")
 
-    pending_match_messages[user_id].append(data)
+    #@TODO verificar o user
+    user_id = data.get("to_user_id")
+    now = datetime.datetime.now().strftime("%d-%m-%Y")
+    # adicionar status e date
+    data["status"] = None
+    data["date"] = now
 
+    current_list = pending_match_messages.get(user_id)
+
+    # se não existe cria
+    if not current_list:
+        pending_match_messages[user_id] = [data]
+        print(f"pending_match_messages {pending_match_messages}")
+        return
+
+    current = current_list[0]
+
+    # substituir se:
+    # - status ainda pendente
+    # - ou cluster diferente
+    # - ou dia diferente
+    if (
+        current.get("status") is None or
+        current.get("cluster") != data.get("cluster") or
+        current.get("date") != now
+    ):
+        pending_match_messages[user_id] = [data]
+
+    print(f"-------------pending_match_messages {pending_match_messages}")
 
 def start_cleanup_thread():
     thread = threading.Thread(target=cleanup_agents, daemon=True)
@@ -269,10 +321,6 @@ def cleanup_agents():
 
 
 if __name__ == '__main__':
-    # try:
-    #     app.run(host='0.0.0.0', port=5000, debug=True)
-    # finally:
-    #     sender_agent.stop_background()
     try:
         start_api()
     finally:

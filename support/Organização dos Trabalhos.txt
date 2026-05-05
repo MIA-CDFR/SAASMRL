@@ -1,0 +1,35 @@
+Em Falta
+SA
+- Ludificação, Ranking (pagina D3 visualização)
+- Rever ML Diego, fazer cluster só para 1 utilizador
+
+Agentes
+-
+
+RL
+- Cada um dar uma vista de olhos
+
+
+
+AP
+- Cada um pega num modelo e explora
+Carlos Densenet
+Diego Resnet
+Rui - Eficientnet
+Filipa - Mobilenet
+ou Outros
+
+
+
+
+SVDC
+- Falta tudo
+Firabase
+Ludificação ?
+D3
+PowerBI
+
+
+
+Projeto
+???
