@@ -4,10 +4,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 
 class UserMatchingClusterModel:
-    """Simple in-memory clustering model for dance partner matchmaking.
+    """In-memory user activity clustering model.
 
-    It groups users by a compact feature vector and then ranks candidates within
-    the same cluster by music preference, distance, and rhythm/heart-rate affinity.
+    Users always start in the first cluster and progress through the same four
+    cluster labels as their activity rhythm increases.
     """
 
     def __init__(
@@ -47,57 +47,9 @@ class UserMatchingClusterModel:
         self._upsert_profile(source_user_id, new_data)
 
         source_profile = self.user_profiles[source_user_id]
-        source_cluster = self._cluster_from_ritmo(source_profile.get("ritmo"))
-
-        # Build invite events for every user in the payload (except source user).
-        invites: List[Dict[str, Any]] = []
-        target_users = self._normalize_users(users_payload)
-
-        for target in target_users:
-            target_user_id = self._extract_user_id(target)
-            if not target_user_id or target_user_id == source_user_id:
-                continue
-
-            self._upsert_profile(target_user_id, target)
-            target_profile = self.user_profiles[target_user_id]
-
-            city_source = (source_profile.get("city") or "").strip().lower()
-            city_target = (target_profile.get("city") or "").strip().lower()
-            same_city = bool(city_source and city_target and city_source == city_target)
-            distance_km = self._distance_km(source_profile, target_profile)
-
-            invites.append(
-                {
-                    "type": "invite",
-                    "invite_id": str(uuid.uuid4()),
-                    "cluster": source_cluster,
-                    "from_user_id": source_user_id,
-                    "to_user_id": target_user_id,
-                    "distance_km": round(distance_km, 3),
-                    "same_city": same_city,
-                    "city": target_profile.get("city"),
-                    "target_cluster": self._cluster_from_ritmo(target_profile.get("ritmo")),
-                }
-            )
-
-        # If there is no other user to match, still emit one event for the source user.
-        if not invites:
-            invites.append(
-                {
-                    "type": "invite",
-                    "invite_id": str(uuid.uuid4()),
-                    "cluster": source_cluster,
-                    "from_user_id": source_user_id,
-                    "to_user_id": source_user_id,
-                    "distance_km": 0.0,
-                    "same_city": True,
-                    "city": source_profile.get("city"),
-                    "target_cluster": source_cluster,
-                    "solo_mode": True,
-                }
-            )
-
-        invites.sort(key=lambda item: (not item.get("same_city", False), item.get("distance_km", self.max_distance_km)))
+        cluster_progression = self._build_cluster_progression(source_profile.get("ritmo"))
+        source_cluster = cluster_progression["current_cluster"]
+        invites = [self._build_progression_invite(source_user_id, source_profile, cluster_progression)]
 
         enriched_payload = payload.copy()
         enriched_payload["matching_result"] = {
@@ -106,13 +58,74 @@ class UserMatchingClusterModel:
             "source_user_id": source_user_id,
             "total_known_users": len(self.user_profiles),
             "invites": invites,
+            "cluster_progression": cluster_progression,
         }
 
         # Backward-compatibility shape used by existing logs/UI paths.
-        enriched_payload["matched_user_id"] = invites[0]["to_user_id"] if invites else None
+        enriched_payload["matched_user_id"] = source_user_id
         enriched_payload["cluster"] = source_cluster
 
         return enriched_payload
+
+    def _build_progression_invite(
+        self,
+        user_id: str,
+        profile: Dict[str, Any],
+        cluster_progression: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        current_cluster = cluster_progression["current_cluster"]
+        next_cluster = cluster_progression.get("next_cluster")
+
+        message = f"Mantem a atividade para consolidar o nivel {current_cluster}."
+        if next_cluster:
+            message = (
+                f"Mantem a atividade para evoluir de {current_cluster} para {next_cluster}."
+            )
+
+        return {
+            "type": "invite",
+            "mode": "cluster_progression",
+            "invite_id": str(uuid.uuid4()),
+            "cluster": current_cluster,
+            "from_user_id": user_id,
+            "to_user_id": user_id,
+            "city": profile.get("city"),
+            "solo_mode": True,
+            "ritmo": profile.get("ritmo"),
+            "next_cluster": next_cluster,
+            "progress_percentage": cluster_progression["progress_percentage"],
+            "current_level_index": cluster_progression["current_level_index"],
+            "levels": cluster_progression["levels"],
+            "message": message,
+        }
+
+    def _build_cluster_progression(self, ritmo: Optional[float]) -> Dict[str, Any]:
+        levels = ["Iniciante", "Moderado", "Avançado", "Expert"]
+        thresholds = [17.0, 18.5, 20.0]
+        current_cluster = self._cluster_from_ritmo(ritmo)
+        current_level_index = levels.index(current_cluster)
+        next_cluster = levels[current_level_index + 1] if current_level_index < len(levels) - 1 else None
+
+        if ritmo is None:
+            progress_percentage = 0.0
+        elif current_level_index == 0:
+            progress_percentage = max(0.0, min((ritmo / thresholds[0]) * 100.0, 100.0))
+        elif current_level_index == len(levels) - 1:
+            progress_percentage = 100.0
+        else:
+            lower_bound = thresholds[current_level_index - 1]
+            upper_bound = thresholds[current_level_index]
+            span = upper_bound - lower_bound
+            progress_percentage = 100.0 if span <= 0 else ((ritmo - lower_bound) / span) * 100.0
+            progress_percentage = max(0.0, min(progress_percentage, 100.0))
+
+        return {
+            "current_cluster": current_cluster,
+            "current_level_index": current_level_index,
+            "next_cluster": next_cluster,
+            "progress_percentage": round(progress_percentage, 2),
+            "levels": levels,
+        }
 
     def _upsert_profile(self, user_id: str, payload: Dict[str, Any]) -> None:
         profile = {
@@ -323,3 +336,6 @@ class UserMatchingClusterModel:
             if value:
                 return str(value)
         return None
+
+
+UserActivityClusterModel = UserMatchingClusterModel

@@ -9,7 +9,7 @@ from agents.har_agent import HarAgent
 from api.server import start_api
 from agents.sensor_agent import SensorAgent
 from agents.coordinator_agent import CoordinatorAgent
-from agents.matching_agent import MatchingAgent
+from agents.matching_agent import ClusteringAgent
 from config.config import AgentAddresses, AGENT_PASSWORD
 
 
@@ -29,22 +29,22 @@ def start_spade_agents():
     database_agent = DatabaseAgent(AgentAddresses.DATABASE_AGENT, AGENT_PASSWORD)
     database_agent.start_background()
 
-    matching_agent = MatchingAgent(AgentAddresses.MATCHING_AGENT, AGENT_PASSWORD)
-    matching_agent.start_background()
+    clustering_agent = ClusteringAgent(AgentAddresses.MATCHING_AGENT, AGENT_PASSWORD)
+    clustering_agent.start_background()
 
 
     print("SPADE agents iniciados")
 
-    return sensor_agent, coordinator_agent, environment_agent, har_agent, database_agent, matching_agent
+    return sensor_agent, coordinator_agent, environment_agent, har_agent, database_agent, clustering_agent
 
 
-def stop_spade_agents(sensor_agent, coordinator_agent, environment_agent, har_agent, database_agent, matching_agent):
+def stop_spade_agents(sensor_agent, coordinator_agent, environment_agent, har_agent, database_agent, clustering_agent):
     sensor_agent.stop_background()
     coordinator_agent.stop_background()
     environment_agent.stop_background()
     har_agent.stop_background()
     database_agent.stop_background()
-    matching_agent.stop_background()
+    clustering_agent.stop_background()
 
     print("***SPADE agents parados")
 
@@ -55,7 +55,7 @@ def main():
     print("[MAIN] A aguardar server arrancar...")
     time.sleep(3)
     print("[MAIN] Arrancar agentes...")
-    sensor_agent, coordinator_agent, environment_agent, har_agent, database_agent, matching_agent = start_spade_agents()
+    sensor_agent, coordinator_agent, environment_agent, har_agent, database_agent, clustering_agent = start_spade_agents()
 
 
     try:
@@ -70,7 +70,7 @@ def main():
             environment_agent,
             har_agent,
             database_agent,
-            matching_agent
+            clustering_agent
         )
     # try:
     #     start_api()
