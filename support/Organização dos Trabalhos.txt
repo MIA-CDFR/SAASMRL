@@ -1,13 +1,17 @@
 Em Falta
 SA
 - Ludificação, Ranking (pagina D3 visualização)
-- Rever ML Diego, fazer cluster só para 1 utilizador
+- Rever ML Diego, fazer cluster só para 1 utilizador - Done
+- Estrutura Firebase - Rui/Carlos
+- Alterar Android para reber nova mensagem de invite - Rui/Carlos
+
 
 Agentes
--
+- Relatorio
 
 RL
 - Cada um dar uma vista de olhos
+- Relatório
 
 
 
@@ -32,4 +36,23 @@ PowerBI
 
 
 Projeto
-???
+Reunião com Professor
+Reunião com empresa + Professor
+
+
+
+	
+	Sensores - 8/05 Projeto fechado, 12/05 - Relatório Pronto
+
+	AR - 15/05 - Fechar Relatório
+
+	AP - 19 - [16/17]/05 - Fechar Modelos, [18/22]/05 - Fechar Relatório
+
+	Visualização - 22/05
+
+
+
+	Agentes - 26/05 - Fechar Relatório
+	Projeto - 
+
+
