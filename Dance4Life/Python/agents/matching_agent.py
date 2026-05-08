@@ -1,6 +1,6 @@
 import jsonpickle
 import requests
- 
+import datetime
 from spade.behaviour import CyclicBehaviour
 from agents.base_background_agent import BaseBackgroundAgent
 from config.config import AgentAddresses, AgentOntologies, AgentPerformatives, SeververConfig
@@ -21,27 +21,53 @@ class ClusteringAgent(BaseBackgroundAgent):
         invites = matching_result.get("invites", [])
         cluster_progression = matching_result.get("cluster_progression", {})
 
-        print(f"[ClusteringAgent] Notificando cluster para API: {invites}")
-
+        #print(f"[ClusteringAgent] Notificando cluster para API: {invites}")
+        now = datetime.datetime.now()
+        
+        base = {}
         for invite in invites:
             target_user_id = invite.get("to_user_id")
 
+            # base = {
+            #     "type": invite.get("type", "invite"),
+            #     "mode": invite.get("mode", "cluster_progression"),
+            #     "id": invite.get("invite_id"),
+            #     "cluster": invite.get("next_cluster", cluster_progression.get("next_cluster")),
+            #     "to_user_id": target_user_id,
+            #     "city": invite.get("city"),
+            #     "ritmo": invite.get("ritmo"),
+            #     "progress_percentage": invite.get(
+            #         "progress_percentage", cluster_progression.get("progress_percentage", 0.0)
+            #     ),
+            #     "current_level_index": invite.get(
+            #         "current_level_index", cluster_progression.get("current_level_index", 0)
+            #     ),
+            #     "message": invite.get("message"),
+            # }
+
             base = {
-                "type": invite.get("type", "invite"),
-                "mode": invite.get("mode", "cluster_progression"),
+                "type": invite.get("type", "invite"),#@TODO
+                #"mode": invite.get("mode", "cluster_progression"),
                 "id": invite.get("invite_id"),
                 "cluster": invite.get("next_cluster", cluster_progression.get("next_cluster")),
-                "to_user_id": target_user_id,
-                "city": invite.get("city"),
-                "ritmo": invite.get("ritmo"),
-                "progress_percentage": invite.get(
-                    "progress_percentage", cluster_progression.get("progress_percentage", 0.0)
-                ),
-                "current_level_index": invite.get(
-                    "current_level_index", cluster_progression.get("current_level_index", 0)
-                ),
+                "userId": target_user_id,
+                "city": payload.get("city"),
+                "latitude": payload.get("latitude"),
+                "longitude": payload.get("longitude"),
+                #"ritmo": invite.get("ritmo"),
+                #"progress_percentage": invite.get(
+                #    "progress_percentage", cluster_progression.get("progress_percentage", 0.0)
+                #),
+                #"current_level_index": invite.get(
+                #    "current_level_index", cluster_progression.get("current_level_index", 0)
+                #),
                 "message": invite.get("message"),
+                "date": now.isoformat(),
+
+
             }
+
+
 
             if target_user_id:
                 try:
@@ -52,6 +78,7 @@ class ClusteringAgent(BaseBackgroundAgent):
                     )
                 except Exception as e:
                     print(f"[ClusteringAgent] Erro ao publicar cluster para {target_user_id}: {e}")
+        return base
 
     def _notify_invites(self, payload):
         self._notify_cluster_invite(payload)
@@ -61,45 +88,45 @@ class ClusteringAgent(BaseBackgroundAgent):
             msg = await self.receive(timeout=10)
  
             if msg:
-                print("\n[ClusteringAgent] Mensagem recebida")
+                #print("\n[ClusteringAgent] Mensagem recebida")
  
                 sender = msg.sender
                 performative = msg.get_metadata("performative")
                 ontology = msg.get_metadata("ontology")
                 conversation_id = msg.get_metadata("conversation-id")
  
-                print(f"[ClusteringAgent] Performative: {performative}")
-                print(f"[ClusteringAgent] Ontology: {ontology}")
-                print(f"[ClusteringAgent] Conversation ID: {conversation_id}")
+                #print(f"[ClusteringAgent] Performative: {performative}")
+                #print(f"[ClusteringAgent] Ontology: {ontology}")
+                #print(f"[ClusteringAgent] Conversation ID: {conversation_id}")
  
                 try:
                     payload = jsonpickle.decode(msg.body)
  
-                    print("**********[ClusteringAgent] Payload recebido:")
-                    print(payload)
+                    #print("**********[ClusteringAgent] Payload recebido:")
+                    #print(payload)
  
                     if ontology == AgentOntologies.MATCHING:
                         if performative == AgentPerformatives.REQUEST:
                             
-                            print(f"**********[ClusteringAgent] A processar dados {AgentOntologies.MATCHING}")
+                            #print(f"**********[ClusteringAgent] A processar dados {AgentOntologies.MATCHING}")
                             try:
                                 payload = self.agent.cluster_model.process_matching_request(payload)
-                                self.agent._notify_cluster_invite(payload)
+                                base = self.agent._notify_cluster_invite(payload)
 
                                 await self.agent.forward_message(
                                     behaviour=self,
-                                    payload=payload,
+                                    payload=base,
                                     agent_to=AgentAddresses.COORDINATOR_AGENT,
                                     performative=AgentPerformatives.REQUEST,
                                     ontology=AgentOntologies.MATCHING,
                                     conversation_id=conversation_id
                                 )
 
-                                print("[ClusteringAgent] Forward concluído")
+                                #print("[ClusteringAgent] Forward concluído")
                             except Exception as e:
                                 print(f"[ClusteringAgent] Erro ao enviar mensagem para CoordinatorAgent: {e}")
 
-                            print("**********[ClusteringAgent] Forward concluído")
+                            #print("**********[ClusteringAgent] Forward concluído")
 
                         elif performative == AgentPerformatives.INFORM:
                             print("[ClusteringAgent] INFORM recebido - dados de atividade processados")
@@ -111,7 +138,7 @@ class ClusteringAgent(BaseBackgroundAgent):
                 print("[ClusteringAgent] Nenhuma mensagem recebida")
  
     async def setup(self):
-        print(f"[ClusteringAgent] {self.jid} iniciado - setup")
+        #print(f"[ClusteringAgent] {self.jid} iniciado - setup")
         await super().setup()
         self.add_behaviour(self.ReceiveClusteringDataBehaviour())
 

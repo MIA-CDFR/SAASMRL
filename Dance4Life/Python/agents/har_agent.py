@@ -14,27 +14,27 @@ class HarAgent(BaseBackgroundAgent):
             msg = await self.receive(timeout=10)
  
             if msg:
-                print("\n[HarAgent] Mensagem recebida")
+                #print("\n[HarAgent] Mensagem recebida")
  
                 sender = msg.sender
                 performative = msg.get_metadata("performative")
                 ontology = msg.get_metadata("ontology")
                 conversation_id = msg.get_metadata("conversation-id")
                 
-                print(f"[HarAgent] Performative: {performative}")
-                print(f"[HarAgent] Ontology: {ontology}")
-                print(f"[HarAgent] Conversation ID: {conversation_id}")
+                #print(f"[HarAgent] Performative: {performative}")
+                #print(f"[HarAgent] Ontology: {ontology}")
+                #print(f"[HarAgent] Conversation ID: {conversation_id}")
  
                 try:
                     payload = jsonpickle.decode(msg.body)
  
-                    print("**********[HarAgent] Payload recebido:")
-                    print(payload)
+                    #print("**********[HarAgent] Payload recebido:")
+                    #print(payload)
  
                     if ontology == AgentOntologies.SENSOR_ACTIVITY:
                         if performative == AgentPerformatives.REQUEST:
 
-                            print("**********[HarAgent] A processar dados de atividade")
+                            #print("**********[HarAgent] A processar dados de atividade")
                             try:
                                 await self.agent.forward_message(
                                     behaviour=self,
@@ -56,7 +56,7 @@ class HarAgent(BaseBackgroundAgent):
                             except Exception as e:
                                 print(f"[HarAgent] Erro ao enviar mensagem para HarAgent: {e}")
 
-                            print("**********[HarAgent] Forward concluído")
+                            #print("**********[HarAgent] Forward concluído")
 
                         elif performative == AgentPerformatives.INFORM:
                             print("[HarAgent] INFORM recebido - dados de atividade processados") 
@@ -68,7 +68,7 @@ class HarAgent(BaseBackgroundAgent):
                 print("[HarAgent] Nenhuma mensagem recebida")
  
     async def setup(self):
-        print(f"[HARAgent] {self.jid} iniciado - setup")
+        #print(f"[HARAgent] {self.jid} iniciado - setup")
         await super().setup()
         self.add_behaviour(self.ReceiveHarDataBehaviour())
  

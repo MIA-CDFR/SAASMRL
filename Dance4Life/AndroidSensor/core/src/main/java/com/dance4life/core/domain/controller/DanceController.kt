@@ -328,7 +328,8 @@ class DanceController(
             result.avgGyro,
             result.avgHR,
             currentLat,
-            currentLon
+            currentLon,
+            currentCity ?: ""
         )
 
         // limpa buffers após envio

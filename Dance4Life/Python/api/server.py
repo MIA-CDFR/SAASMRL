@@ -35,7 +35,7 @@ def stop_api():
 
 users = {}
 pending_match_messages = {}
-
+user_clusters = {}
 
 @app.route('/register_agent', methods=['POST'])
 def register_agent():
@@ -61,7 +61,8 @@ def heartbeat():
     with lock:
         if jid in registered_agents:
             registered_agents[jid]["last_seen"] = time.time()
-            print("Todos os Agentes", registered_agents)
+            #print("Todos os Agentes", registered_agents)
+            #print("Todos os Agentes", registered_agents)
             return jsonify({"status": "alive"})
         else:
             return jsonify({"status": "not_registered"}), 404
@@ -75,9 +76,9 @@ def unregister_agent():
     with lock:
         if jid in registered_agents:
             del registered_agents[jid]
-            print(f"[SERVER] Agent removido: {jid}")
+            #print(f"[SERVER] Agent removido: {jid}")
 
-    print("Todos os Agentes", registered_agents)
+    #print("Todos os Agentes", registered_agents)
 
     return jsonify({"status": "unregistered"})
 
@@ -86,6 +87,7 @@ def unregister_agent():
 def collect_data_activities():
     try:
         data = request.get_json()
+        data["date"] = get_actual_datetime()
 
         if not data:
             return jsonify({
@@ -108,7 +110,7 @@ def collect_data_activities():
             )
 
             future.result()
-        print("\nAgentAddresses.SENSOR_AGENT:")
+        #print("\nAgentAddresses.SENSOR_AGENT:")
         
         asyncio.sleep(5)
         
@@ -124,7 +126,7 @@ def collect_data_activities():
                 )
 
                 future.result()
-        print("\nAgentAddresses.MATCHING_AGENT:")
+        #print("\nAgentAddresses.MATCHING_AGENT:")
         return jsonify({
             "status": "ok",
             "message": "Dados enviados para o Sensor Agent"
@@ -138,8 +140,8 @@ def collect_data_activities():
 def movement_recommendation():
     try:
         data = request.get_json()
-
-        print(f"set_movement_recommendation {data}")
+        data["date"] = get_actual_datetime()
+        #print(f"set_movement_recommendation {data}")
         if not data:
             return jsonify({"status": "error"}), 400
 
@@ -172,18 +174,10 @@ def get_user_match(user_id):
 
         msgs = pending_match_messages.get(user_id, [])
 
-        print(f"Mensagens pendentes para {user_id}: {msgs}")
+        print(f"------------------Mensagens pendentes para {user_id}: {msgs}")
+        print(f"------------------user_clusters {user_clusters}")
 
-        if not msgs:
-            return jsonify([]), 200
-
-        invite = msgs[0]
-
-        # só retorna dados se status for None
-        if invite.get("status") is None:
-            return jsonify([invite]), 200
-
-        return jsonify([]), 200
+        return jsonify(msgs), 200
 
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
@@ -211,7 +205,7 @@ def get_environment_data(user_id, latitude, longitude, cidade):
         "longitude": longitude
     }
 
-    print(f"Enviar dados ambientais: {data}")
+    #print(f"Enviar dados ambientais: {data}")
 
     return jsonify(data)
 
@@ -221,13 +215,20 @@ def set_invite_status(invite_id, status_id):
         status = status_id == "true"
         user_found = None
 
-        print(f"Invite {'aceite' if status else 'recusado'}: {invite_id}")
+        #print(f"Invite {'aceite' if status else 'recusado'}: {invite_id}")
 
         # procurar invite
         for user_id, invite_list in pending_match_messages.items():
 
             if not invite_list:
                 continue
+            
+            if status:
+                user_clusters[user_id] = {
+                    "cluster": invite_list[0].get("cluster"),
+                    "date": get_actual_date()
+                }
+                pending_match_messages[user_id] = []  # limpar mensagens pendentes
 
             invite = invite_list[0]
 
@@ -238,23 +239,21 @@ def set_invite_status(invite_id, status_id):
                 invite["status"] = status
                 user_found = user_id
 
-                print(f"[UPDATE] {user_id} → {invite}")
+                #print(f"[UPDATE] {user_id} → {invite}")
                 break
-
-        now = datetime.datetime.now()
 
         # async save
         asyncio.run(save_invitation({
             "invite_id": invite_id,
-            "user_id": user_found,
+            "userId": user_found,
             "status": status,
-            "date": now
+            "date": get_actual_datetime()
         }))
 
         return jsonify({"status": "ok"})
 
     except Exception as e:
-        print(f"[ERROR] {e}")
+        #print(f"[ERROR] {e}")
         return jsonify({"status": "error"}), 500
 
 def add_user_profile(user_id, latitude, longitude, cidade):
@@ -265,42 +264,26 @@ def add_user_profile(user_id, latitude, longitude, cidade):
     }
 
 def add_invite(user_id, data):
-    print(f"add_invite userID {user_id} data {data}")
+    #print(f"add_invite userID {user_id} data {data}")
 
-    #@TODO verificar o user
-    user_id = data.get("to_user_id")
-    now = datetime.datetime.now().strftime("%d-%m-%Y")
-    # adicionar status e date
-    data["status"] = None
-    data["date"] = now
+    print(f"++++++++++++++++add_invite userID {user_id} data {data}")
+    print(f"++++++++++++++++user_clusters {user_clusters}")
 
-    current_list = pending_match_messages.get(user_id)
-
-    # se não existe cria
-    if not current_list:
-        pending_match_messages[user_id] = [data]
-        print(f"pending_match_messages {pending_match_messages}")
-        return
-
-    current = current_list[0]
-
-    # substituir se:
-    # - status ainda pendente
-    # - ou cluster diferente
-    # - ou dia diferente
-    if (
-        current.get("status") is None or
-        current.get("cluster") != data.get("cluster") or
-        current.get("date") != now
+    if user_id not in pending_match_messages or not (
+        user_id in user_clusters and
+        user_clusters[user_id]["cluster"] == data.get("cluster") and
+        user_clusters[user_id]["date"] == get_actual_date()
     ):
         pending_match_messages[user_id] = [data]
 
-    print(f"-------------pending_match_messages {pending_match_messages}")
+        print(f"pending_match_messages {pending_match_messages}")
+
+    print(f"-------------pending_match_messages userID {user_id} {pending_match_messages}")
 
 def start_cleanup_thread():
     thread = threading.Thread(target=cleanup_agents, daemon=True)
     thread.start()
-    print("[SERVER] Cleanup thread iniciada")
+    #print("[SERVER] Cleanup thread iniciada")
 
 
 def cleanup_agents():
@@ -314,11 +297,18 @@ def cleanup_agents():
                     to_remove.append(jid)
 
             for jid in to_remove:
-                print(f"[SERVER] Agent expirado: {jid}")
+                #print(f"[SERVER] Agent expirado: {jid}")
                 del registered_agents[jid]
 
         time.sleep(10)
 
+def get_actual_datetime():
+    now = datetime.datetime.now()
+    return now.strftime("%d-%m-%Y %H:%M:%S")
+
+def get_actual_date():
+    now = datetime.datetime.now()
+    return now.strftime("%d-%m-%Y")
 
 if __name__ == '__main__':
     try:

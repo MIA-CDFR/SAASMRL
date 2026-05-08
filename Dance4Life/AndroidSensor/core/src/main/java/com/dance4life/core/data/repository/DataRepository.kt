@@ -16,10 +16,11 @@ class DataRepository {
         gyro: Double,
         hr: Double,
         lat: Double,
-        lon: Double
+        lon: Double,
+        city: String
     ) {
         Log.d("CLACULAR", "USERID: $userId")
-        ApiService.sendData(userId, ritmo, acc, gyro, hr, lat, lon)
+        ApiService.sendData(userId, ritmo, acc, gyro, hr, lat, lon, city)
     }
 
 

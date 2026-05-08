@@ -14,30 +14,30 @@ class CoordinatorAgent(BaseBackgroundAgent):
             msg = await self.receive(timeout=10)
  
             if msg:
-                print("\n[CoordinatorAgent] Mensagem recebida")
+                #print("\n[CoordinatorAgent] Mensagem recebida")
 
                 sender = msg.sender
                 performative = msg.get_metadata("performative")
                 ontology = msg.get_metadata("ontology")
                 conversation_id = msg.get_metadata("conversation-id")
  
-                print(f"[CoordinatorAgent] Performative: {performative}")
-                print(f"[CoordinatorAgent] Ontology: {ontology}")
-                print(f"[CoordinatorAgent] Conversation ID: {conversation_id}")
+                #print(f"[CoordinatorAgent] Performative: {performative}")
+                #print(f"[CoordinatorAgent] Ontology: {ontology}")
+                #print(f"[CoordinatorAgent] Conversation ID: {conversation_id}")
  
                 try:
                     payload = jsonpickle.decode(msg.body)
  
-                    print("**********[CoordinatorAgent] Payload recebido:")
-                    print(payload)
+                    #print("**********[CoordinatorAgent] Payload recebido:")
+                    #print(payload)
  
                     if ontology == AgentOntologies.SENSOR_ACTIVITY:
                         if performative == AgentPerformatives.REQUEST:
 
-                            print("**********[CoordinatorAgent] A processar dados de atividade")
+                            #print("**********[CoordinatorAgent] A processar dados de atividade")
                             try:
                                 
-                                print("**********[CoordinatorAgent] Forward para EnvironmentAgent")
+                                #print("**********[CoordinatorAgent] Forward para EnvironmentAgent")
                                 await self.agent.forward_message(
                                     behaviour=self,
                                     payload=payload,
@@ -59,7 +59,7 @@ class CoordinatorAgent(BaseBackgroundAgent):
                             except Exception as e:
                                 print(f"[CoordinatorAgent] Erro ao enviar mensagem para CoordinatorAgent: {e}")
 
-                            print("**********[CoordinatorAgent] Forward concluído")
+                            #print("**********[CoordinatorAgent] Forward concluído")
 
                         elif performative == AgentPerformatives.INFORM:
                             print("[CoordinatorAgent] INFORM recebido - dados de atividade processados")
@@ -102,7 +102,7 @@ class CoordinatorAgent(BaseBackgroundAgent):
                 print("[CoordinatorAgent] Nenhuma mensagem recebida")
  
     async def setup(self):
-        print(f"[CoordinatorAgent] {self.jid} iniciado - setup")
+        #print(f"[CoordinatorAgent] {self.jid} iniciado - setup")
         await super().setup()
         self.add_behaviour(self.ReceiveCoordinatorDataBehaviour())
  

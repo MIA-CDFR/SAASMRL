@@ -60,10 +60,10 @@ class SendMessageBehaviour(OneShotBehaviour):
     
         await self.send(msg)
 
-        print(f"Mensagem enviada para {self.agent_to}")
-        print(f"Payload: {self.payload}")
-        print(f"Performative: {self.performative}")
-        print(f"Ontology: {self.ontology}")
+        #print(f"Mensagem enviada para {self.agent_to}")
+        #print(f"Payload: {self.payload}")
+        #print(f"Performative: {self.performative}")
+        #print(f"Ontology: {self.ontology}")
 
 
 class BaseSenderAgent(Agent):
@@ -87,7 +87,7 @@ class BaseSenderAgent(Agent):
         )
 
         future.result()
-        print(f"{self.jid} iniciado")
+        #print(f"{self.jid} iniciado")
 
     def stop_background(self):
         future = asyncio.run_coroutine_threadsafe(
@@ -98,7 +98,7 @@ class BaseSenderAgent(Agent):
         future.result()
         self.agent_loop.call_soon_threadsafe(self.agent_loop.stop)
 
-        print(f"{self.jid} parado")
+        #print(f"{self.jid} parado")
 
     # async def send_message(
     #     self,

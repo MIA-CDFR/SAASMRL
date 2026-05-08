@@ -65,6 +65,10 @@ class UserMatchingClusterModel:
         enriched_payload["matched_user_id"] = source_user_id
         enriched_payload["cluster"] = source_cluster
 
+        enriched_payload["latitude"] = new_data.get("latitude")
+        enriched_payload["longitude"] = new_data.get("longitude")
+        enriched_payload["city"] = new_data.get("cidade") or new_data.get("city")
+
         return enriched_payload
 
     def _build_progression_invite(

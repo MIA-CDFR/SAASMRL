@@ -14,7 +14,7 @@ class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 
         val inviteId = intent.getStringExtra("inviteId") ?: return
-        //Log.d("Convite", "Recebeu $inviteId")
+
 
         when (intent.action) {
 

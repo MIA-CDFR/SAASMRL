@@ -6,7 +6,7 @@ from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour, Message
 from agents.base_background_agent import BaseBackgroundAgent
 from config.config import AGENT_PASSWORD, AgentAddresses, AgentOntologies, AgentPerformatives
-from sensor.external_sensors import get_weather
+from sensor.external_sensors import get_weather, get_weather_temperature
 
 
 class EnvironmentAgent(BaseBackgroundAgent):
@@ -23,25 +23,25 @@ class EnvironmentAgent(BaseBackgroundAgent):
                 ontology = msg.get_metadata("ontology")
                 conversation_id = msg.get_metadata("conversation-id")
                 
-                print(f"[EnvironmentAgent] Performative: {performative}")
-                print(f"[EnvironmentAgent] Ontology: {ontology}")
-                print(f"[EnvironmentAgent] Conversation ID: {conversation_id}")
+                #print(f"[EnvironmentAgent] Performative: {performative}")
+                #print(f"[EnvironmentAgent] Ontology: {ontology}")
+                #print(f"[EnvironmentAgent] Conversation ID: {conversation_id}")
  
                 try:
                     payload = jsonpickle.decode(msg.body)
 
                     # Enriquecer o payload com dados ambientais
-                    payload.update({
-                        "weather": get_weather(payload.get("latitude"), payload.get("longitude"))
-                    })
- 
-                    print("**********[EnvironmentAgent] Payload recebido:")
-                    print(payload)
+                    # payload.update({
+                    #     "weather": get_weather(payload.get("latitude"), payload.get("longitude"))
+                    # })
+                    payload.update({"weather_temperature": get_weather_temperature(payload.get("latitude"), payload.get("longitude"))})
+                    #print("**********[EnvironmentAgent] Payload recebido:")
+                    #print(payload)
  
                     if ontology == AgentOntologies.SENSOR_ACTIVITY:
                         if performative == AgentPerformatives.REQUEST:
 
-                            print("**********[EnvironmentAgent] A processar dados de atividade")
+                            #print("**********[EnvironmentAgent] A processar dados de atividade")
                             try:
                                 await self.agent.forward_message(
                                     behaviour=self,
@@ -75,7 +75,7 @@ class EnvironmentAgent(BaseBackgroundAgent):
                 print("[EnvironmentAgent] Nenhuma mensagem recebida")
  
     async def setup(self):
-        print(f"[EnvironmentAgent] {self.jid} iniciado - setup")
+        #print(f"[EnvironmentAgent] {self.jid} iniciado - setup")
         await super().setup()
         self.add_behaviour(self.EnvironmentDataBehaviour())
  

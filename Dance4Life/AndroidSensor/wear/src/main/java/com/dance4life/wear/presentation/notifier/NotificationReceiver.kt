@@ -15,6 +15,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
         val inviteId = intent.getStringExtra("inviteId") ?: return
 
+
         when (intent.action) {
 
             "ACTION_TIMEOUT" -> {

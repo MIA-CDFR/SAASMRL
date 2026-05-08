@@ -15,27 +15,27 @@ class DatabaseAgent(BaseBackgroundAgent):
             msg = await self.receive(timeout=10)
  
             if msg:
-                print("\n[DatabaseAgent] Mensagem recebida")
+                #print("\n[DatabaseAgent] Mensagem recebida")
  
                 sender = msg.sender
                 performative = msg.get_metadata("performative")
                 ontology = msg.get_metadata("ontology")
                 conversation_id = msg.get_metadata("conversation-id")
                 
-                print(f"[DatabaseAgent] Performative: {performative}")
-                print(f"[DatabaseAgent] Ontology: {ontology}")
-                print(f"[DatabaseAgent] Conversation ID: {conversation_id}")
+                #print(f"[DatabaseAgent] Performative: {performative}")
+                #print(f"[DatabaseAgent] Ontology: {ontology}")
+                #print(f"[DatabaseAgent] Conversation ID: {conversation_id}")
  
                 try:
                     payload = jsonpickle.decode(msg.body)
  
-                    print("**********[DatabaseAgent] Payload recebido:")
-                    print(payload)
+                    #print("**********[DatabaseAgent] Payload recebido:")
+                    #print(payload)
  
                     if ontology == AgentOntologies.SENSOR_ACTIVITY:
                         if performative == AgentPerformatives.REQUEST:
 
-                            print("**********[DatabaseAgent] A processar dados de atividade")
+                            #print("**********[DatabaseAgent] A processar dados de atividade")
                             try:
                                 payload.pop("visited_agents", None) # Remove visited_agents antes de salvar no Firebase
 
@@ -52,7 +52,7 @@ class DatabaseAgent(BaseBackgroundAgent):
                             except Exception as e:
                                 print(f"[DatabaseAgent] Erro ao enviar mensagem para DatabaseAgent: {e}")
 
-                            print("**********[DatabaseAgent] Forward concluído")
+                            #print("**********[DatabaseAgent] Forward concluído")
 
                         elif performative == AgentPerformatives.INFORM:
                             print("[DatabaseAgent] INFORM recebido - dados de atividade processados") 
@@ -96,6 +96,6 @@ class DatabaseAgent(BaseBackgroundAgent):
                 print("[DatabaseAgent] Nenhuma mensagem recebida")
  
     async def setup(self):
-        print(f"[DatabaseAgent] {self.jid} iniciado - setup")
+        #print(f"[DatabaseAgent] {self.jid} iniciado - setup")
         await super().setup()
         self.add_behaviour(self.ReceiveDatabaseDataBehaviour())

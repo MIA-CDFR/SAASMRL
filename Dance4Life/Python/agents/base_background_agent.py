@@ -31,7 +31,7 @@ class BaseBackgroundAgent(Agent):
         )
         future.result()
 
-        print(f"[{self.__class__.__name__}] {self.jid} iniciado em background")
+        #print(f"[{self.__class__.__name__}] {self.jid} iniciado em background")
 
     def stop_background(self):
         # unregister antes de parar
@@ -49,7 +49,7 @@ class BaseBackgroundAgent(Agent):
 
         self.agent_loop.call_soon_threadsafe(self.agent_loop.stop)
 
-        print(f"[{self.__class__.__name__}] {self.jid} parado")
+        #print(f"[{self.__class__.__name__}] {self.jid} parado")
 
     # ---------------------------
     # REGISTER
@@ -60,7 +60,7 @@ class BaseBackgroundAgent(Agent):
                 requests.post(f"{SERVER_URL}/register_agent", json={
                     "jid": str(self.agent.jid)
                 })
-                print(f"[{self.agent.jid}] registado no server")
+                #print(f"[{self.agent.jid}] registado no server")
             except Exception as e:
                 print(f"[REGISTER ERROR] {e}")
 
@@ -73,7 +73,7 @@ class BaseBackgroundAgent(Agent):
                 requests.post(f"{SERVER_URL}/heartbeat", json={
                     "jid": str(self.agent.jid)
                 })
-                print(f"[{self.agent.jid}] heartbeat enviado")
+                #print(f"[{self.agent.jid}] heartbeat enviado")
             except Exception as e:
                 print(f"[HEARTBEAT ERROR] {e}")
 
@@ -86,7 +86,7 @@ class BaseBackgroundAgent(Agent):
                 requests.post(f"{SERVER_URL}/unregister_agent", json={
                     "jid": str(self.agent.jid)
                 })
-                print(f"[{self.agent.jid}] removido do server")
+                #print(f"[{self.agent.jid}] removido do server")
             except Exception as e:
                 print(f"[UNREGISTER ERROR] {e}")
 
@@ -99,7 +99,7 @@ class BaseBackgroundAgent(Agent):
     # SETUP BASE
     # ---------------------------
     async def setup(self):
-        print(f"[{self.__class__.__name__}] setup base")
+        #print(f"[{self.__class__.__name__}] setup base")
 
         # register uma vez
         self.add_behaviour(self.RegisterBehaviour())
@@ -137,4 +137,4 @@ class BaseBackgroundAgent(Agent):
 
         await behaviour.send(msg)
 
-        print(f"[{self.__class__.__name__}] Mensagem enviada para {agent_to}")
+        #print(f"[{self.__class__.__name__}] Mensagem enviada para {agent_to}")

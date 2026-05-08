@@ -19,7 +19,8 @@ object ApiService {
         gyro: Double,
         hr: Double,
         lat: Double,
-        lon: Double
+        lon: Double,
+        city: String
     ) {
         val json = JSONObject().apply {
             put("userId", userId)
@@ -29,7 +30,9 @@ object ApiService {
             put("hr", hr)
             put("latitude", lat)
             put("longitude", lon)
-            put("timestamp", System.currentTimeMillis())
+            put("city", city)
+
+            //put("timestamp", System.currentTimeMillis())
         }
 
         val body = json.toString()
@@ -126,7 +129,7 @@ object ApiService {
             put("title", recommendation.title)
             put("durationMinutes", recommendation.durationMinutes)
             put("encouragementMessage", recommendation.encouragementMessage)
-            put("timestamp", System.currentTimeMillis())
+            //put("timestamp", System.currentTimeMillis())
         }
 
         val body = json.toString()

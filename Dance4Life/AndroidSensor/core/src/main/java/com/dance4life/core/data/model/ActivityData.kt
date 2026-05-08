@@ -6,5 +6,6 @@ data class ActivityData(
     val gyro: Double,
     val hr: Double,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val city: String
 )
