@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dance4Life User Ranking</title>
+
+    <link rel="icon" type="image/png" href="./img/favicon-96x96.png" sizes="96x96" />
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+    <link rel="stylesheet" href="index.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+    <div class="background-overlay"></div>
+    <div class="background-glow"></div>
+
+    <div id="app-container">
+
+        <!-- HERO -->
+
+        <section class="hero-card glass">
+
+            <div class="hero-left">
+
+                <img src="./img/dance4life_icon.png" alt="logo" class="hero-logo">
+
+            </div>
+
+            <div class="hero-right">
+
+                <span class="hero-badge">
+                    ✨ DANCE4LIFE
+                </span>
+
+                <h1 id="card-title"></h1>
+
+                <h2 id="card-name"></h2>
+                <div id="last-activity-date"></div>
+
+                <div class="hero-pills">
+
+                    <div class="pill glass-light">
+
+                        <div class="pill-label">
+                            🏅 POSIÇÃO
+                        </div>
+
+                        <div class="pill-value" id="card-rank"></div>
+
+                    </div>
+
+                    <div class="pill glass-light">
+
+                        <div class="pill-label">
+                            ⭐ SCORE
+                        </div>
+
+                        <div class="pill-value" id="card-score"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- STATS -->
+
+        <section class="stats-grid">
+
+            <div class="stat-card glass-light">
+                <div class="stat-icon blue">🏃</div>
+                <div class="stat-label">ATIVIDADES</div>
+                <div class="stat-value" id="card-activity"></div>
+            </div>
+
+            <div class="stat-card glass-light">
+                <div class="stat-icon purple">📨</div>
+                <div class="stat-label">CONVITES</div>
+                <div class="stat-value" id="card-inv"></div>
+            </div>
+
+            <div class="stat-card glass-light">
+                <div class="stat-icon green">✅</div>
+                <div class="stat-label">ACEITES</div>
+                <div class="stat-value" id="card-accepted"></div>
+            </div>
+
+            <div class="stat-card glass-light">
+                <div class="stat-icon orange">🤝</div>
+                <div class="stat-label">MATCHINGS</div>
+                <div class="stat-value" id="card-matching"></div>
+            </div>
+
+            <div class="stat-card glass-light">
+                <div class="stat-icon pink">💡</div>
+                <div class="stat-label">RECOMENDAÇÕES</div>
+                <div class="stat-value" id="card-rec"></div>
+            </div>
+
+        </section>
+
+        <!-- CHARTS -->
+
+        <section class="charts-grid">
+
+            <!-- PIE -->
+
+            <div class="chart-card glass">
+
+                <div class="section-title">
+                    Distribuição de Atividades
+                </div>
+
+                <svg id="pie-chart"></svg>
+
+            </div>
+
+            <!-- ACTIVITY -->
+
+            <div class="activity-card glass">
+
+                <div class="section-title">
+                    Nível de Atividade
+                </div>
+
+                <div class="activity-content">
+
+                    <div class="activity-circle">
+
+                        <div class="activity-inner">
+
+                            <span class="activity-number" id="activity-hr">
+                                79
+                            </span>
+
+                            <span class="activity-unit">
+                                bpm
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="activity-side">
+
+                        <!-- RITMO -->
+
+                        <div class="mini-card glass-light">
+
+                            <span>
+                                💃 RITMO
+                            </span>
+
+                            <strong id="activity-ritmo">
+                                17.7
+                            </strong>
+
+                        </div>
+
+                        <!-- NÍVEL -->
+
+                        <div class="mini-card glass-light">
+
+                            <span>
+                                ✨ PLANO
+                            </span>
+
+                            <strong id="activity-level">
+                                -
+                            </strong>
+
+                        </div>
+
+                        <!-- WELLBEING -->
+
+                        <div class="mini-card glass-light">
+
+                            <span>
+                                ❤️ Grupo
+                            </span>
+
+                            <strong id="activity-wellbeing">
+                                -
+                            </strong>
+
+                        </div>
+
+                        <!-- CITY -->
+
+                        <div class="mini-card glass-light">
+
+                            <span>
+                                📍 CIDADE
+                            </span>
+
+                            <strong id="activity-city">
+                                -
+                            </strong>
+
+                        </div>
+
+                        <!-- TEMP -->
+
+                        <div class="mini-card glass-light">
+
+                            <span>
+                                🌡️ TEMPERATURA
+                            </span>
+
+                            <strong id="activity-temp">
+                                -
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+        </section>
+
+        <!-- MAP -->
+
+        <section class="map-card glass">
+
+            <div class="network-header">
+
+                <h3>
+                    Última Localização
+                </h3>
+
+            </div>
+
+            <div id="user-map"></div>
+
+        </section>
+
+        <!-- NETWORK -->
+
+        <section class="network-card glass">
+
+            <div class="network-header">
+
+                <h3>
+                    Utilizadores Relacionados
+                </h3>
+
+            </div>
+
+            <svg id="graph"></svg>
+
+        </section>
+
+        <!-- BUTTON -->
+
+        <a id="dashboard-link" class="dashboard-btn">
+            📊 Abrir Dashboard Completo
+        </a>
+
+        <!-- FOOTER -->
+
+        <footer class="footer glass">
+
+            <div class="footer-logo">
+
+                <img src="./img/uminho.png" alt="Universidade do Minho">
+
+            </div>
+
+            <div class="footer-content">
+
+                <div class="footer-title">
+                    Dance4Life © 2026
+                </div>
+
+                <div class="footer-line">
+                    Carlos Bergueira • Diego Silva • Filipa Araújo • Rui Rodrigues
+                </div>
+
+                <div class="footer-line">
+                    MIA • Universidade do Minho
+                </div>
+
+                <div class="footer-tags">
+
+                    <span>Agentes e Sistemas Multiagente</span>
+
+                    <span>Aprendizagem por Reforço</span>
+
+                    <span>Sensorização e Ambiente</span>
+
+                    <span>Sistemas de Visualização de Dados e Conhecimento</span>
+
+                </div>
+
+            </div>
+
+        </footer>
+
+    </div>
+
+    <script type="module" src="index.js"></script>
+
+</body>
+
+</html>
