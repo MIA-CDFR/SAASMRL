@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>Dance4Life Dashboard</title>
+
+  <link rel="icon" type="image/png" href="./img/favicon-96x96.png" />
+
+  <link rel="icon" type="image/png" href="./img/favicon-96x96.png" sizes="96x96" />
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./dashboard.css">
+
+</head>
+
+<body>
+
+  <!-- BACKGROUND -->
+
+  <div class="background-overlay"></div>
+
+  <div class="background-glow"></div>
+
+  <!-- MAIN -->
+
+  <div class="dashboard-container">
+
+    <!-- HERO -->
+
+    <section class="hero glass">
+
+      <div class="hero-left">
+
+        <img src="./img/dance4life_icon.png" class="hero-logo">
+
+        <div>
+
+          <h1>
+            Dance4Life Dashboard
+          </h1>
+
+        </div>
+
+      </div>
+
+      <div class="hero-right">
+
+        <a id="ranking-link" class="hero-chip">
+          👤 Ranking
+        </a>
+
+
+      </div>
+
+    </section>
+
+    <!-- SEARCH -->
+
+    <section id="search-area" class="glass">
+
+      <input type="text" id="search-input" placeholder="Pesquisar utilizador...">
+
+      <button onclick="searchUser()">
+        Pesquisar
+      </button>
+
+    </section>
+
+    <!-- USER CARD -->
+
+    <div id="user-card" class="glass">
+
+      <h2 id="card-name"></h2>
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <span>🏅 Ranking</span>
+          <strong id="card-rank"></strong>
+        </div>
+
+        <div class="stat-card">
+          <span>⭐ Score</span>
+          <strong id="card-score"></strong>
+        </div>
+
+        <div class="stat-card">
+          <span>🏃 Atividades</span>
+          <strong id="card-activity"></strong>
+        </div>
+
+        <div class="stat-card">
+          <span>📨 Convites</span>
+          <strong id="card-inv"></strong>
+        </div>
+
+        <div class="stat-card">
+          <span>✅ Aceites</span>
+          <strong id="card-accepted"></strong>
+        </div>
+
+        <div class="stat-card">
+          <span>🤝 Matchings</span>
+          <strong id="card-matching"></strong>
+        </div>
+
+        <div class="stat-card">
+          <span>💡 Recomendações</span>
+          <strong id="card-rec"></strong>
+        </div>
+
+      </div>
+
+      <svg id="pie-chart"></svg>
+
+    </div>
+
+    <!-- TABS -->
+
+    <div id="tabs">
+
+      <button class="tab-btn" onclick="showTab('tab-ranking')" id="btn-ranking">
+        🏆 Ranking
+      </button>
+
+      <button class="tab-btn" onclick="showTab('tab-timeline')" id="btn-timeline">
+        📈 Temporal
+      </button>
+
+      <button class="tab-btn" onclick="showTab('tab-map')" id="btn-map">
+        🗺️ Cidades
+      </button>
+
+      <button class="tab-btn" onclick="showTab('tab-invites')" id="btn-invites">
+        📊 Convites
+      </button>
+
+
+
+    </div>
+
+    <!-- RANKING -->
+
+    <section id="tab-ranking" class="tab-content">
+
+      <div class="chart-card glass">
+
+        <h3>
+          Top 10 Utilizadores
+        </h3>
+
+        <svg id="bar-chart"></svg>
+
+      </div>
+
+      <div id="output" class="glass table-card"></div>
+
+    </section>
+
+    <!-- TIMELINE -->
+
+    <section id="tab-timeline" class="tab-content" style="display:none">
+
+      <div class="chart-card glass">
+
+        <h3>
+          Atividade ao longo do tempo
+        </h3>
+
+        <svg id="timeline-chart"></svg>
+
+      </div>
+
+    </section>
+
+    <!-- MAP -->
+
+    <section id="tab-map" class="tab-content" style="display:none">
+
+      <div class="chart-card glass">
+
+        <h3>
+          Atividades por Cidade
+        </h3>
+
+        <div id="map-chart"></div>
+
+      </div>
+
+    </section>
+
+    <!-- INVITES -->
+
+    <section id="tab-invites" class="tab-content" style="display:none">
+
+      <div class="chart-card glass">
+
+        <h3>
+          Distribuição de Convites
+        </h3>
+
+        <svg id="invites-chart"></svg>
+
+      </div>
+
+    </section>
+
+    <!-- FOOTER -->
+
+    <footer class="footer glass">
+
+      <div class="footer-logo">
+
+        <img src="./img/uminho.png" alt="Universidade do Minho">
+
+      </div>
+
+      <div class="footer-content">
+
+        <div class="footer-title">
+          Dance4Life © 2026
+        </div>
+
+        <div class="footer-line">
+          Carlos Bergueira • Diego Silva • Filipa Araújo • Rui Rodrigues
+        </div>
+
+        <div class="footer-line">
+          MIA • Universidade do Minho
+        </div>
+
+        <div class="footer-tags">
+
+          <span>Agentes e Sistemas Multiagente</span>
+
+          <span>Aprendizagem por Reforço</span>
+
+          <span>Sensorização e Ambiente</span>
+
+          <span>Sistemas de Visualização de Dados e Conhecimento</span>
+
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+  <script src="./dashboard.js"></script>
+
+</body>
+
+</html>

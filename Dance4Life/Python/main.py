@@ -2,7 +2,9 @@ import signal
 import sys
 import threading
 import time
-
+import os
+from functools import partial
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from agents.database_agent import DatabaseAgent
 from agents.environment_agent import EnvironmentAgent
 from agents.har_agent import HarAgent
@@ -48,8 +50,41 @@ def stop_spade_agents(sensor_agent, coordinator_agent, environment_agent, har_ag
 
     print("***SPADE agents parados")
 
+def start_dashboard_server():
+
+    dashboard_path = os.path.abspath(
+        os.path.join(os.getcwd(), "../D3_web")
+    )
+
+    print("CURRENT:", os.getcwd())
+    print("DASHBOARD PATH:", dashboard_path)
+    print("EXISTS:", os.path.exists(dashboard_path))
+
+    from functools import partial
+    from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
+
+    handler = partial(
+        SimpleHTTPRequestHandler,
+        directory=dashboard_path
+    )
+
+    server = ThreadingHTTPServer(
+        ("0.0.0.0", 8000),
+        handler
+    )
+
+    print("[DASHBOARD] http://localhost:8000/dashboard.html")
+
+    server.serve_forever()
 
 def main():
+
+    dashboard_thread = threading.Thread(
+        target=start_dashboard_server,
+        daemon=True
+    )
+    dashboard_thread.start()
+        
     api_thread = threading.Thread(target=start_api, daemon=True)
     api_thread.start()
     print("[MAIN] A aguardar server arrancar...")

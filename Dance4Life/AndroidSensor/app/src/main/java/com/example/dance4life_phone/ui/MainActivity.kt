@@ -2,6 +2,7 @@ package com.example.dance4life_phone.ui
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -17,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,6 +52,9 @@ import com.example.dance4life_phone.domain.device.PhoneDeviceProvider
 import com.example.dance4life_phone.domain.location.PhoneLocationProvider
 import com.example.dance4life_phone.domain.sensor.PhoneSensorProvider
 import com.example.dance4life_phone.ui.notifier.InviteNotifier
+import android.net.Uri
+import androidx.core.net.toUri
+import com.dance4life.core.utils.Constants
 
 class MainActivity : AppCompatActivity() {
 
@@ -78,7 +84,8 @@ class MainActivity : AppCompatActivity() {
                 locationData = locationData,
                 rhythm = rhythm,
                 recommendation = recommendation,
-                environmentData = environmentData
+                environmentData = environmentData,
+                userId = deviceProvider.getUserId()
             )
         }
         /*
@@ -218,8 +225,11 @@ fun DashboardScreen(
     locationData: LocationData?,
     rhythm: Double?,
     recommendation: MovementRecommendation?,
-    environmentData: EnvironmentData?
+    environmentData: EnvironmentData?,
+    userId: String
 ) {
+    val context = LocalContext.current
+
     Box(modifier = Modifier.fillMaxSize()) {
 
         Image(
@@ -234,7 +244,6 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.45f))
         )
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -395,6 +404,20 @@ fun DashboardScreen(
                 }
             }
         }
+        // BOX INVISÍVEL CLICÁVEL POR CIMA
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(175.dp)
+                .align(Alignment.TopCenter)
+                .clickable {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        "${Constants.WEBSITE_URL}/index.html?userid=$userId".toUri()
+                    )
+                    context.startActivity(intent)
+                }
+        )
     }
 }
 
