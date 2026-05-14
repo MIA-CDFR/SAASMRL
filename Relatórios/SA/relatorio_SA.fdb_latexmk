@@ -1,11 +1,11 @@
 # Fdb version 4
-["xdvipdfmx"] 1778756660.56777 "relatorio_SA.xdv" "relatorio_SA.pdf" "relatorio_SA" 1778756660.89557 0
-  "relatorio_SA.xdv" 1778756660.55171 49560 c2a44750607d87a47c2f9742b71f786a "xelatex"
+["xdvipdfmx"] 1778794163.93678 "relatorio_SA.xdv" "relatorio_SA.pdf" "relatorio_SA" 1778794164.27645 0
+  "relatorio_SA.xdv" 1778794163.91937 49620 8f42829b103088643dde6b9ecfd4e27d "xelatex"
   (generated)
   "relatorio_SA.pdf"
   (rewritten before read)
-["xelatex"] 1778756660.31667 "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/SA/relatorio_SA.tex" "relatorio_SA.xdv" "relatorio_SA" 1778756660.89512 0
-  "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/SA/relatorio_SA.tex" 1778756659.87694 32657 0545cc98e28246d5b4e98e5ab6afb296 ""
+["xelatex"] 1778794163.64922 "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/SA/relatorio_SA.tex" "relatorio_SA.xdv" "relatorio_SA" 1778794164.27598 0
+  "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/SA/relatorio_SA.tex" 1778794163.32462 32476 6ea80d14089ee65f2af138986d8db4a1 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmmi6.tfm" 1136768653 1512 f21f83efb36853c0b70002322c1ab3ad ""
@@ -71,9 +71,9 @@
   "images/heatmap-atividades.png" 1778708631.52593 20442 25d9eed6e6ab5ad17df885c53de414d3 ""
   "images/serie-temporal.png" 1778708508.91546 18687 b2b2415ce4a0b8e0463aff9a8d4f0081 ""
   "llncs.cls" 1706524644 43402 5fb5a2dc40571aa40f3d199c00cbb986 ""
-  "relatorio_SA.aux" 1778756660.55088 8523 598fdbb5fbf4850eea9e86e78d39ad5f "xelatex"
-  "relatorio_SA.out" 1778756660.55157 487 967e18769574db9ffb76b3ef8d64670f "xelatex"
-  "relatorio_SA.tex" 1778756659.87694 32657 0545cc98e28246d5b4e98e5ab6afb296 ""
+  "relatorio_SA.aux" 1778794163.91866 8524 bc12a7ab430439cda8939d30eb2eab01 "xelatex"
+  "relatorio_SA.out" 1778794163.91919 487 967e18769574db9ffb76b3ef8d64670f "xelatex"
+  "relatorio_SA.tex" 1778794163.32462 32476 6ea80d14089ee65f2af138986d8db4a1 ""
   (generated)
   "relatorio_SA.aux"
   "relatorio_SA.log"

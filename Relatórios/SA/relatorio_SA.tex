@@ -47,7 +47,7 @@ Rui Manuel Martins Marques Rodrigues (pg7942@alunos.uminho.pt)
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-Este artigo apresenta o Dance4Life, uma plataforma de sensorização e inteligência artificial desenvolvida no âmbito da unidade curricular de Sensorização e Ambiente do Mestrado em Inteligência Artificial. O sistema tem como objetivo promover o envelhecimento ativo através da dança, integrando dados meteorológicos (OpenWeatherMap) com dados fisiológicos, inerciais e de localização recolhidos em dispositivos Android (smartphone e wearables). A arquitetura assenta em três pilares: um servidor Flask para ingestão e encaminhamento de dados, uma camada de agentes para processamento e persistência, e uma camada de visualização interativa com PowerBI e D3.js/Leaflet para análise exploratória. Em paralelo, os dados suportam o desenvolvimento de um agente de Aprendizagem por Reforço (RL), treinado em ambiente simulado estocástico (\texttt{MovementEnv}) com algoritmos DQN e PPO, para otimização de intervenções personalizadas. O trabalho demonstra a viabilidade de uma plataforma distribuída, centrada no utilizador sénior, que combina contexto ambiental, segurança fisiológica e motivação social através da música e da dança.
+Este artigo apresenta o Dance4Life, uma plataforma de sensorização e inteligência artificial desenvolvida no âmbito da unidade curricular de Sensorização e Ambiente do Mestrado em Inteligência Artificial. O sistema tem como objetivo promover o envelhecimento ativo através da dança, integrando dados meteorológicos (API OpenWeatherMap) com dados fisiológicos, inerciais e de localização recolhidos em dispositivos Android (smartphone e wearables). A arquitetura assenta em três pilares: um servidor Flask para ingestão e encaminhamento de dados, uma camada de agentes para processamento e persistência, e uma camada de visualização interativa com PowerBI e D3.js/Leaflet para análise exploratória. Em paralelo, os dados suportam o desenvolvimento de um agente de Aprendizagem por Reforço, treinado em ambiente simulado estocástico (\texttt{MovementEnv}) com algoritmos DQN e PPO, para otimização de intervenções personalizadas. O trabalho demonstra a viabilidade de uma plataforma distribuída, centrada no utilizador sénior, que combina contexto ambiental, segurança fisiológica e motivação social através da música e da dança.
 
 \keywords{Sensorização \and Dance4Life \and Envelhecimento Ativo \and Machine Learning \and HAR}
 \end{abstract}
@@ -55,26 +55,26 @@ Este artigo apresenta o Dance4Life, uma plataforma de sensorização e inteligê
 %
 %
 \section{Introdução}
-O envelhecimento da população europeia constitui um dos maiores desafios sociais e de saúde pública do século XXI. Em Portugal, estima-se que, em 2050, mais de 35% da população terá mais de 65 anos, tornando imperativa a adoção de soluções tecnológicas que promovam a autonomia, a atividade física e a integração social da população sénior.
-O Dance4Life surge como resposta a este desafio, propondo uma plataforma inteligente que combina sensorização ambiental e fisiológica com mecanismos de ludificação baseados na dança e na música. O sistema é concebido para funcionar em dispositivos móveis (smartphones e smartwatches), processando dados localmente segundo o paradigma de Edge Computing, em conformidade com os princípios de Privacy by Design exigidos pelo RGPD.
-Este relatório documenta a segunda fase do trabalho prático, focada na implementação da plataforma: a definição e implementação dos coletores de dados, o tratamento e visualização dos dados recolhidos, e a conceção do agente de Aprendizagem por Reforço (RL) desenvolvido no contexto da unidade curricular de Aprendizagem por Reforço. Complementarmente, apresenta-se uma proposta de modelo de negócio que enquadra a viabilidade da solução em contextos reais.
+O envelhecimento da população europeia constitui um dos maiores desafios sociais e de saúde pública do século XXI. Em Portugal, estima-se que, em 2050, mais de 35\% da população terá mais de 65 anos, tornando imperativa a adoção de soluções tecnológicas que promovam a autonomia, a atividade física e a integração social da população sénior.
+O Dance4Life surge como resposta a este desafio, propondo uma plataforma inteligente que combina sensorização ambiental e fisiológica com mecanismos de ludificação baseados na dança. O sistema é concebido para funcionar em dispositivos móveis (smartphones e smartwatches), processando dados localmente segundo o paradigma de Edge Computing, em conformidade com os princípios de Privacy by Design exigidos pelo RGPD.
+Este relatório documenta a segunda fase do trabalho prático, focada na implementação da plataforma: a definição e implementação dos coletores de dados, o tratamento e visualização dos dados recolhidos, e a conceção do agente de Aprendizagem por Reforço. Complementarmente, apresenta-se uma proposta de modelo de negócio que enquadra a viabilidade da solução em contextos reais.
 O documento está organizado da seguinte forma: a Secção 2 descreve a arquitetura global do sistema e os domínios abordados; a Secção 3 detalha os sensores e os coletores de dados implementados; a Secção 4 apresenta a exploração e visualização dos dados; a Secção 5 descreve o agente de Aprendizagem por Reforço concebido; a Secção 6 analisa resultados e limitações; e a Secção 7 apresenta o modelo de negócio.
 
 \section{Domínios, Objetivos e Arquitetura}
 \subsection{Domínios Abordados}
 O Dance4Life opera na intersecção de três domínios principais:
-\subsubsection{Saúde e Bem-Estar Sénior} Monitorização da atividade física, frequência cardíaca e padrões de movimento, com o objetivo de promover o exercício seguro e personaliza-do.
-\subsubsection{Ambiente Urbano Inteligente} Integração de dados contextuais do ambiente, com foco nas condições meteorológicas e de localização, para adaptar as recomendações de atividade ao contexto real do utilizador.
+\subsubsection{Saúde e Bem-Estar Sénior} Monitorização da atividade física, frequência cardíaca e padrões de movimento, com o objetivo de promover o exercício seguro e personalizado.
+\subsubsection{Ambiente Urbano Inteligente} Integração de dados contextuais do ambiente, com foco nas condições meteorológicas e de localização.
 \subsubsection{Interação Social e Ludificação} Matching de utilizadores com perfis compatíveis (Dancing Match) e estímulos musicais adaptativos que transformam a monitorização passiva numa experiência ativa e motivadora.
 
 \subsection{Objetivos}
 Os objetivos da fase prática organizam-se em três níveis:
 Implementar coletores de dados para sensores físicos e virtuais, integrando a API OpenWeatherMap e a recolha de dados em dispositivos Android (smartphone e wearables).
-Explorar, tratar e visualizar os dados recolhidos, aplicando técnicas de visualização interativa com D3.js para análise de padrões temporais e correlações entre variáveis ambientais e fisiológicas.
-Conceber e implementar um agente de Aprendizagem por Reforço (RL) para otimiza-ção da política de intervenção do sistema Dance4Life, equilibrando a promoção da atividade física com a prevenção de fadiga de alarme.
+Explorar, tratar e visualizar os dados recolhidos, aplicando técnicas de visualização interativa com PowerBI e D3.js para análise de padrões temporais e correlações entre variáveis ambientais e fisiológicas.
+Conceber e implementar um agente de Aprendizagem por Reforço para otimização da política de intervenção do sistema Dance4Life, equilibrando a promoção da atividade física com a prevenção de fadiga de alarme.
 
 \subsection{Arquitetura Global do Sistema}
-A arquitetura do Dance4Life segue um modelo distribuído em camadas, conforme ilustrado na Figura~\ref{arquitetura}. A camada de aquisição de dados agrega três tipos de fontes: dados meteorológicos (OpenWeatherMap), dados de sensores inerciais/fisiológicos dos dispositivos Android e dados de localização. Os dados convergem num servidor Flask central, responsável pela receção, validação, encaminhamento para agentes e persistência em base de dados. Uma camada de processamento alimenta o agente de Aprendizagem por Reforço responsável pelas decisões de intervenção. Por fim, uma camada de apresentação expõe dashboards interativos com PowerBI,D3.js e Leaflet para análise exploratória dos dados.
+A arquitetura do Dance4Life segue um modelo distribuído em camadas, conforme ilustrado na Figura~\ref{arquitetura}. A camada de aquisição de dados agrega três tipos de fontes: dados meteorológicos (API OpenWeatherMap), dados de sensores inerciais/fisiológicos dos dispositivos Android e dados de localização. Os dados convergem num servidor Flask central, responsável pela receção, validação, encaminhamento para agentes e persistência em base de dados. Uma camada de processamento alimenta o agente de Aprendizagem por Reforço responsável pelas decisões de intervenção. Por fim, uma camada de apresentação expõe dashboards interativos com PowerBI e D3.js para análise exploratória dos dados.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{images/arquitetura.png}
@@ -90,10 +90,10 @@ Na implementação atual, o contexto ambiental é obtido através de um módulo 
 
 \subsubsection{Sensor Meteorológico (OpenWeatherMap)}
 O módulo external\_sensors.py recolhe dados meteorológicos em tempo real, recorrendo à API REST da OpenWeatherMap (endpoint \texttt{/data/2.5/weather}). A consulta pode ser realizada por coordenadas geográficas (latitude/longitude) ou por cidade. Os parâmetros recolhidos incluem temperatura (\(^\circ\)C), humidade relativa (\%), velocidade do vento (m/s) e timestamp Unix da observação. Os dados são obtidos em unidades métricas (\texttt{units=metric}) e retornados como dicionário Python, facilitando a integração com os restantes módulos.
-A relevância deste sensor para o Dance4Life reside na capacidade de contextualizar a atividade física: temperaturas extremas ou humidade elevada condicionam a intensida-de recomendada pelo sistema, enquanto condições favoráveis podem ser utilizadas como estímulo adicional para atividade ao ar livre.
+A relevância deste sensor para o Dance4Life reside na capacidade de contextualizar a atividade física: temperaturas extremas ou humidade elevada condicionam a intensidade recomendada pelo sistema, enquanto condições favoráveis podem ser utilizadas como estímulo adicional para atividade ao ar livre.
 \subsubsection{Simulador Dispositivo Android}
 O módulo \_simulate\_android\_emulator.py replica o comportamento de um dispositivo Android equipado com sensores inerciais e fisiológicos, enviando dados simulados para o servidor Flask através de pedidos HTTP POST. Cada payload gerado inclui um identificador de utilizador (\texttt{user\_1} a \texttt{user\_5}), leituras de acelerómetro (\texttt{acc}, normalizado entre 0 e 1), frequência cardíaca (\texttt{hr}, entre 60 e 160 bpm), ritmo de movimento (\texttt{ritmo}, entre 0 e 1), coordenadas GPS (\texttt{latitude} e \texttt{longitude}, na região do Porto) e timestamp UTC.
-A geração de dados segue uma distribuição aleatória uniforme, o que permite testar o comportamento do sistema em condições diversas de atividade. Os dados são envia-dos com um intervalo de 30 segundos, simulando a cadência de amostragem de um dispositivo real em contexto de monitorização contínua. O mecanismo de timeout configurado (3 segundos de ligação, 20 segundos de leitura) garante robustez perante latências do servidor.
+A geração de dados segue uma distribuição aleatória uniforme, o que permite testar o comportamento do sistema em condições diversas de atividade. Os dados são enviados com um intervalo de 30 segundos, simulando a cadência de amostragem de um dispositivo real em contexto de monitorização contínua. O mecanismo de timeout configurado (3 segundos de ligação, 20 segundos de leitura) garante robustez perante latências do servidor.
 O endpoint de receção (\texttt{/collect\_data\_activities}) foi configurado no servidor Flask local (localhost:5000), com suporte para endereçamento alternativo em rede local, facilitando testes em cenários de dispositivos fisicamente distribuídos.
 
 
@@ -138,7 +138,7 @@ As visualizações foram implementadas recorrendo à biblioteca D3.js, escolhida
 \end{figure}
 
 \section{Modelos de Machine Learning}
-O motor de decisão inteligente do Dance4Life é implementado através de um agente de Aprendizagem por Reforço (RL), desenvolvido no âmbito da unidade curricular de Aprendizagem por Reforço do Mestrado em Inteligência Artificial. O agente é responsável por aprender uma política ótima de intervenção, decidindo em cada momento quando e com que intensidade intervir junto do utilizador sénior, equilibrando dois objetivos críticos em geriatria: a promoção da atividade física (combate ao sedentarismo) e a preservação do bem-estar psicológico (prevenção de fadiga de alarme e rejeição tecnológica).
+O motor de decisão inteligente do Dance4Life é implementado através de um agente de Aprendizagem por Reforço, desenvolvido no âmbito da unidade curricular de Aprendizagem por Reforço do Mestrado em Inteligência Artificial. O agente é responsável por aprender uma política ótima de intervenção, decidindo em cada momento quando e com que intensidade intervir junto do utilizador sénior, equilibrando dois objetivos críticos em geriatria: a promoção da atividade física (combate ao sedentarismo) e a preservação do bem-estar psicológico (prevenção de fadiga de alarme e rejeição tecnológica).
 
 \subsection{Problema de Classificação e Classes}
 O problema é formalmente modelado como um Processo de Decisão de Markov (MDP), estruturado da seguinte forma:
@@ -180,7 +180,7 @@ Recompensa &  Condição e Descrição\\
 \hline
 +15 (contí-nua) &  Utilizador na zona ideal: Atividade ∈ [4, 7], Fadiga < 7 e Irritação < 5\\
 -5 (contí-nua) &  Utilizador em sedentarismo perigoso: Atividade < 2 por timestep\\
--50 (termi-nal) &  Estado de Game Over: Fadiga Máxima (risco médico) OU Irrita-ção Máxima (abandono do sistema)\\
+-50 (termi-nal) &  Estado de Game Over: Fadiga Máxima (risco médico) OU Irritação Máxima (abandono do sistema)\\
 \hline
 \end{tabular}
 \end{table}
@@ -266,7 +266,7 @@ A viabilidade do Dance4Life assenta num ecossistema de parcerias estratégicas:
 A estratégia de monetização combina dois modelos complementares:
 \begin{itemize}
 \item Subscrição institucional (SaaS): licença mensal por instituição, com preço escalável em função do número de utilizadores ativos. Este modelo garante receita recorrente e previsível.
-\item Modelo freemium para utilizadores individuais: versão gratuita com funcionalidades básicas (monitorização de atividade e sugestões musicais), e versão premium com funcionalidades avançadas (em-parelhamento social, relatórios de saúde detalhados, integração com wearables).
+\item Modelo freemium para utilizadores individuais: versão gratuita com funcionalidades básicas (monitorização de atividade e sugestões musicais), e versão premium com funcionalidades avançadas (emparelhamento social, relatórios de saúde detalhados, integração com wearables).
 \end{itemize}
 
 Adicionalmente, os dados anonimizados e agregados gerados pela plataforma constituem um ativo de valor para investigação académica e para entidades de saúde pública, abrindo uma terceira linha de receita através de parcerias de investigação e venda de insights analíticos, sempre em conformidade com o RGPD.
