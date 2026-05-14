@@ -9,6 +9,7 @@
 % so please use T1 fonts in your manuscript whenever possible.
 % Other font encondings may result in incorrect characters.
 %
+\usepackage{svg}
 \usepackage{graphicx}
 \usepackage{multirow}
 \usepackage[hidelinks]{hyperref}
@@ -69,37 +70,106 @@ O Dance4Life opera na intersecção de três domínios principais:
 
 \subsection{Objetivos}
 Os objetivos da fase prática organizam-se em três níveis:
-Implementar coletores de dados para sensores físicos e virtuais, integrando a API OpenWeatherMap e a recolha de dados em dispositivos Android (smartphone e wearables).
-Explorar, tratar e visualizar os dados recolhidos, aplicando técnicas de visualização interativa com PowerBI e D3.js para análise de padrões temporais e correlações entre variáveis ambientais e fisiológicas.
-Conceber e implementar um agente de Aprendizagem por Reforço para otimização da política de intervenção do sistema Dance4Life, equilibrando a promoção da atividade física com a prevenção de fadiga de alarme.
+\begin{enumerate}
+\item \textbf{Sensorização e recolha:} Implementar coletores de dados para sensores físicos e virtuais, integrando a API OpenWeatherMap e os sensores inerciais, fisiológicos e de localização de dispositivos Android (smartphone e Wear OS).
+\item \textbf{Análise e visualização:} Explorar, tratar e visualizar os dados recolhidos, aplicando técnicas de visualização interativa em D3.js e Leaflet para identificação de padrões temporais, geográficos e de participação social.
+\item \textbf{Decisão inteligente:} Conceber e implementar um agente de Aprendizagem por Reforço para otimização da política de intervenção do sistema Dance4Life, equilibrando a promoção da atividade física com a prevenção de fadiga de alarme.
+\end{enumerate}
 
 \subsection{Arquitetura Global do Sistema}
-A arquitetura do Dance4Life segue um modelo distribuído em camadas, conforme ilustrado na Figura~\ref{arquitetura}. A camada de aquisição de dados agrega três tipos de fontes: dados meteorológicos (API OpenWeatherMap), dados de sensores inerciais/fisiológicos dos dispositivos Android e dados de localização. Os dados convergem num servidor Flask central, responsável pela receção, validação, encaminhamento para agentes e persistência em base de dados. Uma camada de processamento alimenta o agente de Aprendizagem por Reforço responsável pelas decisões de intervenção. Por fim, uma camada de apresentação expõe dashboards interativos com PowerBI e D3.js para análise exploratória dos dados.
+A arquitetura do Dance4Life foi concebida segundo o paradigma distribuído \emph{edge--cloud}, procurando equilibrar três requisitos fundamentais e frequentemente conflituantes em sistemas de saúde digital: a latência de resposta às intervenções, a preservação da privacidade dos dados biométricos e a escalabilidade do processamento analítico. A separação de responsabilidades entre dispositivo e servidor não é, por isso, meramente técnica --- reflecte uma decisão de desenho fundamentada nos princípios de \emph{Privacy by Design} exigidos pelo RGPD, ao garantir que os sinais fisiológicos brutos são processados localmente e apenas métricas derivadas atravessam a rede. A arquitetura resultante, ilustrada na Figura~\ref{arquitetura}, organiza-se em cinco camadas funcionais com interfaces bem definidas.
 
-\begin{figure}
-\includegraphics[width=\textwidth]{images/arquitetura.png}
-\caption{Arquitetura global do sistema Dance4Life.} \label{arquitetura}
+A camada de \textbf{aquisição no edge} é materializada em duas aplicações nativas para Android --- uma para smartphone e outra para Wear OS --- responsáveis pela captura contínua dos sinais inerciais (acelerómetro triaxial e giroscópio, via \texttt{TYPE\_ACCELEROMETER} e \texttt{TYPE\_GYROSCOPE}) e fisiológicos (frequência cardíaca via \texttt{TYPE\_HEART\_RATE}, com mecanismo de \emph{fallback} baseado em estimativa por magnitudes inerciais quando o sensor não está disponível), bem como da localização geográfica enriquecida semanticamente por \emph{reverse geocoding} (cidade, país e rua). Ambos os dispositivos partilham os mesmos contratos de abstração definidos no módulo \texttt{core} --- as interfaces \texttt{SensorProvider}, \texttt{LocationProvider} e \texttt{DeviceProvider} --- tornando o código de domínio independente da plataforma física e facilitando a extensão a outros tipos de dispositivos.
+
+O \textbf{pré-processamento local} é executado pelo \texttt{DanceController}, que agrega os eventos sensoriais em janelas deslizantes, computa as magnitudes euclidianas dos vetores inerciais, estima o indicador de ritmo de movimento e constrói a observação compacta \texttt{MovementObservation} --- com as variáveis \emph{activityLevel}, \emph{physicalFatigue} e \emph{irritationLevel} --- que alimenta a política de Aprendizagem por Reforço inferida localmente via ONNX Runtime. A periodicidade de envio ao servidor está fixada em 30 segundos, assegurando granularidade temporal suficiente para análise longitudinal sem sobrecarregar a rede.
+
+A camada de \textbf{ingestão e serviços de contexto}, implementada em Flask, expõe uma API REST com cinco endpoints principais: \texttt{/collect\_data\_activities} para receção de telemetria de atividade; \texttt{/get\_environment\_data} para consulta de contexto meteorológico em tempo real junto da API OpenWeatherMap; \texttt{/set\_movement\_recommendation} para registo das recomendações geradas no edge; e \texttt{/get\_user\_match} e \texttt{/set\_invite\_status} para gestão do ciclo de vida dos convites sociais. O servidor mantém ainda um registo de agentes ativos com mecanismo de \emph{heartbeat}, suportando a coordenação assíncrona da camada multiagente.
+
+A \textbf{orquestração multiagente}, construída sobre a framework SPADE, implementa um pipeline de mensagens orientadas por ontologias e performativas, seguindo a ordem \texttt{SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ HarAgent $\rightarrow$ EnvironmentAgent $\rightarrow$ DatabaseAgent} para o fluxo principal de atividade. O \textit{EnvironmentAgent} enriquece o payload com a temperatura ambiente obtida em tempo real, enquanto o \textit{DatabaseAgent} persiste o evento enriquecido no Firebase. Em paralelo, um ramo independente do \textit{CoordinatorAgent} encaminha dados de atividade para o \textit{MatchingAgent}, que aplica um modelo de agrupamento por níveis de atividade para gerar convites sociais entre utilizadores compatíveis. Esta arquitetura orientada a mensagens confere elevada modularidade e permite evoluir componentes individuais sem afetar o restante pipeline.
+
+Por fim, a \textbf{camada de persistência e analítica} utiliza o Firebase como \emph{backend} documental para armazenamento de eventos de atividade, convites, estados de \emph{matching} e recomendações de movimento. Os dados persistidos são consumidos por dashboards analíticos implementados em D3.js e Leaflet, disponibilizando visualizações interativas de séries temporais, distribuição geográfica, rankings de participação e decomposição de scores por utilizador.
+
+\begin{figure}[t]
+\centering
+\includesvg[width=\textwidth]{images/arquitetura}
+\caption{Arquitetura global do sistema Dance4Life (visão em camadas e fluxo de dados).} \label{arquitetura}
 \end{figure}
 
-A separação entre a camada de Edge (dispositivos móveis) e a camada de servidor garante que os dados biométricos granulares são processados localmente, transmitindo apenas inferências categóricas anonimizadas para o servidor central, em conformidade com o RGPD.
+Esta arquitetura em cinco camadas reflecte um equilíbrio deliberado entre a capacidade de resposta em tempo real --- garantida pelo processamento e inferência no edge --- e a riqueza analítica proporcionada pela persistência centralizada. A adoção do paradigma multiagente com SPADE não se limita a uma conveniência de implementação: decorre da necessidade de coordenar comportamentos heterogéneos (reconhecimento de atividade, enriquecimento contextual, \emph{matching} social e persistência) de forma assíncrona, auditável e com separação clara de responsabilidades. Do ponto de vista da privacidade, o facto de os sinais biométricos brutos nunca abandonarem o dispositivo --- sendo apenas transmitidas métricas derivadas com granularidade de 30 em 30 segundos --- concretiza operacionalmente o princípio de minimização de dados preconizado pelo RGPD, constituindo simultaneamente uma vantagem técnica (redução de largura de banda e latência) e uma garantia de conformidade regulatória.
+
+\subsection{Tecnologias e Ferramentas}
+A Tabela~\ref{tab:tecnologias} resume o conjunto de tecnologias e bibliotecas que suportam a implementação do Dance4Life, organizadas por camada funcional. A selecção de cada ferramenta foi motivada por critérios de maturidade, adequação ao domínio e compatibilidade com os requisitos de privacidade e desempenho do sistema.
+
+\begin{table}[t]
+\centering
+\caption{Tecnologias e ferramentas utilizadas no Dance4Life, por camada funcional.}\label{tab:tecnologias}
+\begin{tabular}{|p{2.8cm}|p{3.0cm}|p{6.5cm}|}
+\hline
+\textbf{Camada} & \textbf{Tecnologia} & \textbf{Papel no sistema}\\
+\hline
+Edge --- Smartphone e Wear OS & Kotlin + Android SDK & Aquisição de sensores, pré-processamento local e comunicação com o servidor\\
+\hline
+Edge --- Inferência & ONNX Runtime (Android) & Execução da política de AR exportada em formato ONNX diretamente no dispositivo\\
+\hline
+Backend --- Ingestão & Python 3 + Flask & Servidor REST para receção de telemetria, contexto ambiental e gestão de convites sociais\\
+\hline
+Backend --- Multiagente & SPADE 3 & Orquestração assíncrona de agentes por troca de mensagens com ontologias e performativas FIPA\\
+\hline
+Persistência & Firebase Firestore & Base de dados documental para eventos de atividade, convites, \textit{matching} e recomendações\\
+\hline
+Contexto ambiental & OpenWeatherMap API & Sensor virtual meteorológico (temperatura, humidade, vento) consumido pelo servidor\\
+\hline
+Aprendizagem por Reforço & Gymnasium + Stable-Baselines3 & Definição do ambiente \texttt{MovementEnv} e treino comparativo de DQN e PPO\\
+\hline
+Visualização & D3.js + Leaflet & Dashboards analíticos interativos com séries temporais, mapas e rankings de participação\\
+\hline
+\end{tabular}
+\end{table}
 
 \section{Sensores, Coletores de Dados e Ambiente}
+A recolha de dados no Dance4Life assenta numa arquitectura de sensorização heterogénea, que combina \textbf{sensores físicos} --- transdutores embarcados nos dispositivos que convertem grandezas físicas em sinais digitais --- e \textbf{sensores virtuais} --- fontes cujos valores resultam de processamento sobre múltiplas fontes primárias ou da consulta a serviços externos~\cite{bouchabou2021}. Esta distinção estrutura o \textit{pipeline} de aquisição do sistema: determina o local de processamento, o padrão de latência e as implicações de privacidade de cada sinal adquirido.
 
-\subsection{Sensores Virtuais Ambientais}
-Na implementação atual, o contexto ambiental é obtido através de um módulo de sensorização virtual meteorológica. Este sensor permite ao sistema adaptar recomendações de atividade em função das condições climáticas no momento da recolha.
+\subsection{Sensores Físicos no Edge}
+Os sensores físicos operam em dois dispositivos Android --- um smartphone e um smartwatch com Wear OS --- acedidos através da \texttt{SensorManager} API com as constantes \texttt{TYPE\_ACCELEROMETER}, \texttt{TYPE\_GYROSCOPE} e \texttt{TYPE\_HEART\_RATE}. Ambos os dispositivos partilham os contratos de abstracção definidos no módulo \texttt{core} (interfaces \texttt{SensorProvider}, \texttt{LocationProvider} e \texttt{DeviceProvider}), tornando o código de domínio independente da plataforma física subjacente.
 
-\subsubsection{Sensor Meteorológico (OpenWeatherMap)}
-O módulo external\_sensors.py recolhe dados meteorológicos em tempo real, recorrendo à API REST da OpenWeatherMap (endpoint \texttt{/data/2.5/weather}). A consulta pode ser realizada por coordenadas geográficas (latitude/longitude) ou por cidade. Os parâmetros recolhidos incluem temperatura (\(^\circ\)C), humidade relativa (\%), velocidade do vento (m/s) e timestamp Unix da observação. Os dados são obtidos em unidades métricas (\texttt{units=metric}) e retornados como dicionário Python, facilitando a integração com os restantes módulos.
-A relevância deste sensor para o Dance4Life reside na capacidade de contextualizar a atividade física: temperaturas extremas ou humidade elevada condicionam a intensidade recomendada pelo sistema, enquanto condições favoráveis podem ser utilizadas como estímulo adicional para atividade ao ar livre.
-\subsubsection{Simulador Dispositivo Android}
-O módulo \_simulate\_android\_emulator.py replica o comportamento de um dispositivo Android equipado com sensores inerciais e fisiológicos, enviando dados simulados para o servidor Flask através de pedidos HTTP POST. Cada payload gerado inclui um identificador de utilizador (\texttt{user\_1} a \texttt{user\_5}), leituras de acelerómetro (\texttt{acc}, normalizado entre 0 e 1), frequência cardíaca (\texttt{hr}, entre 60 e 160 bpm), ritmo de movimento (\texttt{ritmo}, entre 0 e 1), coordenadas GPS (\texttt{latitude} e \texttt{longitude}, na região do Porto) e timestamp UTC.
-A geração de dados segue uma distribuição aleatória uniforme, o que permite testar o comportamento do sistema em condições diversas de atividade. Os dados são enviados com um intervalo de 30 segundos, simulando a cadência de amostragem de um dispositivo real em contexto de monitorização contínua. O mecanismo de timeout configurado (3 segundos de ligação, 20 segundos de leitura) garante robustez perante latências do servidor.
-O endpoint de receção (\texttt{/collect\_data\_activities}) foi configurado no servidor Flask local (localhost:5000), com suporte para endereçamento alternativo em rede local, facilitando testes em cenários de dispositivos fisicamente distribuídos.
+O \textbf{acelerómetro triaxial} é um transdutor inercial de tecnologia MEMS (\textit{Micro-Electro-Mechanical Systems}) que mede a aceleração linear nos três eixos cartesianos $\{x, y, z\}$ em $\mathrm{m/s}^2$. Por incorporar a componente gravítica, o sinal capturado reflecte simultaneamente o movimento voluntário do utilizador e a orientação do dispositivo, sendo o sinal primário para reconhecimento de actividade humana (HAR)~\cite{hossen2025}. O \textbf{giroscópio triaxial}, igualmente de base MEMS, mede a velocidade angular por eixo em $\mathrm{rad/s}$, explorando o efeito de Coriolis sobre estruturas vibrantes de escala microscópica. Enquanto o acelerómetro captura forças de translação, o giroscópio captura a dinâmica rotacional; a fusão das magnitudes euclidianas dos dois vectores --- computada pelo \texttt{DanceController} --- caracteriza o padrão de movimento tridimensional de forma mais robusta do que qualquer dos sensores isoladamente~\cite{paraschiakos2020}.
 
+O \textbf{sensor de frequência cardíaca} (FC), baseado em fotopletismografia óptica (PPG) no smartwatch, fornece a frequência cardíaca instantânea em batimentos por minuto (bpm). Dado que este sensor pode tornar-se indisponível por ausência de contacto dérmico ou limitação de hardware, o sistema implementa um mecanismo de \emph{fallback}: o valor é estimado a partir das magnitudes inerciais, assegurando a completude dos \textit{payloads} e a continuidade do cálculo da variável \emph{physicalFatigue} no \texttt{MovementObservation}. A \textbf{localização geográfica} é obtida por fusão de GPS e rede celular (AGPS) via \texttt{LocationProvider}, enriquecida por \emph{reverse geocoding} com o \texttt{Android Geocoder}, que converte coordenadas em metadados textuais (cidade, país e rua). A aplicação agrega estes sinais em \textit{payloads} periódicos (\texttt{ritmo}, \texttt{acc}, \texttt{gyro}, \texttt{hr}, coordenadas e cidade), transmitidos ao servidor com intervalo fixo de 30 segundos.
+
+\subsection{Sensor Virtual Meteorológico}
+No contexto da sensorização heterogénea, um \textbf{sensor virtual} é uma abstracção que produz uma grandeza observável a partir de fontes primárias sem que exista um transdutor dedicado para essa grandeza~\cite{bouchabou2021}. O contexto meteorológico constitui o exemplo central desta categoria no Dance4Life: temperatura exterior, humidade relativa e velocidade do vento não podem ser medidas com fiabilidade por sensores embarcados --- cujas leituras de temperatura são dominadas pela dissipação térmica do processador --- sendo por isso obtidas via API REST da OpenWeatherMap (\texttt{/data/2.5/weather}). Esta decisão de desenho é deliberada: um termómetro embarcado mediria essencialmente o calor interno do \textit{chipset}, e não a temperatura do ambiente em que o utilizador se encontra, variável com relevância directa para a modulação de recomendações de dança em contexto exterior.
+
+O módulo \texttt{external\_sensors.py} abstrai este sensor virtual, suportando consulta por coordenadas geográficas ou por cidade, com devolução de variáveis em unidades métricas (\texttt{units=metric}). O servidor Flask integra o dado ambiental através do endpoint \texttt{/get\_environment\_data}, tornando temperatura e humidade disponíveis tanto para a camada de agentes SPADE (\textit{EnvironmentAgent}) como para o espaço de observação do agente de Aprendizagem por Reforço.
+
+\subsection{Inventário de Sensores e Variáveis Observáveis}
+A Tabela~\ref{tab:sensores_d4l} sintetiza os sensores e fontes de dados efetivamente integrados no protótipo, distinguindo aquisição física no edge e aquisição virtual de contexto. Esta explicitação é relevante para reprodutibilidade experimental e para delimitação do espaço observável do sistema.
+
+\begin{table}[t]
+\centering
+\caption{Sensores e fontes de dados implementados no Dance4Life.}\label{tab:sensores_d4l}
+\begin{tabular}{|p{3.0cm}|p{3.0cm}|p{4.5cm}|p{2.4cm}|}
+\hline
+\textbf{Origem} & \textbf{Sensor/Fonte} & \textbf{Variáveis principais} & \textbf{Unidade/Formato}\\
+\hline
+Smartphone e Wear OS & Acelerómetro triaxial & $acc_x$, $acc_y$, $acc_z$, magnitude inercial & m/s$^2$ (e magnitude derivada)\\
+\hline
+Smartphone e Wear OS & Giroscópio triaxial & $gyro_x$, $gyro_y$, $gyro_z$, magnitude angular & rad/s (e magnitude derivada)\\
+\hline
+Smartphone e Wear OS & Sensor de frequência cardíaca & frequência cardíaca instantânea (com fallback estimado) & bpm\\
+\hline
+Smartphone e Wear OS & Localização (GPS/rede + Geocoder) & latitude, longitude, cidade, país, rua & coordenadas + metadados textuais\\
+\hline
+Servidor (sensor virtual) & OpenWeatherMap API & temperatura, humidade, velocidade do vento, timestamp meteorológico & $^\circ$C, \%, m/s, Unix time\\
+\hline
+\end{tabular}
+\end{table}
+
+No edge, os dados inerciais e fisiológicos são adquiridos de forma assíncrona e fundidos localmente. Quando a leitura de frequência cardíaca não está disponível, o sistema aplica uma estimativa robusta baseada nas magnitudes de acelerómetro e giroscópio, assegurando continuidade operacional. A localização é enriquecida semanticamente por \emph{reverse geocoding}, permitindo análises por cidade e contexto urbano.
 
 \subsection{Servidor de Recolha de Dados (Flask)}
-O servidor Flask constitui o núcleo da camada de recolha de dados, expondo endpoints REST para receção dos dados provenientes do simulador Android e para consulta dos dados ambientais recolhidos pelos sensores virtuais. A arquitetura do servidor segue o padrão MVC simplificado, com separação entre a lógica de receção de dados, a camada de persistência em base de dados e os módulos de sensorização.
-A cada pedido recebido no endpoint \texttt{/collect\_data\_activities}, o servidor valida o payload JSON, adiciona metadados temporais e encaminha os dados para os agentes de processamento (HAR, ambiente, base de dados, coordenador e matching). O enriquecimento ambiental, aplicado em tempo de execução, centra-se na variável de temperatura. Esta fusão de dados sensoriais e contextuais numa operação de ingestão integrada constitui um dos elementos distintivos da arquitetura Dance4Life.
+O servidor Flask constitui o ponto de entrada de dados e de coordenação de serviços. Na implementação atual, expõe, entre outros, os endpoints \texttt{/collect\_data\_activities}, \texttt{/get\_environment\_data}, \texttt{/set\_movement\_recommendation}, \texttt{/get\_user\_match} e \texttt{/set\_invite\_status}. Este desenho permite separar claramente três responsabilidades: ingestão de telemetria, disponibilização de contexto ambiental e gestão de interação social/recomendação.
+
+Na cadeia de ingestão, cada payload recebido é enriquecido com metadados temporais e encaminhado para a camada de agentes SPADE. O fluxo principal de atividade segue a ordem SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ HarAgent $\rightarrow$ EnvironmentAgent $\rightarrow$ DatabaseAgent, onde o \textit{EnvironmentAgent} acrescenta contexto meteorológico e o \textit{DatabaseAgent} realiza persistência em Firebase. Em paralelo, o \textit{MatchingAgent} processa progressão por clusters e gera convites sociais, preservando separação entre decisão social e persistência. Esta arquitetura orientada a mensagens aumenta modularidade, facilita evolução independente dos agentes e suporta rastreabilidade do processamento ponta-a-ponta.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{images/diagrama-fluxo.png}
@@ -107,121 +177,93 @@ A cada pedido recebido no endpoint \texttt{/collect\_data\_activities}, o servid
 \end{figure}
 
 \section{Exploração e Visualização dos Dados}
-\subsection{Tratamento e Pré-Processamento}
+A camada de visualização do Dance4Life materializa o fluxo completo de dados sensoriais: os sinais capturados nos dispositivos Android percorrem o pipeline de ingestão, são enriquecidos e persistidos no Firebase Firestore, e tornam-se consultáveis pelos dashboards analíticos implementados em D3.js e Leaflet. Esta secção descreve esse percurso desde a aquisição sensorial até à representação visual.
 
-Na implementação atual, o tratamento de dados ocorre em duas fases complementares:
-\subsubsection{Validação e enriquecimento em ingestão} no servidor Flask, cada payload recebido é validado a nível estrutural (JSON válido e campos esperados), enriquecido com metadados temporais e encaminhado para os agentes de processamento.
-\subsubsection{Agregação para análise} no dashboard PowerBI/D3.js, os dados persistidos são agregados por utilizador, mês, cidade e estado de convite, permitindo análise exploratória comparativa e cálculo de indicadores de participação (atividade, convites aceites, matching e recomendações).
+\subsection{Da Captura Sensorial ao Dado Persistido}
+Cada \textit{payload} transmitido ao servidor a cada 30 segundos transporta variáveis com origem direta nos sensores físicos e virtuais descritos na Secção~3: o \textbf{ritmo} (magnitude de movimento inercial derivada do acelerómetro e giroscópio), a \textbf{frequência cardíaca} (PPG ou estimativa inercial por \textit{fallback}), as \textbf{coordenadas geográficas e cidade} (GPS/AGPS + \textit{reverse geocoding}), e os \textbf{dados meteorológicos} (temperatura, humidade e vento, via OpenWeatherMap). No servidor Flask, cada \textit{payload} é validado estruturalmente (campos obrigatórios e tipos de dados), enriquecido com metadados temporais e encaminhado para o pipeline multiagente SPADE, onde o \textit{EnvironmentAgent} acrescenta o contexto meteorológico em tempo real antes de o \textit{DatabaseAgent} persistir o evento enriquecido no Firebase. É este registo final --- contendo variáveis inerciais, fisiológicas, geográficas e ambientais numa única entrada temporal --- que alimenta a camada de análise.
 
 \subsection{Análise Exploratória}
-A análise exploratória dos dados recolhidos focou-se na identificação de padrões temporais e comportamentais de utilização da plataforma. A distribuição de atividade por utilizador permitiu distinguir perfis de maior e menor participação, enquanto a análise temporal mensal evidenciou variações no volume de recolha ao longo do período observado. A análise por cidade, suportada por visualização georreferenciada, permitiu identificar concentração de atividade em determinados contextos geográficos. Adicionalmente, a distribuição de estados de convite (aceite, recusado, pendente) e os indicadores de matching forneceram uma perspetiva complementar sobre o envolvimento social promovido pelo sistema.
+Os dados persistidos foram explorados com o objetivo de identificar padrões comportamentais de utilização da plataforma a partir das variáveis sensoriais. A distribuição de \textbf{atividade por utilizador} (derivada das magnitudes inerciais do acelerómetro e giroscópio) permitiu distinguir perfis de maior e menor participação. A \textbf{análise temporal mensal} evidenciou variações no volume de recolha ao longo do período observado, refletindo a periodicidade real da emissão de \textit{payloads} pelos dispositivos. A \textbf{análise geográfica por cidade}, suportada por visualização georreferenciada com coordenadas GPS enriquecidas por \textit{reverse geocoding}, permitiu identificar concentração de atividade em determinados contextos urbanos. A \textbf{distribuição de estados de convite} (aceite, recusado, pendente) e os indicadores de \textit{matching} social forneceram uma perspetiva complementar sobre o envolvimento social promovido pelo sistema com base nos perfis de ritmo e frequência cardíaca dos utilizadores.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{images/serie-temporal.png}
 \caption{Séries temporais das variáveis sensoriais recolhidas (D3.js).} \label{serie_temporal}
 \end{figure}
 
-\subsection{Técnicas de Visualização Implementadas}
-As visualizações foram implementadas recorrendo à biblioteca D3.js, escolhida pela sua flexibilidade e capacidade de renderização interativa de grandes volumes de dados temporais. Foram desenvolvidos os seguintes tipos de visualização:
+\subsection{Visualizações Implementadas e Variáveis Sensoriais Expostas}
+As visualizações foram implementadas com D3.js e Leaflet, escolhidos pela sua flexibilidade na renderização interativa de séries temporais e dados geoespaciais. A Tabela~\ref{tab:vizualizacoes} resume cada visualização e as variáveis sensoriais que expõe.
 
-\begin{itemize}
-\item Gráfico de barras (Top 10): comparação dos utilizadores com melhor score global, agregando atividade, convites aceites, matching e recomendações.
-\item Série temporal mensal (line chart): evolução do número de registos de atividade ao longo do tempo.
-\item Mapa por cidade (Leaflet + D3): distribuição geográfica da atividade, com codificação visual por intensidade de registos.
-\item Distribuição de convites por estado: visualização comparativa entre convites aceites, recusados e pendentes.
-\item Cartão individual de utilizador com gráfico circular: decomposição do score por componentes de participação.
-\end{itemize}
+\begin{table}[t]
+\centering
+\caption{Visualizações implementadas e respetivas origens sensoriais.}\label{tab:vizualizacoes}
+\begin{tabular}{|p{3.8cm}|p{8.5cm}|}
+\hline
+\textbf{Visualização} & \textbf{Variáveis sensoriais expostas}\\
+\hline
+Ranking Top 10 (barras) & Score agregado por utilizador: atividade (inercial), convites aceites, \textit{matching} (ritmo + FC) e recomendações\\
+\hline
+Série temporal mensal & Volume de registos de atividade ao longo do tempo; reflete a periodicidade de emissão de \textit{payloads} pelos dispositivos\\
+\hline
+Mapa por cidade (Leaflet) & Coordenadas GPS e cidade por \textit{reverse geocoding}; intensidade de atividade inercial por localização\\
+\hline
+Distribuição de convites & Estado dos convites sociais gerados pelo \texttt{ClusteringAgent} a partir do \textit{ritmo} inercial\\
+\hline
+Cartão individual (circular) & Decomposição do score por componente: atividade inercial, FC, participação social e recomendações\\
+\hline
+\end{tabular}
+\end{table}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{images/heatmap-atividades.png}
 \caption{Visualização de intensidade de atividade no dashboard (D3.js).} \label{heatmap_atividade}
 \end{figure}
 
-\section{Modelos de Machine Learning}
-O motor de decisão inteligente do Dance4Life é implementado através de um agente de Aprendizagem por Reforço, desenvolvido no âmbito da unidade curricular de Aprendizagem por Reforço do Mestrado em Inteligência Artificial. O agente é responsável por aprender uma política ótima de intervenção, decidindo em cada momento quando e com que intensidade intervir junto do utilizador sénior, equilibrando dois objetivos críticos em geriatria: a promoção da atividade física (combate ao sedentarismo) e a preservação do bem-estar psicológico (prevenção de fadiga de alarme e rejeição tecnológica).
+\section{Aprendizagem Automática: Intervenção e Agrupamento Social}
+O Dance4Life incorpora dois modelos de aprendizagem automática complementares que consomem diretamente os dados produzidos pela camada de sensorização descrita na Secção~3: um agente de Aprendizagem por Reforço (AR) para otimização das intervenções individuais, e um modelo de agrupamento (\textit{clustering}) para emparelhamento social entre utilizadores (\textit{Dancing Match})~\cite{gonul2021,liu2024}.
 
-\subsection{Problema de Classificação e Classes}
-O problema é formalmente modelado como um Processo de Decisão de Markov (MDP), estruturado da seguinte forma:
-\subsubsection{Espaço de Estado} O espaço de observação é contínuo, composto por três variáveis dinâmicas com valores no intervalo [0, 10], que representam o estado multidimensional do utilizador em cada instante temporal:
+\subsection{Formulação MDP e Origens Sensoriais do Estado}
+O problema de intervenção é formalizado como um Processo de Decisão de Markov (MDP). O espaço de estado é contínuo, com três variáveis em $[0, 10]$ construídas pelo \texttt{DanceController} a partir dos sinais sensoriais recolhidos nos dispositivos Android, conforme a Tabela~\ref{estados_mdp}.
 
-\begin{table}
+\begin{table}[t]
 \centering
-\caption{Espaço de estado do MDP do agente Dance4Life.}\label{estados_mdp}
-\begin{tabular}{|l|c|p{6.6cm}|}
+\caption{Variáveis de estado do MDP e respetivas origens sensoriais.}\label{estados_mdp}
+\begin{tabular}{|l|c|p{7.2cm}|}
 \hline
-Variável de Estado &  Intervalo & Descrição\\
+\textbf{Variável} & \textbf{Intervalo} & \textbf{Origem sensorial}\\
 \hline
-Nível de Atividade &  [0, 10] & Grau atual de movimento do utilizador (0 = sedentarismo absoluto)\\
-Fadiga Física &  [0, 10] & Cansaço fisiológico/cardíaco acumulado ao longo da sessão\\
-Irritação (Fadiga de Alarme) &  [0, 10] & Saturação psicológica pelas notificações enviadas pelo sistema\\
+Nível de Atividade & [0, 10] & Magnitude euclidiana do acelerómetro (\texttt{TYPE\_ACCE\-LEROMETER}) e giroscópio (\texttt{TYPE\_GYROSCOPE}), fundida pelo \texttt{DanceController}\\
+\hline
+Fadiga Física & [0, 10] & Frequência cardíaca (\texttt{TYPE\_HEART\_RATE}, PPG); em caso de indisponibilidade, estimativa por \textit{fallback} inercial\\
+\hline
+Irritação (Fadiga de Alarme) & [0, 10] & Frequência de intervenções emitidas pelo sistema ao longo da sessão\\
 \hline
 \end{tabular}
 \end{table}
 
-\subsubsection{Espaço de Ação}
-O espaço de ação é discreto, com quatro níveis de intensidade de intervenção que o agente pode selecionar em cada timestep:
+O espaço de ação é discreto com quatro níveis: \textbf{Silêncio} (sem intervenção), \textbf{Baixa}, \textbf{Média} e \textbf{Alta Intensidade}. A função de recompensa codifica os objetivos clínicos: $+15$ (contínua) quando o utilizador se encontra na zona ideal (atividade $\in [4,7]$, fadiga $< 7$, irritação $< 5$); $-5$ (contínua) em sedentarismo perigoso (atividade $< 2$); e $-50$ (terminal) em falha por exaustão fisiológica ou abandono por fadiga de alarme.
 
-\begin{itemize}
-\item Ação 0 — Silêncio: Nenhuma intervenção. Prioriza o descanso e reduz a irri-tação, mas conduz à queda progressiva do nível de atividade.
-\item Ação 1 — Baixa Intensidade: Incentivo leve (ex.: notificação suave ou suges-tão musical subtil). Mantém o nível de atividade base e apoia a recuperação, com ligeiro incremento da irritação.
-\item Ação 2 — Média Intensidade: Recomendação moderada (ex.: sugestão de sessão de dança leve). Aumenta a atividade para níveis saudáveis, com in-cremento equilibrado de fadiga e irritação.
-\item Ação 3 — Alta Intensidade: Desafio forte (ex.: convite a sessão de dança ati-va com parceiro). Maximiza a atividade em casos críticos de sedentarismo, mas com custo elevado em fadiga e irritação.
-\end{itemize}
+\subsection{Ambiente, Algoritmos e Resultados}
+O agente é treinado no ambiente simulado estocástico \texttt{MovementEnv} (Gymnasium/Farama Foundation), que imita a dinâmica fisiológica e comportamental de um utilizador sénior com base nos mesmos três sinais derivados dos sensores. Foram implementados e comparados dois algoritmos via Stable-Baselines3: \textbf{DQN} (\textit{value-based}, com \textit{Experience Replay} e \textit{Target Network}) e \textbf{PPO} (\textit{policy-based/actor-critic}, com função objetivo \textit{clipped surrogate}). Ambos convergiram para \textit{survival rate} de 100\% em 30 episódios de avaliação (Tabela~\ref{comparacao_algoritmos}); o DQN atingiu este desempenho ao 20\,000 timestep, enquanto o PPO requereu 260\,000 timesteps.
 
-\subsubsection{Função de Recompensa}
-A função de recompensa foi cuidadosamente desenhada para codificar os objetivos clínicos e comportamentais do sistema, penalizando estados de risco e recompensando a manutenção do utilizador na zona de atividade ideal:
-
-\begin{table}
+\begin{table}[t]
 \centering
-\caption{Função de recompensa do agente de Aprendizagem por Reforço.}\label{recompensa_mdp}
-\begin{tabular}{|l|p{9.7cm}|}
-\hline
-Recompensa &  Condição e Descrição\\
-\hline
-+15 (contí-nua) &  Utilizador na zona ideal: Atividade ∈ [4, 7], Fadiga < 7 e Irritação < 5\\
--5 (contí-nua) &  Utilizador em sedentarismo perigoso: Atividade < 2 por timestep\\
--50 (termi-nal) &  Estado de Game Over: Fadiga Máxima (risco médico) OU Irritação Máxima (abandono do sistema)\\
-\hline
-\end{tabular}
-\end{table}
-
-A penalização terminal de -50 é particularmente relevante: modela dois cenários de falha crítica distintos — o risco médico por exaustão fisiológica e o abandono tecno-lógico por fadiga de alarme — ambos determinando o fim do episódio. Esta dualida-de obriga o agente a aprender uma política equilibrada que não apenas maximize a atividade, mas também gerencie ativamente a saturação psicológica do utilizador.
-
-\subsection{Ambiente Simulado — MovementEnv}
-Devido às restrições éticas que impedem o treino inicial com utilizadores reais (população sénior vulnerável), o agente é treinado num ambiente simulado estocástico designado \texttt{MovementEnv}, desenvolvido com a framework Gymnasium da Farama Foundation. Este ambiente imita a evolução fisiológica e comportamental de um utilizador idoso, gerando estados dinâmicos e reagindo às intervenções do agente de forma realista.
-O ambiente incorpora estocasticidade nas transições de estado, modelando a variabilidade natural do comportamento humano: a mesma ação do agente pode produzir respostas ligeiramente diferentes em diferentes episódios, replicando a imprevisibilidade inerente a utilizadores reais. A integração com o ecossistema Dance4Life permite que os dados ambientais recolhidos pelos sensores virtuais (temperatura, qualidade do ar) influenciem os parâmetros de transição do ambiente simulado, enriquecendo o realismo da simulação.
-
-\begin{figure}
-\includegraphics[width=\textwidth]{images/ciclo-rl.png}
-\caption{Ciclo de interação do agente RL com o ambiente \texttt{MovementEnv}.} \label{ciclo_rl}
-\end{figure}
-
-\subsection{Algoritmos Implementados: DQN e PPO}
-Foram implementados e avaliados comparativamente dois algoritmos de Deep Reinforcement Learning, selecionados pela sua adequação às características do problema (estados contínuos, ações discretas), recorrendo à biblioteca Stable-Baselines3.
-\subsubsection{DQN — Deep Q-Network} O DQN é um algoritmo baseado em valor (value-based) que aproxima a função Q(s, a) — o valor esperado de executar a ação a no estado s — através de uma rede neuronal profunda. Utiliza dois mecanismos fundamentais para estabilizar o treino em ambientes com estados contínuos: Experience Replay (armazenamento e amostragem aleatória de experiências passadas para quebrar correlações temporais) e Target Network (rede alvo de atualização lenta para evitar oscilações na função de valor). A sua natureza value-based torna-o particularmente adequado para espaços de ação discretos como o definido no MDP Dance4Life.
-\subsubsection{PPO — Proximal Policy Optimization} O PPO é um algoritmo baseado em política (policy-based/actor-critic), reconhecido no estado da arte pela sua estabilidade de treino e facilidade de convergência. O mecanismo central do PPO é a função objetivo clipped surrogate, que limita a magnitude das atualizações de política a cada iteração, evitando passos de gradiente demasiado grandes que poderiam desestabilizar o agente. A componente critic estima o valor do estado atual, guiando as atualizações da componente actor (a política propriamente dita). A robustez do PPO em ambientes estocásticos torna-o o candidato preferencial para o cenário Dance4Life.
-
-\subsection{Métricas de Avaliação e Comparação}
-A avaliação e comparação dos dois agentes (DQN vs. PPO) é realizada através das seguintes métricas:
-\subsubsection{Curvas de Aprendizagem} evolução da recompensa média por episódio ao longo dos timesteps de treino, permitindo avaliar a velocidade de convergência e a estabilidade de cada algoritmo.
-\subsubsection{Duração Média dos Episódios} capacidade do agente para manter o utilizador ativo ao longo de uma sessão completa sem desencadear um estado terminal (Game Over por fadiga ou abandono).
-\subsubsection{Survival Rate} proporção de episódios concluídos com sucesso total, sem atingir nenhum dos limites críticos definidos na função de recompensa.
-\subsubsection{Análise Comparativa de Política}  exame das políticas aprendidas por cada agente — quais ações são preferidas em que estados — para avaliar a adequação clínica das deci-sões tomadas.
-
-\begin{table}
-\centering
-\caption{Comparação de desempenho DQN vs. PPO no ambiente \texttt{MovementEnv}.}\label{comparacao_algoritmos}
+\caption{Comparação de desempenho DQN vs.\ PPO no ambiente \texttt{MovementEnv}.}\label{comparacao_algoritmos}
 \begin{tabular}{|l|l|l|}
 \hline
-Métrica & DQN & PPO\\
+\textbf{Métrica} & \textbf{DQN} & \textbf{PPO}\\
 \hline
-Recompensa Média (30 episódios) &  1437.50 & 1436.00\\
-Duração Média de Episódio (passos) &  96.00 & 96.00\\
-Survival Rate &  100.00\% & 100.00\%\\
-Timesteps até melhor desempenho observado &  20\,000 & 260\,000\\
+Recompensa Média (30 episódios) & 1437.50 & 1436.00\\
+Duração Média de Episódio (passos) & 96.00 & 96.00\\
+Survival Rate & 100.00\% & 100.00\%\\
+Timesteps até convergência & 20\,000 & 260\,000\\
 \hline
 \end{tabular}
 \end{table}
+
+\subsection{Agrupamento e Matching Social (ClusteringAgent)}
+Em paralelo ao agente AR, o \texttt{ClusteringAgent} implementa um modelo de agrupamento de utilizadores baseado nos mesmos dados sensoriais, com o objetivo de gerar convites sociais entre utilizadores com perfis de atividade compatíveis --- o \textit{Dancing Match}.
+
+Os utilizadores são classificados em quatro \textit{clusters} de progressão determinados pelo valor de \textit{ritmo} --- a magnitude de movimento inercial derivada da fusão do acelerómetro e giroscópio pelo \texttt{DanceController}: \textbf{Iniciante} (\textit{ritmo} $< 17$), \textbf{Moderado} ($17 \leq$ \textit{ritmo} $< 18.5$), \textbf{Avançado} ($18.5 \leq$ \textit{ritmo} $< 20$) e \textbf{Expert} (\textit{ritmo} $\geq 20$). Para efeitos de emparelhamento entre utilizadores, aplica-se um algoritmo K-Means em memória (máximo 20 iterações), sem dependência de bibliotecas externas, sobre vetores de cinco dimensões: coordenadas geográficas normalizadas, frequência cardíaca normalizada, \textit{ritmo} e género musical. O \textit{score} de compatibilidade entre dois utilizadores é calculado como combinação ponderada de três critérios: semelhança musical (45\%), proximidade geográfica (35\%) e semelhança de sinais vitais --- FC e \textit{ritmo} --- (20\%). São gerados convites apenas para pares com \textit{score} $\geq 0.45$ e distância $\leq 8$ km. Em simultâneo, o modelo emite um convite de progressão individual, motivando o utilizador a atingir o \textit{cluster} seguinte com base no valor atual do seu \textit{ritmo} inercial.
 
 \section{Resultados, Limitações e Recomendações}
 \subsection{Sumário dos Resultados Obtidos}
@@ -230,7 +272,7 @@ A implementação da plataforma Dance4Life na sua fase prática permitiu alcanç
 \begin{itemize}
 \item Integração do sensor virtual meteorológico (OpenWeatherMap), com recolha contínua de dados ambientais para suporte contextual.
 \item Implementação de um simulador de dispositivo Android funcional, capaz de gerar e transmitir dados fisiológicos e inerciais realistas para o servidor Flask com intervalo de 30 segundos.
-\item Desenvolvimento de um servidor Flask robusto, com mecanismo de fusão sensorial na ingestão e persistência em base de dados rela-cional.
+\item Desenvolvimento de um servidor Flask robusto, com mecanismo de fusão sensorial na ingestão e persistência em base de dados documental (Firebase Firestore).
 \item Criação de um conjunto de visualizações PowerBI e D3.js/Leaflet interativas que permitem a análise exploratória dos dados recolhidos, incluindo ranking, série temporal, distribuição geográfica e estado de convites.
 \item Conceção e avaliação comparativa de dois agentes de Aprendizagem por Reforço (DQN e PPO) num ambiente simulado estocástico (\texttt{MovementEnv}), com formulação MDP documentada e métricas de avaliação definidas.
 \end{itemize}

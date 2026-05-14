@@ -1,0 +1,62 @@
+flowchart LR
+    %% Dance4Life - Arquitetura Global do Sistema
+
+    subgraph EDGE[Dispositivos Moveis - Edge]
+        SW[Smartwatch - sensores FC accelerometro giroscopio]
+        PH[Smartphone - sensores accelerometro giroscopio GPS]
+        PRE[Pre-processamento local - magnitudes ritmo observacao RL]
+        SW --> PRE
+        PH --> PRE
+    end
+
+    subgraph API[Servidor Flask - Ingestao e Contexto]
+        C1[/collect_data_activities/]
+        C2[/get_environment_data/]
+        C3[/set_movement_recommendation/]
+        C4[/get_user_match/]
+        C5[/set_invite_status/]
+    end
+
+    subgraph AG[Camada de Agentes - SPADE]
+        SA[SensorAgent]
+        CO[CoordinatorAgent]
+        HA[HarAgent]
+        EA[EnvironmentAgent - enriquecimento OpenWeatherMap]
+        DA[DatabaseAgent - persistencia]
+        MA[MatchingAgent - clusters e convites]
+
+        SA --> CO --> HA --> EA --> DA
+        SA --> CO
+        CO --> MA
+        MA --> DA
+    end
+
+    subgraph RL[Agente de Aprendizagem por Reforco]
+        POL[Politica RL DQN PPO ONNX]
+        ENV[MovementEnv MDP estocastico treino]
+        POL --> ENV
+        ENV --> POL
+    end
+
+    subgraph DATA[Persistencia e Analise]
+        FB[(Firebase)]
+        DASH[Dashboards PowerBI D3.js Leaflet]
+    end
+
+    PRE --> C1
+    PRE --> C3
+    PRE --> C4
+    PRE --> C5
+    PRE --> C2
+
+    C1 --> SA
+    C3 --> SA
+    C4 --> MA
+    C5 --> MA
+    C2 --> EA
+
+    DA --> FB
+    FB --> DASH
+
+    POL -. recomenda .-> PRE
+    EA -. contexto meteorologico .-> PRE
