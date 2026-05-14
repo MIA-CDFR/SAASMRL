@@ -11,6 +11,7 @@
 %
 \usepackage{graphicx}
 \usepackage{multirow}
+\usepackage[hidelinks]{hyperref}
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 %
@@ -73,7 +74,7 @@ Explorar, tratar e visualizar os dados recolhidos, aplicando técnicas de visual
 Conceber e implementar um agente de Aprendizagem por Reforço (RL) para otimiza-ção da política de intervenção do sistema Dance4Life, equilibrando a promoção da atividade física com a prevenção de fadiga de alarme.
 
 \subsection{Arquitetura Global do Sistema}
-A arquitetura do Dance4Life segue um modelo distribuído em camadas, conforme ilustrado na Figura 1. A camada de aquisição de dados agrega três tipos de fontes: dados meteorológicos (OpenWeatherMap), dados de sensores inerciais/fisiológicos dos dispositivos Android e dados de localização. Os dados convergem num servidor Flask central, responsável pela receção, validação, encaminhamento para agentes e persistência em base de dados. Uma camada de processamento alimenta o agente de Aprendizagem por Reforço responsável pelas decisões de intervenção. Por fim, uma camada de apresentação expõe dashboards interativos com PowerBI,D3.js e Leaflet para análise exploratória dos dados.
+A arquitetura do Dance4Life segue um modelo distribuído em camadas, conforme ilustrado na Figura~\ref{arquitetura}. A camada de aquisição de dados agrega três tipos de fontes: dados meteorológicos (OpenWeatherMap), dados de sensores inerciais/fisiológicos dos dispositivos Android e dados de localização. Os dados convergem num servidor Flask central, responsável pela receção, validação, encaminhamento para agentes e persistência em base de dados. Uma camada de processamento alimenta o agente de Aprendizagem por Reforço responsável pelas decisões de intervenção. Por fim, uma camada de apresentação expõe dashboards interativos com PowerBI,D3.js e Leaflet para análise exploratória dos dados.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{images/arquitetura.png}
@@ -286,37 +287,37 @@ Como trabalho futuro, a prioridade recai na substituição dos dados simulados p
 %
 \begin{thebibliography}{11}
 
-\bibitem{ref_article1}
-Bouchabou, D., Nguyen, S.M., Lohr, C., LeDuc, B., Kanellos, I.: A Survey of Human Activity Recognition in Smart Homes Based on IoT Sensors Algorithms. Sensors 21(18), 6037 (2021).
+\bibitem{bouchabou2021}
+Bouchabou, D., Nguyen, S.M., Lohr, C., LeDuc, B., Kanellos, I.: A Survey of Human Activity Recognition in Smart Homes Based on IoT Sensors Algorithms. Sensors \textbf{21}(18), 6037 (2021).
 
-\bibitem{ref_article2}
+\bibitem{liu2024}
 Liu, C., Thiamwong, L., Nguyen, T., Suarez, J.R., Park, J.-H., Lou, Q., Xie, R.: A reinforcement learning approach to enhance physical activity and reduce fall risk in older adults. Innovation in Aging 8(Suppl.~1), 1081--1081 (2024). \doi{10.1093/geroni/igae098.3473}
 
-\bibitem{ref_article3}
+\bibitem{gonul2021}
 Gönül, S., Namlı, T., Coşar, A., Toroslu, I.H.: A reinforcement learning based algorithm for personalization of digital, just-in-time, adaptive interventions. Artificial Intelligence in Medicine 115, 102062 (2021). \doi{10.1016/j.artmed.2021.102062}
 
-\bibitem{ref_article4}
+\bibitem{hossen2025}
 Hossen, M.A., Abas, P.E.: Machine Learning for Human Activity Recognition: State-of-the-Art Techniques and Emerging Trends. J. Imaging 11(3), 91 (2025).
 
-\bibitem{ref_article5}
+\bibitem{liao2019}
 Liao, P. et al.: Personalized HeartSteps: A Reinforcement Learning Algorithm for Optimizing Physical Activity. ACM (2019). \doi{10.1145/3381007}
 
-\bibitem{ref_article6}
+\bibitem{lu2024}
 Lu, Y. et al.: StepCountJITAI: simulation environment for RL with application to physical activity adaptive intervention. arXiv:2411.00336 (2024).
 
-\bibitem{ref_article7}
-Paraschiakos, S. et al.: Activity recognition using wearable sensors for tracking the elderly. User Model. User-Adapt. Interact. 30, 567-605 (2020).
+\bibitem{paraschiakos2020}
+Paraschiakos, S. et al.: Activity recognition using wearable sensors for tracking the elderly. User Model. User-Adapt. Interact. \textbf{30}, 567--605 (2020).
 
-\bibitem{ref_article8}
+\bibitem{peng2024}
 Peng, C. et al.: Promoting physical activity in middle-aged and older adults through digital intervention via deep reinforcement learning. Int. J. Human-Computer Interaction (2024). \doi{10.1080/23311908.2025.2541720}
 
-\bibitem{ref_url1}
+\bibitem{gymnasium_url}
 Gymnasium (Farama Foundation): Framework para ambientes de Aprendizagem por Reforço. \url{https://gymnasium.farama.org/} (acedido em maio de 2026).
 
-\bibitem{ref_url2}
+\bibitem{sb3_url}
 Stable-Baselines3: Biblioteca de algoritmos de Deep RL em PyTorch. \url{https://stable-baselines3.readthedocs.io/} (acedido em maio de 2026).
 
-\bibitem{ref_url3}
+\bibitem{openweathermap_url}
 OpenWeatherMap API Documentation. \url{https://openweathermap.org/api} (acedido em maio de 2026).
 
 \end{thebibliography}

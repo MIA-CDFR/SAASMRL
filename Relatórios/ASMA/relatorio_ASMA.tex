@@ -13,6 +13,20 @@
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 %
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray},
+  stringstyle=\color{black},
+  breaklines=true,
+  frame=single,
+  numbers=none,
+  showstringspaces=false
+}
+%
 % If you use the hyperref package, please uncomment the following two lines
 % to display URLs in blue roman font according to Springer's eBook style:
 %\usepackage{color}
@@ -21,9 +35,9 @@
 %
 \begin{document}
 %
-\title{Contribution Title}
+\title{Dance4Life: Implementação de um Sistema Multiagente para a Promoção do Envelhecimento Ativo}
 %
-%\titlerunning{Abbreviated paper title}
+\titlerunning{Dance4Life: Sistema Multiagente para Envelhecimento Ativo}
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
@@ -38,112 +52,431 @@ Rui Manuel Martins Marques Rodrigues (pg7942@alunos.uminho.pt)
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
-\institute{Princeton University, Princeton NJ 08544, USA \and
-Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany
-\email{lncs@springer.com}\\
-\url{http://www.springer.com/gp/computer-science/lncs} \and
-ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
-\email{\{abc,lncs\}@uni-heidelberg.de}}
+\institute{Universidade do Minho, Braga, Portugal \\
+% \email{pg11605@alunos.uminho.pt, pg59999@alunos.uminho.pt, pg42201@alunos.uminho.pt, pg7942@alunos.uminho.pt}
+}
 %
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
+O presente relatório descreve a conceção, modelação e implementação do protótipo do sistema Dance4Life, um ecossistema distribuído baseado em Sistemas Multiagente (SMA) desenvolvido em Python com recurso à framework SPADE (Smart Python Agent Development Environment). O sistema visa promover o envelhecimento ativo, correlacionando dados de movimento físico com estímulos musicais e variáveis de contexto social, no âmbito do paradigma aging in place.
+A arquitetura implementada compõe seis agentes especializados - ApiAgent, SensorAgent, CoordinatorAgent, HARAgent, EnvironmentAgent e DatabaseAgent -, comunicando através do protocolo FIPA-ACL (performativas request, agree, inform e failure) e transmitindo objetos estruturados via pydantic e jsonpickle.
+A implementação valida a viabilidade técnica do paradigma SMA para a coordenação sequencial e assíncrona de pipelines de saúde geriátrica, desde a perceção sensorial até à persistência em base de dados. São discutidos os resultados obtidos, as limitações arquiteturais identificadas e propostas concretas de evolução futura, incluindo paralelismo com asyncio.gather e integração de um Directory Facilitator para descoberta dinâmica de serviços.
 
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+
+\keywords{Sistemas Multiagente \and SPADE\and FIPA-ACL \and Envelhecimento Ativo \and Reconhecimento de Atividade (HAR)}
 \end{abstract}
 %
 %
 %
-\section{First Section}
-\subsection{A Subsection Sample}
-Please note that the first paragraph of a section or subsection is
-not indented. The first paragraph that follows a table, figure,
-equation etc. does not need an indent, either.
+\section{Introdução}
+\subsection{Domínio e Motivação}
+O envelhecimento demográfico global constitui um dos principais desafios societais e de saúde pública da atualidade. A estimativa de que, até 2050, a população com mais de 65 anos atinja 1,5 mil milhões de pessoas impõe uma mudança de paradigma: a transição de cuidados clínicos hospitalares para modelos de envelhecimento ativo e monitorização remota na própria residência.
+É neste contexto que surge o ecossistema concetual Dance4Life, proposto como domínio de aplicação deste trabalho prático. O Dance4Life visa promover o envelhecimento ativo através da inferência implícita de preferências do utilizador, correlacionando o movimento físico com estímulos musicais e interações sociais. A diversidade de dados envolvidos (sensores inerciais, sinais vitais, contexto sonoro e perfis sociais) não pode ser gerida eficientemente por uma arquitetura monolítica.
+Os SMA emergem como o paradigma tecnológico ideal para este cenário. A sua natureza modular, distribuída e assíncrona permite que entidades computacionais autónomas - os agentes - colaborem para perceber o ambiente, interpretar dados ruidosos e tomar decisões em tempo real.
 
-Subsequent paragraphs, however, are indented.
+\subsection{Objetivos}
+O objetivo central deste projeto consiste na conceção e implementação de um protótipo distribuído baseado no paradigma SMA, focado no domínio do envelhecimento ativo, desenvolvido em Python com a biblioteca SPADE. Os objetivos são:
+\begin{itemize}
+\item Conceção Arquitetural: Desenhar uma arquitetura distribuída e modular, apoiada por metodologias Agent UML.
+\item Implementação de Agentes Inteligentes: Definir os agentes ApiAgent, SensorAgent, CoordinatorAgent, HARAgent, EnvironmentAgent e DatabaseAgent, com os seus comportamentos (CyclicBehaviour e OneShotBehaviour).
+\item Padronização FIPA-ACL: Implementar o fluxo conversacional request → agree → inform/failure em todas as interações ponto-a-ponto.
+\item Transmissão de Dados Estruturados: Garantir que o intercâmbio de mensagens utiliza objetos pydantic serializados com jsonpickle, em vez de strings simples.
+\item Orquestração Assíncrona: Desenvolver mecanismos de coordenação no CoordinatorAgent para gerir o pipeline sequencial sem bloqueios na thread principal.
+\end{itemize}
 
-\subsubsection{Sample Heading (Third Level)} Only two levels of
-headings should be numbered. Lower level headings remain unnumbered;
-they are formatted as run-in headings.
+\subsection{Estrutura do Relatório}
+O relatório está organizado do seguinte modo: a Secção 2 apresenta a conceção e modelação do sistema (topologia, agentes e protocolos); a Secção 3 detalha a implementação técnica e o fluxo de dados; a Secção 4 apresenta os resultados e a análise crítica; e a Secção 5 conclui com recomendações de trabalho futuro.
 
-\paragraph{Sample Heading (Fourth Level)}
-The contribution should contain no more than four levels of
-headings. Table~\ref{tab1} gives a summary of all heading levels.
+\section{Conceção e Modelação do Sistema}
+A fase de conceção seguiu os princípios da metodologia de modelação baseada em agentes (Agent UML - AUML). O desenvolvimento de um ecossistema focado no envelhecimento ativo exige o processamento de dados heterogéneos em tempo real (fisiológicos, inerciais e ambientais). A arquitetura de software foi desenhada para isolar responsabilidades computacionais, mitigando a conexão entre a captura de dados físicos e as inferências cognitivas ou sociais.
+\subsection{Arquitetura do Sistema Multiagente (Topologia)}
+A arquitetura do sistema Dance4Life foi concebida segundo uma topologia distribuída e hierárquica, inspirada nas melhores práticas identificadas no estado da arte dos Sistemas Multiagente aplicados ao envelhecimento ativo. A heterogeneidade dos dados envolvidos - sinais inerciais, contexto social, preferências musicais e metadados ambientais - exige uma infraestrutura capaz de integrar múltiplas fontes de informação, processá-las de forma sequencial e garantir fiabilidade em cenários sensíveis, como aplicações geriátricas. Por este motivo, a arquitetura adotada combina um modelo edge-to-cloud com um mecanismo de coordenação centralizada, assegurando coerência, modularidade e extensibilidade.
+No núcleo da topologia encontra-se o CoordinatorAgent, responsável por gerir o pipeline de processamento e garantir que as dependências lógicas entre etapas são respeitadas. A existência deste agente central é justificada pela natureza sequencial do domínio: não é possível inferir contexto social antes de reconhecer a atividade física, nem persistir dados na base de dados antes de validar a integridade das fases anteriores. Assim, o CoordinatorAgent atua como uma máquina de estados distribuída, delegando tarefas aos agentes especialistas e consolidando os resultados num fluxo ordenado e atomicamente consistente. Esta abordagem reduz a ligação entre agentes, facilita a substituição de módulos (por exemplo, a troca do HARAgent por um modelo de Machine Learning real) e aumenta a robustez global do sistema - um requisito crítico em aplicações de saúde e bem estar sénior.
+A periferia do sistema é composta pelo ApiAgent e pelo SensorAgent, que formam a camada de entrada (edge). O ApiAgent simula a origem dos dados provenientes de dispositivos externos, como smartwatches ou sensores inerciais, articulando-os num formato estruturado e enviando-os para o SensorAgent. Este último desempenha o papel de gateway da camada física, validando a receção dos dados e encaminhando-os para o CoordinatorAgent. Esta separação entre aquisição e processamento permite isolar falhas de dispositivos, reduzir a complexidade da camada cognitiva e preparar o sistema para cenários multiutilizador.
+A camada de processamento especializado é composta por três agentes distintos:
+\begin{itemize}
+\item HARAgent, responsável pela interpretação dos sinais físicos e pela inferência da atividade;
+\item EnvironmentAgent, que contextualiza a atividade com variáveis ambientais e sociais;
+\item DatabaseAgent, que assegura a persistência atómica dos dados na cloud.
+\end{itemize}
+Cada um destes agentes opera de forma autónoma e independente, comunicando através de mensagens FIPA ACL e trocando objetos estruturados serializados com jsonpickle. Esta articulação permite que cada componente evolua de forma isolada, suportando futuras extensões como novos sensores, modelos cognitivos mais avançados ou mecanismos de recomendação social.
+A topologia adotada reflete, assim, um equilíbrio entre centralização funcional e distribuição computacional, alinhando-se com arquiteturas modernas como JADE, PANGEA e THOMAS, que privilegiam a interoperabilidade, a escalabilidade e a resiliência. O resultado é um ecossistema multiagente capaz de integrar dados heterogéneos, operar em tempo real e fornecer suporte inteligente ao envelhecimento ativo, garantindo simultaneamente segurança, consistência e extensibilidade.
 
 \begin{table}
-\caption{Table captions should be placed above the
-tables.}\label{tab1}
+\centering
+\caption{Topologia e comunicações do sistema Dance4Life.}\label{agentes_comunicacao}
 \begin{tabular}{|l|l|l|}
 \hline
-Heading level &  Example & Font size and style\\
+Agente & Tipo / Papel & Communicates With \\
 \hline
-Title (centered) &  {\Large\bfseries Lecture Notes} & 14 point, bold\\
-1st-level heading &  {\large\bfseries 1 Introduction} & 12 point, bold\\
-2nd-level heading & {\bfseries 2.1 Printing Area} & 10 point, bold\\
-3rd-level heading & {\bfseries Run-in Heading in Bold.} Text follows & 10 point, bold\\
-4th-level heading & {\itshape Lowest Level Heading.} Text follows & 10 point, italic\\
+ApiAgent & Gateway / Trigger externo & SensorAgent \\
+SensorAgent & Reativo — periferia & ApiAgent, CoordinatorAgent \\
+CoordinatorAgent & Orquestrador — máquina de estados & SensorAgent, HARAgent, EnvironmentAgent, DatabaseAgent \\
+HARAgent & Cognitivo — HAR / ML & CoordinatorAgent \\
+EnvironmentAgent & Contextual — social/ambiental & CoordinatorAgent \\
+DatabaseAgent & Persistência — Firebase & CoordinatorAgent \\
 \hline
 \end{tabular}
 \end{table}
 
+**DIAGRAMA**
 
-\noindent Displayed equations are centered and set on a separate
-line.
-\begin{equation}
-x + y = z
-\end{equation}
-Please try to avoid rasterized images for line-art diagrams and
-schemas. Whenever possible, use vector graphics instead (see
-Fig.~\ref{fig1}).
+\subsection{Definição dos Agentes}
+\subsubsection{Classes, Behaviours e Performativas}
+A arquitetura do Dance4Life assenta num conjunto de seis agentes especializados, cada um responsável por uma função distinta dentro do ecossistema distribuído. A modelação seguiu os princípios de Agent UML e as normas FIPA ACL, garantindo modularidade, isolamento funcional e interoperabilidade entre componentes. Cada agente herda de spade.agent.Agent e implementa comportamentos concorrentes através de CyclicBehaviour e OneShotBehaviour. A comunicação entre agentes é orientada a objetos, recorrendo a modelos Pydantic serializados com jsonpickle.
 
-\begin{figure}
-\includegraphics[width=\textwidth]{fig1.eps}
-\caption{A figure caption is always placed below the illustration.
-Please note that short captions are centered, while long ones are
-justified by the macro package automatically.} \label{fig1}
-\end{figure}
+\subsubsection{ApiAgent — Gateway / Interface Externa}
+O ApiAgent representa a fronteira entre o sistema multiagente e o mundo exterior. É responsável por simular a origem dos dados provenientes de dispositivos periféricos (ex.: smartwatch, sensores inerciais ou aplicações móveis). Este agente isola os dados brutos num objeto estruturado, gera um conversation-id único via uuid4() e inicia o protocolo FIPA Request enviando o pedido ao SensorAgent.
+Behaviour principal:
+\begin{itemize}
+\item RequestBehaviourSendSensorActivityToSensor (OneShotBehaviour) - envolve os dados, define ontologia e metadados, envia o pedido e aguarda confirmação (agree) antes de terminar a transação.
+\end{itemize}
+Este agente garante que toda a comunicação que entra no sistema é validada, rastreável e semanticamente consistente.
 
-\begin{theorem}
-This is a sample theorem. The run-in heading is set in bold, while
-the following text appears in italics. Definitions, lemmas,
-propositions, and corollaries are styled the same way.
-\end{theorem}
-%
-% the environments 'definition', 'lemma', 'proposition', 'corollary',
-% 'remark', and 'example' are defined in the LLNCS documentclass as well.
-%
-\begin{proof}
-Proofs, examples, and remarks have the initial word in italics,
-while the following text appears in normal font.
-\end{proof}
-For citations of references, we prefer the use of square brackets
-and consecutive numbers. Citations using labels or the author/year
-convention are also acceptable. The following bibliography provides
-a sample reference list with entries for journal
-articles~\cite{ref_article1}, an LNCS chapter~\cite{ref_lncs1}, a
-book~\cite{ref_book1}, proceedings without editors~\cite{ref_proc1},
-and a homepage~\cite{ref_url1}. Multiple citations are grouped
-\cite{ref_article1,ref_lncs1,ref_book1},
-\cite{ref_article1,ref_book1,ref_proc1,ref_url1}.
+\subsubsection{SensorAgent — Agente Reativo de Periferia}
+O SensorAgent atua como controlador lógico da camada física. É responsável por receber os dados enviados pelo ApiAgent, validar a ontologia e reencaminhar a informação para o CoordinatorAgent. Funciona como um intermediário entre a aquisição sensorial e o processamento cognitivo, isolando falhas e garantindo que apenas dados válidos entram no pipeline.
+Behaviours:
+\begin{itemize}
+\item ReceiveBehaviourSensorAgent (CyclicBehaviour) - escuta continuamente mensagens FIPA ACL, valida ontologia e responde com agree ou failure.
+\item RequestBehaviourSendToCoordinator (OneShotBehaviour) - criado dinamicamente para enviar os dados ao CoordinatorAgent sem bloquear o ciclo principal, utilizando asyncio.Future.
+\end{itemize}
+Este agente assegura que o sistema permanece responsivo mesmo sob carga elevada.
 
-\begin{credits}
-\subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
-used for general acknowledgments, for example: This study was funded
-by X (grant number Y).
+\subsubsection{CoordinatorAgent — Agente Orquestrador}
+O CoordinatorAgent é o núcleo lógico do sistema. Não executa cálculos complexos; a sua inteligência reside na capacidade de gerir o pipeline sequencial e delegar tarefas aos agentes especialistas. Atua como uma máquina de estados distribuída, garantindo que cada fase ocorre na ordem correta (HAR → Contexto → Persistência).
+Behaviours:
+\begin{itemize}
+\item ReceiveBehaviourCoordinatorAgent (CyclicBehaviour) - recebe dados do SensorAgent e inicia o pipeline.
+\item RequestBehaviourRequestFromHAR (OneShotBehaviour) - delega a fase de reconhecimento de atividade.
+\item RequestBehaviourRequestFromEnvironment (OneShotBehaviour) - solicita contexto social/ambiental.
+\item RequestBehaviourRequestToDatabase (OneShotBehaviour) - envia os dados consolidados para persistência.
+\end{itemize}
+Cada fase utiliza asyncio.Future para suspender a execução sem bloquear o agente, permitindo que o Coordinator continue a receber outras mensagens.
 
-\subsubsection{\discintname}
-It is now necessary to declare any competing interests or to specifically
-state that the authors have no competing interests. Please place the
-statement with a bold run-in heading in small font size beneath the
-(optional) acknowledgments\footnote{If EquinOCS, our proceedings submission
-system, is used, then the disclaimer can be provided directly in the system.},
-for example: The authors have no competing interests to declare that are
-relevant to the content of this article. Or: Author A has received research
-grants from Company W. Author B has received a speaker honorarium from
-Company X and owns stock in Company Y. Author C is a member of committee Z.
-\end{credits}
+\subsubsection{HARAgent — Agente Cognitivo (Human Activity Recognition)}
+O HARAgent é responsável pela interpretação dos sinais físicos e pela inferência da atividade do utilizador. Estimula o comportamento de um modelo de Machine Learning, transformando dados inerciais em semântica comportamental (ex.: “dançar”, “caminhar”, “parado”).
+Behaviours:
+\begin{itemize}
+\item ReceiveBehaviourHARAgent (CyclicBehaviour) - recebe pedidos do CoordinatorAgent, processa os dados e devolve um objeto CalculatedActivityData (Pydantic), garantindo validação de tipos e integridade semântica.
+\end{itemize}
+Este agente representa a camada cognitiva do sistema, podendo futuramente integrar modelos reais de HAR baseados em CNN/LSTM.
+
+\subsubsection{EnvironmentAgent — Agente de Contexto Social}
+O EnvironmentAgent complementa a interpretação da atividade com variáveis externas, como música em reprodução, densidade de pessoas na sala ou métricas sociais derivadas de preferências do utilizador. Este agente permite que o sistema evolua de uma monitorização puramente física para uma abordagem holística de envelhecimento ativo.
+Behaviours:
+\begin{itemize}
+\item ReceiveBehaviourEnvironmentAgent (CyclicBehaviour) - recebe o resultado do HARAgent e produz um objeto EnvironmentData, incluindo listas de relacionamento social e metadados ambientais.
+\end{itemize}
+Este agente aproxima o Dance4Life de arquiteturas modernas que integram suporte social e cognitivo.
+
+\subsubsection{DatabaseAgent — Agente de Persistência e Recursos}
+O DatabaseAgent isola todas as operações de input/output e comunicação com a infraestrutura externa (Firebase Firestore). Esta separação garante que falhas de rede ou problemas de persistência não afetam a lógica cognitiva dos restantes agentes.
+Behaviours:
+\begin{itemize}
+\item ReceiveBehaviourDatabaseAgent (CyclicBehaviour) - recebe pedidos de escrita, valida a ontologia e executa a operação save\_activity, devolvendo inform ou failure.
+\end{itemize}
+Este agente assegura atomicidade, rastreabilidade e consistência dos dados armazenados.
+
+\begin{table}
+\centering
+\caption{Síntese dos agentes, behaviours e tipos.}\label{agentes_behaviours}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Agente & Behaviour Principal & Tipo & Ontologia Suportada\\
+\hline
+ApiAgent & RequestBehaviourSendSensorActivityToSensor & OneShotBehaviour & sensor\_activity\\
+SensorAgent & ReceiveBehaviourSensorAgent RequestBehaviourSendToCoordinator & Cyclic + OneShot & sensor\_activity\\
+CoordinatorAgent & ReceiveBehaviourCoordinatorAgent RequestBehaviourRequest{HAR,Env,DB} & Cyclic + 3x OneShot & sensor\_activity\\
+HARAgent & ReceiveBehaviourHARAgent & CyclicBehaviour & sensor\_activity\\
+EnvironmentAgent & ReceiveBehaviourEnvironmentAgent & CyclicBehaviour & sensor\_activity\\
+DatabaseAgent & ReceiveBehaviourDatabaseAgent & CyclicBehaviour & sensor\_activity\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Protocolos de Comunicação e Performativas FIPA-ACL}
+A comunicação entre agentes no Dance4Life segue as normas definidas pela FIPA ACL (Foundation for Intelligent Physical Agents – Agent Communication Language), garantindo interoperabilidade, previsibilidade e rastreabilidade em todas as interações. Esta escolha alinha o sistema com plataformas consolidadas como JADE, THOMAS e TeleCARE, que demonstram a importância de protocolos formais em ecossistemas distribuídos aplicados à saúde e ao envelhecimento ativo.
+A adoção de FIPA ACL permite que cada mensagem trocada entre agentes seja semanticamente explícita, contendo metadados essenciais como performative, ontology, conversation-id e reply-with. Esta estruturação é relevante em domínios geriátricos, onde a ambiguidade comunicacional pode comprometer a integridade dos dados clínicos ou gerar interpretações incorretas de sinais fisiológicos.
+
+\subsubsection{Modelo de Interação}
+FIPA Request Interaction Protocol: Todas as interações ponto a ponto no Dance4Life seguem o FIPA Request Interaction Protocol, composto por três fases fundamentais:
+
+\begin{enumerate}
+\item Iniciação (request): O agente emissor (por exemplo, o ApiAgent ou o CoordinatorAgent) inicia a interação enviando uma mensagem com performativa request. Esta mensagem inclui:
+    \begin{itemize}
+        \item ontologia partilhada ("sensor\_activity")
+        \item conversation-id único (gerado via uuid4())
+        \item objeto estruturado serializado com jsonpickle
+    \end{itemize}
+A utilização de objetos Pydantic garante type safety e evita ambiguidades nas mensagens textuais.
+\item Avaliação (agree ou failure): O agente recetor valida a ontologia e a estrutura da mensagem.
+    \begin{itemize}
+        \item Se a ontologia for reconhecida, responde com agree, comprometendo se a processar o pedido.
+        \item Se a ontologia for inválida ou a mensagem estiver mal formada, responde imediatamente com failure, evitando processamento desnecessário e preservando a integridade do pipeline.
+    \end{itemize}
+Este mecanismo reflete boas práticas observadas em arquiteturas como SAAA, que enfatizam segurança, validação e governança de dados.
+\item Resolução (inform ou failure): Após o processamento assíncrono, o agente recetor envia:
+    \begin{itemize}
+        \item inform, contendo o resultado estruturado (ex.: CalculatedActivityData, EnvironmentData), ou
+        \item failure, caso ocorra erro, timeout ou inconsistência.
+    \end{itemize}
+Esta fase encerra a conversação, permitindo ao emissor prosseguir para a etapa seguinte do pipeline.
+\end{enumerate}
+
+\subsubsection{Gestão de Conversações e Isolamento de Sessões}
+Para garantir isolamento entre múltiplas interações concorrentes, cada ciclo de comunicação é identificado por um conversation-id único. Todos os agentes filtram mensagens recebidas com base neste identificador, assegurando que:
+\begin{itemize}
+\item respostas não se misturam entre pipelines distintos
+\item o CoordinatorAgent consegue gerir múltiplas sessões em paralelo
+\item o sistema permanece determinístico mesmo sob carga elevada
+\end{itemize}
+Este mecanismo é inspirado no modelo de conversation tracking utilizado em JADE e THOMAS.
+
+\subsubsection{Troca de Dados Estruturados}
+Embora o protocolo XMPP utilizado pelo SPADE contenha apenas texto, o Dance4Life implementa um mecanismo de comunicação orientada a objetos:
+\begin{itemize}
+\item Pydantic define modelos de dados com validação automática;
+\item jsonpickle serializa e desserializa objetos complexos para JSON;
+\item os agentes acedem diretamente aos atributos dos objetos, evitando parsing manual.
+\end{itemize}
+Este paradigma reduz erros semânticos, aumenta a legibilidade e aproxima o sistema de arquiteturas modernas baseadas em ontologias formais.
+
+\begin{table}
+\caption{Performativas FIPA-ACL utilizadas no sistema.}\label{performativas_fipa}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Performativa & Direção & Significado & Quando enviada\\
+\hline
+request & Emissor → Recetor & Pedido de execução de tarefa & Início de qualquer interação\\
+agree & Recetor → Emissor & Ontologia reconhecida; processamento iniciado & Após validação da ontologia\\
+inform & Recetor → Emissor & Resultado positivo com dados estruturados & Após execução bem-sucedida\\
+failure & Recetor → Emissor & Erro, ontologia inválida ou timeout & Em qualquer ponto de falha\\
+\hline
+\end{tabular}
+\end{table}
+
+A implementação dos protocolos FIPA ACL confere ao Dance4Life um nível elevado de formalismo comunicacional, essencial para aplicações sensíveis como o envelhecimento ativo. A combinação de ontologias validadas, isolamento de conversações e troca de objetos estruturados garante robustez, escalabilidade e alinhamento com o estado da arte em Sistemas Multiagente.
+
+\section{Implementação e Funcionamento (Baseado em SPADE)}
+A implementação do sistema Dance4Life foi realizada integralmente em Python, recorrendo à framework SPADE (Smart Python Agent Development Environment), que fornece uma infraestrutura robusta para a criação de agentes assíncronos baseados em XMPP e compatíveis com os protocolos FIPA ACL. Esta secção descreve a transposição da arquitetura conceptual para código executável, destacando os mecanismos de concorrência, isolamento de conversações, troca de objetos estruturados e orquestração sequencial do pipeline.
+A escolha da SPADE justifica se pela sua aderência nativa ao modelo de agentes proposto no estado da arte, nomeadamente pela utilização de comportamentos (Behaviours), suporte a comunicação FIPA ACL e integração transparente com o motor assíncrono asyncio. Estas características permitem construir um ecossistema distribuído, modular e responsivo, adequado às exigências do domínio do envelhecimento ativo, onde a fiabilidade e a rastreabilidade são essenciais.
+
+\subsection{Fluxo de Dados — Pipeline Sequencial Assíncrono}
+Embora os Sistemas Multiagente sejam inerentemente concorrentes, o domínio do Dance4Life exige um pipeline sequencial, devido às dependências lógicas entre as fases de processamento. A atividade física deve ser reconhecida antes de ser contextualizada, e ambos os resultados devem ser validados antes de serem persistidos na base de dados. Assim, o CoordinatorAgent implementa uma máquina de estados distribuída que executa três fases ordenadas:
+\begin{itemize}
+\item Interpretação (HARAgent)
+\item Contextualização (EnvironmentAgent)
+\item Persistência (DatabaseAgent)
+\end{itemize}
+Para evitar bloqueios no event loop do agente, cada fase utiliza objetos asyncio.Future, permitindo suspender a execução local enquanto se aguarda a resposta remota, sem comprometer a capacidade do agente de receber outras mensagens.
+Este mecanismo garante que o sistema permanece responsivo, mesmo em cenários com múltiplas conversações simultâneas, aproximando o comportamento do Dance4Life de arquiteturas como THOMAS e PANGEA, que privilegiam escalabilidade e processamento distribuído.
+
+**DIAGRAMA**
+
+\subsection{Gestão de Conversações e Isolamento de Mensagens}
+Para garantir o correto isolamento de mensagens num ambiente de alta concorrência, cada conversa é identificada por um conversation-id único gerado com uuid4() pelo ApiAgent. Todos os agentes filtram as mensagens recebidas com base neste identificador:
+\begin{lstlisting}
+# Geração de conversation-id único (ApiAgent)
+self.conversation_id = str(uuid.uuid4())
+
+# Filtragem de mensagens por conversation-id (todos os agentes)
+if reply.get_metadata('conversation-id') != self.conversation_id:
+    continue  # ignora mensagens de outras conversas
+\end{lstlisting}
+
+Adicionalmente, cada behaviour de delegação utiliza asyncio.Future para suspender a execução sem bloquear a thread principal do agente:
+\begin{lstlisting}
+# CoordinatorAgent -- delegação com Future
+future_har = asyncio.get_running_loop().create_future()
+behaviour_har = self.agent.RequestBehaviourRequestFromHAR(
+    ontology='sensor_activity', data=data,
+    receiver='har_agent@localhost',
+    conversation_id=conv_id, future=future_har
+)
+self.agent.add_behaviour(behaviour_har)
+result_ok_har = await future_har  # suspende até resolução
+\end{lstlisting}
+
+\subsection{Troca de Mensagens Baseada em Objetos (Pydantic + Jsonpickle)}
+A arquitetura implementada não utiliza a passagem de texto simples no corpo das mensagens (o parâmetro body das mensagens FIPA-ACL no SPADE). O envio de strings brutas introduz fragilidades na extração de dados (parsing) e dificulta a manutenção do código em ecossistemas heterogéneos.
+Para colmatar esta limitação arquitetural do protocolo XMPP (que apenas transporta cadeias de caracteres), o sistema tira partido de duas bibliotecas complementares para implementar um mecanismo avançado de transferência de objetos (Data Transfer Objects):
+\begin{itemize}
+\item Estruturação com Pydantic: Os dados processados pelos agentes especialistas são modelados através de classes que herdam de pydantic.BaseModel. O HARAgent analisa e devolve o objeto complexo CalculatedActivityData (que valida tipos de dados para atividade, interesse e vetores temporais minuciosos). Simultaneamente, o EnvironmentAgent lida com a classe EnvironmentData, englobando metadados como musica\_id e matrizes socioculturais como a matching\_list. Esta abordagem assegura type safety nativo.
+\item Serialização e Desserialização com Jsonpickle: No momento de envio do request ou inform, o emissor converte instantaneamente as instâncias das classes em representações JSON serializadas (jsonpickle.encode(data)). No lado do recetor, o corpo da mensagem XMPP é descodificado na sua forma original (jsonpickle.decode(msg.body)), permitindo o acesso imediato e orientado a objetos aos atributos das classes (ex: data.utilizador\_id).
+\end{itemize}
+
+Este paradigma de comunicação orientada a objetos aumenta a robustez, a type safety e a legibilidade da infraestrutura, mitigando falhas na interpretação semântica da informação partilhada na rede.
+O diagrama de classes UML a seguir representa a estrutura de dados criada e o fluxo de serialização para o isolamento no corpo das mensagens SPADE:
+
+**DIAGRAMA**
+
+\subsection{Validação de Ontologias}
+Cada agente recetor mantém uma lista local de ontologias suportadas (ontology\_list). Antes de iniciar qualquer processamento, o agente verifica se a ontologia da mensagem recebida está nessa lista. Caso contrário, responde imediatamente com failure, libertando o emissor e evitando processamento desnecessário:
+\begin{lstlisting}
+ontology_list = ['sensor_activity']
+
+if ontology not in ontology_list:
+    failure = msg.make_reply()
+    failure.set_metadata('performative', 'failure')
+    failure.body = f"Ontology '{ontology}' não suportada"
+    await self.send(failure)
+    return
+\end{lstlisting}
+
+\subsection{Estrutura de Ficheiros do Projeto}
+O projeto está organizado nos seguintes módulos principais:
+\begin{table}
+\caption{Estrutura de ficheiros do projeto.}\label{estrutura_ficheiros}
+\begin{tabular}{|l|l|}
+\hline
+Ficheiro & Conteúdo / Responsabilidade\\
+\hline
+api\_agent.py & ApiAgent — trigger externo, geração de conversation-id\\
+sensor\_agent.py & SensorAgent — gateway da camada física, reencaminhamento para o Coordenador\\
+coordinator\_agent.py & CoordinatorAgent — orquestrador do pipeline sequencial em 3 fases\\
+har\_agent.py & HARAgent — reconhecimento de atividade, resposta com CalculatedActivityData\\
+environment\_agent.py & EnvironmentAgent — contexto social/ambiental, resposta com EnvironmentData\\
+database\_agent.py & DatabaseAgent — persistência atómica via Firebase (save\_activity)\\
+base\_agent.py & BaseAgent — utilitários partilhados (build\_request, wait\_for\_reply)\\
+model/data\_model.py & Modelos pydantic: CalculatedActivityData, EnvironmentData\\
+services/firebase\_service.py & Integração com Firebase Firestore\\
+utilities/helper.py & Funções auxiliares (e.g., generate\_mock\_matching\_list)\\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Resultados e Análise Crítica}
+A implementação do protótipo Dance4Life permitiu validar a arquitetura proposta e demonstrar a viabilidade técnica de um sistema multiagente distribuído para o domínio do envelhecimento ativo. Os testes realizados evidenciaram o correto funcionamento do pipeline sequencial, a robustez da comunicação FIPA ACL e a eficácia da troca de objetos estruturados entre agentes. No entanto, a análise crítica revela também limitações arquiteturais e operacionais que devem ser consideradas para evoluções futuras.
+
+\subsection{Sumário do Funcionamento e Testes}
+Durante as sessões de teste e execução, o comportamento emergente da rede de agentes confirmou a conformidade com as regras de negócio desenhadas em Agent UML. Verificaram-se os seguintes resultados práticos:
+
+\begin{itemize}
+\item Integração Conversacional FIPA-ACL: A adoção das performativas padronizadas revelou-se robusta. O mecanismo de handshake (agree antes do processamento pesado + inform no final) forneceu garantias de entrega e evitou situações de bloqueio silencioso. Sempre que foi injetada uma mensagem com ontologia desconhecida, o sistema respondeu instantaneamente com failure, evidenciando a correta validação de domínio.
+\item Transação de Dados Complexos: A utilização da triada pydantic + objetos nativos + jsonpickle funcionou com qualidade. A capacidade de envolver variáveis heterogéneas (listas de emparelhamento geradas pelo EnvironmentAgent, marcadores temporais do HARAgent) e transitá-las entre processos sem recorrer à manipulação de strings provou ser eficiente e isenta de perdas semânticas.
+\item Gestão de Sessão via Identificadores: A geração de conversation-id único pela ApiAgent (uuid4()) garantiu o correto isolamento de mensagens. O CoordinatorAgent geriu múltiplas interações filtrando apenas as respostas associadas ao contexto em execução.
+\item Rastreabilidade do Fluxo: Os logs de execução revelaram o fluxo completo e ordenado das performativas entre todos os agentes, confirmando a sequência: request → agree → (processamento) → inform/failure em cada par de agentes.
+\item Integração com Firebase: O DatabaseAgent integrou com sucesso o serviço firebase\_service para persistência atómica dos dados de atividade processados, completando o ciclo de vida da informação desde a periferia até à cloud.
+\end{itemize}
+
+\subsection{Análise Crítica — Estrangulamento Sequencial}
+Apesar dos resultados positivos, a análise crítica revela limitações estruturais que devem ser abordadas para garantir escalabilidade, resiliência e extensibilidade do sistema.
+
+\begin{enumerate}
+\item Restrição sequencial no CoordinatorAgent
+A limitação mais significativa reside no facto de o pipeline ser rigidamente linear:
+    \begin{lstlisting}
+    await future_har -> await future_env -> await future_db
+    \end{lstlisting}
+Isto implica que:
+    \begin{itemize}
+    \item o tempo total de resposta é a soma das três fases
+    \item o CoordinatorAgent não pode processar múltiplos pipelines em paralelo
+    \item o sistema não escala bem para múltiplos utilizadores ou múltiplos dispositivos
+    \end{itemize}
+Embora adequado para um protótipo, este modelo não é sustentável em cenários reais de envelhecimento ativo, onde dezenas de eventos podem ocorrer simultaneamente.
+
+\item Ausência de Paralelismo entre Agentes Especialistas
+O HARAgent e o EnvironmentAgent são independentes, mas o sistema não explora essa independência. Num cenário real, seria possível:
+    \begin{itemize}
+    \item processar HAR e contexto em paralelo
+    \item aplicar asyncio.gather para reduzir latência
+    \item permitir que o Coordinator gere múltiplas conversações simultaneamente
+    \end{itemize}
+
+\item Falta de Descoberta Dinâmica de Serviços
+Atualmente, todos os agentes estão rigidamente configurados. Isto contrasta com arquiteturas modernas como THOMAS, que utilizam um Directory Facilitator para:
+    \begin{itemize}
+    \item registar agentes dinamicamente
+    \item descobrir serviços em tempo real
+    \item substituir agentes sem alterar o código do coordenador
+    \end{itemize}
+A ausência deste mecanismo reduz a flexibilidade e dificulta a evolução do sistema.
+
+\item Dependência de um Único Ponto de Falha
+O CoordinatorAgent é um single point of failure. Se falhar:
+    \begin{itemize}
+    \item o pipeline colapsa;
+    \item nenhum agente consegue completar o ciclo de processamento;
+    \item o sistema perde resiliência.
+    \end{itemize}
+
+Arquiteturas distribuídas modernas tendem a evitar este tipo de centralização.
+
+\item Simulação de Dados em Vez de Modelos Reais
+Embora adequado para um protótipo, o HARAgent e o EnvironmentAgent utilizam lógica simulada. Para aplicações reais, seria necessário:
+\begin{itemize}
+\item integrar modelos de HAR baseados em CNN/LSTM;
+\item incorporar sensores reais;
+\item utilizar dados fisiológicos e sociais autênticos.
+\end{itemize}
+\end{enumerate}
+
+O protótipo Dance4Life demonstra que um SMA baseado em SPADE é tecnicamente viável para o domínio do envelhecimento ativo. A arquitetura é modular, clara e extensível, e a implementação respeita rigorosamente as normas FIPA ACL. No entanto, a escalabilidade, a resiliência e a autonomia do sistema podem ser melhoradas através de paralelismo, descoberta dinâmica de serviços e substituição do coordenador central por mecanismos mais distribuídos.
+
+\section{Conclusões e Recomendações para Melhoria}
+\subsection{Conclusões}
+O desenvolvimento do protótipo Dance4Life permitiu demonstrar a viabilidade técnica e conceptual de um SMA aplicado ao domínio do envelhecimento ativo. A arquitetura distribuída concebida - composta por agentes especializados, comunicação FIPA ACL e troca de objetos estruturados - revelou se adequada para integrar dados heterogéneos, processá los de forma sequencial e garantir rastreabilidade e coerência em todas as fases do pipeline.
+A implementação em SPADE validou a capacidade dos agentes para operar de forma assíncrona, modular e isolada, refletindo princípios observados em arquiteturas de referência como JADE, PANGEA e THOMAS. O CoordinatorAgent demonstrou ser eficaz na formulação do fluxo de dados, assegurando que cada etapa (HAR, contexto social e persistência) ocorre de forma ordenada e consistente. A utilização de Pydantic e jsonpickle permitiu uma comunicação orientada a objetos robusta, evitando ambiguidades semânticas e facilitando a evolução futura do sistema.
+Do ponto de vista funcional, o protótipo cumpriu todos os requisitos definidos:
+\begin{itemize}
+\item o pipeline executou se corretamente;
+\item as ontologias foram validadas;
+\item as conversações foram isoladas;
+\item os dados foram persistidos com sucesso;
+\item e o sistema manteve responsividade mesmo sob múltiplas interações.
+\end{itemize}
+Em síntese, o Dance4Life demonstra que SMA são uma abordagem promissora para apoiar o envelhecimento ativo, permitindo integrar monitorização física, contexto social e persistência de dados num ecossistema distribuído, modular e extensível.
+
+\subsection{Recomendações e Trabalho Futuro}
+\subsubsection{Paralelismo de Comportamentos e Otimização Assíncrona}
+Para mitigar a latência acumulada no CoordinatorAgent, o processamento sequencial deve evoluir para um paradigma concorrente. Utilizando as primitivas avançadas do asyncio, o Coordenador poderá instanciar e aguardar pelos Futures do HARAgent e do EnvironmentAgent em simultâneo:
+\begin{lstlisting}
+# Proposta: execução paralela com asyncio.gather
+future_har = asyncio.get_running_loop().create_future()
+future_env = asyncio.get_running_loop().create_future()
+
+self.agent.add_behaviour(RequestBehaviourRequestFromHAR(
+    ..., future=future_har))
+self.agent.add_behaviour(RequestBehaviourRequestFromEnvironment(
+    ..., future=future_env))
+
+# Aguarda ambos em paralelo
+result_ok_har, result_ok_env = await asyncio.gather(future_har, future_env)
+
+# Apenas a fase de persistência mantém-se sequencial
+if result_ok_har and result_ok_env:
+    result_ok_db = await future_db
+\end{lstlisting}
+
+Esta abordagem reduziria o tempo de resposta do sistema quase a metade, dado que a abstração de contexto social não tem de esperar pelo cálculo de atividade física. Apenas a etapa final (chamada ao DatabaseAgent) se manteria estritamente sequencial.
+\subsubsection{Adição de Novos Agentes e Descoberta Dinâmica}
+A infraestrutura atual recorre a endereços estáticos (hardcoded, e.g., \texttt{har\_agent@localhost}). Em trabalhos futuros, o sistema deve implementar mecanismos de Serviço de Diretório (Directory Facilitator ou Service Facilitator), permitindo que os agentes se registem dinamicamente e que o Coordenador descubra o serviço adequado em tempo de execução.
+Além disso, a arquitetura ganharia robustez com a inclusão de dois novos agentes:
+\begin{itemize}
+    \item Security Agent: Para auditoria de acessos e monitorização contínua da frequência cardíaca, com autonomia para interromper sessões de dança em caso de fadiga detetada.
+    \item Feedback Agent: Responsável por interagir de volta com o utilizador de forma proativa (e.g., recomendar uma música com base nos dados guardados), fechando o ciclo de recomendação inteligente.
+\end{itemize}
+
+\subsubsection{Segurança de Dados e Edge Computing}
+Considerando a sensibilidade clínica e demográfica dos dados gerados, é necessário o reforço da privacidade em conformidade com o RGPD. O desenvolvimento futuro deve englobar:
+\begin{itemize}
+    \item Edge Computing: Transição do processamento cognitivo (modelos de ML emulados no HAR) para o próprio dispositivo do utilizador, garantindo que apenas parâmetros anonimizados, e não sinais biométricos brutos, viajam pela rede XMPP.
+    \item Encriptação end-to-end: A comunicação deverá incorporar encriptação em todos os behaviours de rede.
+    \item Aprendizagem Colaborativa Distribuída: Implementação de Federated Learning, onde os agentes partilham apenas os parâmetros do modelo, preservando a privacidade dos dados brutos.
+\end{itemize}
+
+\subsubsection{Melhorias de Código Identificadas}
+Na análise ao código existente, foram ainda identificadas as seguintes melhorias pontuais de implementação:
+\begin{itemize}
+    \item BaseAgent: O método request\_and\_wait encontra-se comentado. A sua reativação e utilização sistemática pelos agentes reduziria significativamente a duplicação de código de envio e receção de mensagens.
+    \item SensorAgent: A verificação \texttt{if reply and reply.get\_metadata("conversation-id") != self.conversation\_id: continue} deveria preceder a verificação de \texttt{if not reply}, como já implementado no CoordinatorAgent.
+    \item Deduplicação dos \texttt{RequestBehaviour}: Os três \texttt{RequestBehaviour} do CoordinatorAgent (HAR, Environment, Database) são quase idênticos. Poderiam ser refatorados num único behaviour parametrizável, reduzindo a duplicação de código.
+\end{itemize}
+
+O Dance4Life constitui uma prova de conceito sólida que demonstra o potencial dos Sistemas Multiagente para apoiar o envelhecimento ativo. A arquitetura é clara, modular e extensível, e a implementação em SPADE valida a capacidade dos agentes para operar de forma distribuída e assíncrona. As recomendações apresentadas fornecem um roteiro concreto para transformar o protótipo num sistema mais escalável, inteligente e alinhado com as necessidades reais da população sénior.
+
 %
 % ---- Bibliography ----
 %
@@ -153,24 +486,61 @@ Company X and owns stock in Company Y. Author C is a member of committee Z.
 % \bibliographystyle{splncs04}
 % \bibliography{mybibliography}
 %
-\begin{thebibliography}{8}
-\bibitem{ref_article1}
-Author, F.: Article title. Journal \textbf{2}(5), 99--110 (2016)
+\begin{thebibliography}{18}
 
-\bibitem{ref_lncs1}
-Author, F., Author, S.: Title of a proceedings paper. In: Editor,
-F., Editor, S. (eds.) CONFERENCE 2016, LNCS, vol. 9999, pp. 1--13.
-Springer, Heidelberg (2016). \doi{10.10007/1234567890}
+\bibitem{bugaychenko2013}
+Bugaychenko, D., Dzuba, A.: Musical Recommendations and Personalization in a Social Network. In: Proc. RecSys '13, pp. 273--280. ACM (2013)
 
-\bibitem{ref_book1}
-Author, F., Author, S., Author, T.: Book title. 2nd edn. Publisher,
-Location (1999)
+\bibitem{camarinha2002}
+Camarinha-Matos, L.M., Castolo, O., Rosas, J.: A Multi-agent Based Platform for Virtual Communities in Elderly Care. In: IEEE ETFA (2002/2003)
 
-\bibitem{ref_proc1}
-Author, A.-B.: Contribution title. In: 9th International Proceedings
-on Proceedings, pp. 1--2. Publisher, Location (2010)
+\bibitem{crista2025}
+Crista, V., Martinho, D.V., Marreiros, G.: Chat4Elderly: A Multi-Agent System for Personalized Wellness Using Generative AI and Wearable Technology. In: Proc. AAMAS 2025
 
-\bibitem{ref_url1}
-LNCS Homepage, \url{http://www.springer.com/lncs}, last accessed 2023/10/25
+\bibitem{esmaeili2023}
+Esmaeili, A., Ghorrati, Z., Matson, E.T.: Distributed Agent-Based Collaborative Learning in Cross-Individual Wearable Sensor-Based Human Activity Recognition. arXiv:2311.04236 (2023)
+
+\bibitem{ferrimolla2025}
+Ferri-Molla, I., Linares-Pellicer, J., et al.: Multi-Agent AI System for Adaptive Cognitive Training in Elderly Care. In: Proc. ICAART 2025
+
+\bibitem{fraile2009}
+Fraile, J.A., Bajo, J., Corchado, J.M.: Multi-Agent Architecture for Dependent Environments. Inteligencia Artificial \textbf{13}(41) (2009)
+
+\bibitem{frailenieto2010}
+Fraile Nieto, J.A., et al.: The THOMAS Architecture: A Case Study in Home Care Scenarios. Springer (2010)
+
+\bibitem{humayun2022}
+Humayun, M., Jhanjhi, N.Z., et al.: Agent-Based Medical Health Monitoring System. Sensors \textbf{22}(8), 2820 (2022)
+
+\bibitem{ivascu2021}
+Iva\c{s}cu, T., Negru, V.: Activity-Aware Vital Sign Monitoring Based on a Multi-Agent Architecture. Sensors \textbf{21}(12), 4181 (2021)
+
+\bibitem{mendes2017}
+Mendes, S., Queiroz, J., Leit\~{a}o, P.: Data Driven Multi-agent m-Health System to Characterize the Daily Activities of Elderly People. In: Proc. CISTI 2017
+
+\bibitem{ozkara2022}
+\"{O}zkara, M., Turan, M.: Personalized News Recommendation System. Journal of Technology and Applied Sciences (2022)
+
+\bibitem{paraschiv2026}
+Paraschiv, E.A., Vevera, A.V., et al.: Towards Trustworthy AI Agents in Geriatric Medicine. Future Internet \textbf{18}, 75 (2026)
+
+\bibitem{sanchezsblas2021}
+S\'{a}nchez San Blas, H., Mendes, A.S., et al.: A Multi-agent System for Data Fusion Techniques Applied to the IoT Enabling Physical Rehabilitation Monitoring. Applied Sciences \textbf{11}(1), 331 (2021)
+
+\bibitem{shakshuki2015}
+Shakshuki, E., Reid, M.: Multi-Agent System Applications in Healthcare. Procedia Computer Science \textbf{52}, 252--261 (2015)
+
+\bibitem{teixeira2021}
+Teixeira, E., Fonseca, H., et al.: Wearable Devices for Physical Activity and Healthcare Monitoring in Elderly People. Geriatrics \textbf{6}(2), 38 (2021)
+
+\bibitem{vargemidis2020}
+Vargemidis, D., Gerling, K., et al.: Wearable Physical Activity-Tracking Systems for Older Adults. ACM Trans. Comput. Healthcare \textbf{1}(1) (2020)
+
+\bibitem{vemuri2021}
+Vemuri, A., Decker, K., et al.: Multi agent architecture for automated health coaching. Journal of Medical Systems \textbf{45}(11), 95 (2021)
+
+\bibitem{ziaoddini2025}
+Ziaoddini, K.: Socially Aware Music Recommendation: A Multi-Modal Graph Neural Networks for Collaborative Music Consumption. arXiv:2511.05497 (2025)
+
 \end{thebibliography}
 \end{document}

@@ -1,27 +1,65 @@
 \relax 
-\@writefile{toc}{\contentsline {title}{Contribution Title}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {title}{Dance4Life: Implementação de um Sistema Multiagente para a Promoção do Envelhecimento Ativo}{1}{}\protected@file@percent }
 \@writefile{toc}{\authcount {1}}
 \@writefile{toc}{\contentsline {author}{ Carlos da Mota Bergueira (pg11605@alunos.uminho.pt) \unskip \ \ignorespaces  Diego Jefferson Mendes Silva (pg59999@alunos.uminho.pt) \unskip \ \ignorespaces  Filipa Araújo Pereira (pg42201@alunos.uminho.pt) \unskip \ \ignorespaces  Rui Manuel Martins Marques Rodrigues (pg7942@alunos.uminho.pt) }{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {1}First Section}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}A Subsection Sample}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{Sample Heading (Third Level)}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Sample Heading (Fourth Level)}{1}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Table captions should be placed above the tables.}}{1}{}\protected@file@percent }
-\newlabel{tab1}{{1}{1}{}{table.1}{}}
-\citation{ref_article1}
-\citation{ref_lncs1}
-\citation{ref_book1}
-\citation{ref_proc1}
-\citation{ref_url1}
-\citation{ref_article1,ref_lncs1,ref_book1}
-\citation{ref_article1,ref_book1,ref_proc1,ref_url1}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces A figure caption is always placed below the illustration. Please note that short captions are centered, while long ones are justified by the macro package automatically.}}{2}{}\protected@file@percent }
-\newlabel{fig1}{{1}{2}{}{figure.1}{}}
-\@writefile{toc}{\contentsline {subsubsection}{Acknowledgments.}{2}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{Disclosure of Interests.}{2}{}\protected@file@percent }
-\bibcite{ref_article1}{1}
-\bibcite{ref_lncs1}{2}
-\bibcite{ref_book1}{3}
-\bibcite{ref_proc1}{4}
-\bibcite{ref_url1}{5}
-\gdef \@abspage@last{3}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introdução}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Domínio e Motivação}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Objetivos}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Estrutura do Relatório}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Conceção e Modelação do Sistema}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Arquitetura do Sistema Multiagente (Topologia)}{3}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Topologia e comunicações do sistema Dance4Life.}}{4}{}\protected@file@percent }
+\newlabel{agentes_comunicacao}{{1}{4}{}{table.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Definição dos Agentes}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Classes, Behaviours e Performativas}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{ApiAgent — Gateway / Interface Externa}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{SensorAgent — Agente Reativo de Periferia}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{CoordinatorAgent — Agente Orquestrador}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{HARAgent — Agente Cognitivo (Human Activity Recognition)}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{EnvironmentAgent — Agente de Contexto Social}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{DatabaseAgent — Agente de Persistência e Recursos}{6}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Síntese dos agentes, behaviours e tipos.}}{6}{}\protected@file@percent }
+\newlabel{agentes_behaviours}{{2}{6}{}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Protocolos de Comunicação e Performativas FIPA-ACL}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Modelo de Interação}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Gestão de Conversações e Isolamento de Sessões}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Troca de Dados Estruturados}{7}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Performativas FIPA-ACL utilizadas no sistema.}}{8}{}\protected@file@percent }
+\newlabel{performativas_fipa}{{3}{8}{}{table.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Implementação e Funcionamento (Baseado em SPADE)}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Fluxo de Dados — Pipeline Sequencial Assíncrono}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Gestão de Conversações e Isolamento de Mensagens}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Troca de Mensagens Baseada em Objetos (Pydantic + Jsonpickle)}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Validação de Ontologias}{10}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Estrutura de Ficheiros do Projeto}{10}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Estrutura de ficheiros do projeto.}}{11}{}\protected@file@percent }
+\newlabel{estrutura_ficheiros}{{4}{11}{}{table.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Resultados e Análise Crítica}{11}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Sumário do Funcionamento e Testes}{11}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Análise Crítica — Estrangulamento Sequencial}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusões e Recomendações para Melhoria}{13}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Conclusões}{13}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Recomendações e Trabalho Futuro}{14}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Paralelismo de Comportamentos e Otimização Assíncrona}{14}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Adição de Novos Agentes e Descoberta Dinâmica}{14}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Segurança de Dados e Edge Computing}{14}{}\protected@file@percent }
+\bibcite{bugaychenko2013}{1}
+\bibcite{camarinha2002}{2}
+\bibcite{crista2025}{3}
+\bibcite{esmaeili2023}{4}
+\bibcite{ferrimolla2025}{5}
+\bibcite{fraile2009}{6}
+\bibcite{frailenieto2010}{7}
+\@writefile{toc}{\contentsline {subsubsection}{Melhorias de Código Identificadas}{15}{}\protected@file@percent }
+\bibcite{humayun2022}{8}
+\bibcite{ivascu2021}{9}
+\bibcite{mendes2017}{10}
+\bibcite{ozkara2022}{11}
+\bibcite{paraschiv2026}{12}
+\bibcite{sanchezsblas2021}{13}
+\bibcite{shakshuki2015}{14}
+\bibcite{teixeira2021}{15}
+\bibcite{vargemidis2020}{16}
+\bibcite{vemuri2021}{17}
+\bibcite{ziaoddini2025}{18}
+\gdef \@abspage@last{16}
