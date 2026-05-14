@@ -3,7 +3,7 @@ package com.dance4life.core.utils
 object Constants {
     const val BASE_URL = "http://192.168.1.68:5000" //@TODO: Alterar IP
 
-    const val WEBSITE_URL = "http://192.168.1.68:8000"
+    const val WEBSITE_URL = "http://192.168.1.68:5500" //@TODO: Alterar IP 8000
 
     const val COLLECT_DATA = "/collect_data_activities"
 
