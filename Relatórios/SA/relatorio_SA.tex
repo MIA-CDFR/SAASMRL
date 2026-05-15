@@ -48,31 +48,31 @@ Rui Manuel Martins Marques Rodrigues (pg7942@alunos.uminho.pt)
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-Este artigo apresenta o Dance4Life, uma plataforma de sensorização e inteligência artificial desenvolvida no âmbito da unidade curricular de Sensorização e Ambiente do Mestrado em Inteligência Artificial. O sistema tem como objetivo promover o envelhecimento ativo através da dança, integrando dados meteorológicos (API OpenWeatherMap) com dados fisiológicos, inerciais e de localização recolhidos em dispositivos Android (smartphone e wearables). A arquitetura assenta em três pilares: um servidor Flask para ingestão e encaminhamento de dados, uma camada de agentes para processamento e persistência, e uma camada de visualização interativa com PowerBI e D3.js/Leaflet para análise exploratória. Em paralelo, os dados suportam o desenvolvimento de um agente de Aprendizagem por Reforço, treinado em ambiente simulado estocástico (\texttt{MovementEnv}) com algoritmos DQN e PPO, para otimização de intervenções personalizadas. O trabalho demonstra a viabilidade de uma plataforma distribuída, centrada no utilizador sénior, que combina contexto ambiental, segurança fisiológica e motivação social através da música e da dança.
+Este artigo apresenta o Dance4Life, uma plataforma de sensorização e inteligência artificial desenvolvida no âmbito da unidade curricular de Sensorização e Ambiente do Mestrado em Inteligência Artificial. O sistema tem como objetivo promover o envelhecimento ativo através da dança, integrando dados meteorológicos (API OpenWeatherMap) com dados fisiológicos, inerciais e de localização recolhidos em dispositivos Android (\textit{smartphones} e \textit{smartwatches}). A arquitetura assenta em três pilares: um servidor Web para ingestão e encaminhamento de dados, uma camada de agentes para processamento e persistência, e uma camada de visualização interativa com PowerBI, D3.js e Leaflet para análise exploratória. Em paralelo, os dados suportam o desenvolvimento de um agente de Aprendizagem por Reforço, treinado em ambiente simulado estocástico (\texttt{MovementEnv}) com algoritmos DQN (\textit{Deep Q Learning}) e PPO (\textit{Proximal Policy Optimization}), para otimização de intervenções personalizadas. O trabalho demonstra a viabilidade de uma plataforma distribuída, centrada no utilizador sénior, que combina contexto ambiental, segurança fisiológica e motivação social através da música e da dança.
 
-\keywords{Sensorização \and Dance4Life \and Envelhecimento Ativo \and Machine Learning \and HAR}
+\keywords{Sensorização \and Dance4Life \and Envelhecimento Ativo \and Machine Learning \and \textit{Human Activity Recognition}}
 \end{abstract}
 %
 %
 %
 \section{Introdução}
 O envelhecimento da população europeia constitui um dos maiores desafios sociais e de saúde pública do século XXI. Em Portugal, estima-se que, em 2050, mais de 35\% da população terá mais de 65 anos, tornando imperativa a adoção de soluções tecnológicas que promovam a autonomia, a atividade física e a integração social da população sénior.
-O Dance4Life surge como resposta a este desafio, propondo uma plataforma inteligente que combina sensorização ambiental e fisiológica com mecanismos de ludificação baseados na dança. O sistema é concebido para funcionar em dispositivos móveis (smartphones e smartwatches), processando dados localmente segundo o paradigma de Edge Computing, em conformidade com os princípios de Privacy by Design exigidos pelo RGPD.
+Este estudo pretende ser um contributo para resposta a este desafio, propondo uma plataforma inteligente que combina sensorização ambiental e fisiológica com mecanismos de ludificação baseados na dança. O sistema é concebido para funcionar em dispositivos móveis (\textit{smartphones} e \textit{smartwatches}), processando dados localmente segundo o paradigma de \textit{Edge Computing}, em conformidade com os princípios de \textit{Privacy by Design} exigidos pelo RGPD (Regime Geral de Proteção de Dados).
 Este relatório documenta a segunda fase do trabalho prático, focada na implementação da plataforma: a definição e implementação dos coletores de dados, o tratamento e visualização dos dados recolhidos, e a conceção do agente de Aprendizagem por Reforço. Complementarmente, apresenta-se uma proposta de modelo de negócio que enquadra a viabilidade da solução em contextos reais.
 O documento está organizado da seguinte forma: a Secção 2 descreve a arquitetura global do sistema e os domínios abordados; a Secção 3 detalha os sensores e os coletores de dados implementados; a Secção 4 apresenta a exploração e visualização dos dados; a Secção 5 descreve o agente de Aprendizagem por Reforço concebido; a Secção 6 analisa resultados e limitações; e a Secção 7 apresenta o modelo de negócio.
 
 \section{Domínios, Objetivos e Arquitetura}
 \subsection{Domínios Abordados}
-O Dance4Life opera na intersecção de três domínios principais:
-\subsubsection{Saúde e Bem-Estar Sénior} Monitorização da atividade física, frequência cardíaca e padrões de movimento, com o objetivo de promover o exercício seguro e personalizado.
-\subsubsection{Ambiente Urbano Inteligente} Integração de dados contextuais do ambiente, com foco nas condições meteorológicas e de localização.
-\subsubsection{Interação Social e Ludificação} Matching de utilizadores com perfis compatíveis (Dancing Match) e estímulos musicais adaptativos que transformam a monitorização passiva numa experiência ativa e motivadora.
+O Dance4Life opera na intersecção de três domínios principais:\\
+\textbf{Saúde e Bem-Estar Sénior} Monitorização da atividade física, frequência cardíaca e padrões de movimento, com o objetivo de promover o exercício seguro e personalizado.\\
+\textbf{Ambiente Urbano Inteligente} Integração de dados contextuais do ambiente, com foco nas condições meteorológicas e de localização.\\
+\textbf{Interação Social e Ludificação} \textit{Matching} de utilizadores com perfis compatíveis (\textit{Dancing Match}) e estímulos musicais adaptativos que transformam a monitorização passiva numa experiência ativa e motivadora.
 
 \subsection{Objetivos}
 Os objetivos da fase prática organizam-se em três níveis:
 \begin{enumerate}
-\item \textbf{Sensorização e recolha:} Implementar coletores de dados para sensores físicos e virtuais, integrando a API OpenWeatherMap e os sensores inerciais, fisiológicos e de localização de dispositivos Android (smartphone e Wear OS).
-\item \textbf{Análise e visualização:} Explorar, tratar e visualizar os dados recolhidos, aplicando técnicas de visualização interativa em D3.js e Leaflet para identificação de padrões temporais, geográficos e de participação social.
+\item \textbf{Sensorização e recolha:} Implementar coletores de dados para sensores físicos e virtuais, integrando a API OpenWeatherMap e os sensores inerciais, fisiológicos e de localização de dispositivos Android (\textit{smartphones} e \textit{smartwatches}).
+\item \textbf{Análise e visualização:} Explorar, tratar e visualizar os dados recolhidos, aplicando técnicas de visualização interativa em PowerBI, D3.js e Leaflet para identificação de padrões temporais, geográficos e de participação social.
 \item \textbf{Decisão inteligente:} Conceber e implementar um agente de Aprendizagem por Reforço para otimização da política de intervenção do sistema Dance4Life, equilibrando a promoção da atividade física com a prevenção de fadiga de alarme.
 \end{enumerate}
 
@@ -91,7 +91,7 @@ Por fim, a \textbf{camada de persistência e analítica} utiliza o Firebase como
 
 \begin{figure}[t]
 \centering
-\includesvg[width=\textwidth]{images/arquitetura}
+\includegraphics[width=\textwidth]{images/arquitetura_old.png}
 \caption{Arquitetura global do sistema Dance4Life (visão em camadas e fluxo de dados).} \label{arquitetura}
 \end{figure}
 

@@ -1,11 +1,11 @@
 # Fdb version 4
-["xdvipdfmx"] 1778801003.14927 "relatorio_SA.xdv" "relatorio_SA.pdf" "relatorio_SA" 1778801003.41336 0
-  "relatorio_SA.xdv" 1778801003.12456 80044 043ebdf96ca96a977f7f812f13ef867f "xelatex"
+["xdvipdfmx"] 1778879921.0237 "relatorio_SA.xdv" "relatorio_SA.pdf" "relatorio_SA" 1778879921.86916 0
+  "relatorio_SA.xdv" 1778879920.9699 68244 dddec576198e2bb4b4e523a41b3ed988 "xelatex"
   (generated)
   "relatorio_SA.pdf"
   (rewritten before read)
-["xelatex"] 1778801002.79617 "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/SA/relatorio_SA.tex" "relatorio_SA.xdv" "relatorio_SA" 1778801003.41272 0
-  "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/SA/relatorio_SA.tex" 1778800707.70092 41756 936716eec36748777bcc9754a305c4c5 ""
+["xelatex"] 1778879920.24737 "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/SA/relatorio_SA.tex" "relatorio_SA.xdv" "relatorio_SA" 1778879921.86738 0
+  "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/SA/relatorio_SA.tex" 1778879920.0362 42019 8f47501b8dbefeb07191f9a8b6aef8dc ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmmi6.tfm" 1136768653 1512 f21f83efb36853c0b70002322c1ab3ad ""
@@ -94,16 +94,14 @@
   "/usr/local/texlive/2026/texmf-dist/web2c/texmf.cnf" 1770478701 43630 e9fa012910491fe5ae08a72c3c2997a7 ""
   "/usr/local/texlive/2026/texmf-var/web2c/xetex/xelatex.fmt" 1774041148 5948559 1db49bf15858a732af7d952f30185331 ""
   "/usr/local/texlive/2026/texmf.cnf" 1772409725 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
-  "images/arquitetura.svg" 1778801002.36169 46836 9487208a7209a1d9e7c30b3488d30083 ""
+  "images/arquitetura_old.png" 1778707818.37033 90245 53530cadf2e53d47b62ee21c5a782e23 ""
   "images/diagrama-fluxo.png" 1778708277.73298 85285 20519b28de3ef6e902b52b9cfe61bf9d ""
   "images/heatmap-atividades.png" 1778708631.52593 20442 25d9eed6e6ab5ad17df885c53de414d3 ""
   "images/serie-temporal.png" 1778708508.91546 18687 b2b2415ce4a0b8e0463aff9a8d4f0081 ""
   "llncs.cls" 1706524644 43402 5fb5a2dc40571aa40f3d199c00cbb986 ""
-  "relatorio_SA.aux" 1778801003.12374 7932 4fc6d67c48f0120ac6006a2d2bf973aa "xelatex"
-  "relatorio_SA.out" 1778801003.12442 487 967e18769574db9ffb76b3ef8d64670f "xelatex"
-  "relatorio_SA.tex" 1778800707.70092 41756 936716eec36748777bcc9754a305c4c5 ""
-  "svg-inkscape/arquitetura_svg-tex.pdf" 1778800671.07937 18942 7a42d2eafbe03c5060e96f59bd7553b4 ""
-  "svg-inkscape/arquitetura_svg-tex.pdf_tex" 1778800671.07983 15026 164952a50b15d0271ca2466777ed3d01 ""
+  "relatorio_SA.aux" 1778879920.96821 7583 329739f237578ca4ed3d781036857fac "xelatex"
+  "relatorio_SA.out" 1778879920.96952 487 967e18769574db9ffb76b3ef8d64670f "xelatex"
+  "relatorio_SA.tex" 1778879920.0362 42019 8f47501b8dbefeb07191f9a8b6aef8dc ""
   (generated)
   "relatorio_SA.aux"
   "relatorio_SA.log"
