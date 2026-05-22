@@ -1,389 +1,96 @@
-acc,actionId,device_id,durationMinutes,encouragementMessage,hr,id,latitude,longitude,recommendation,timestamp,title,userId
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,05R1o9P9wKZ6Gr4waVm9,,,True,1776809126090.0,Low-intensity movement cue,9d789fd91804129f
-0.7425,,device-607,,,97.62,0AhmID8Grub6JQex1GKg,41.152903,-8.720756,True,,,
-0.4081,,device-276,,,135.62,0COoHPme1yoTZe7DH2Tq,41.397938,-7.914987,True,,,
-1.2102,,device-112,,,101.56,0OEq41I77Eoj90YC9rHh,42.045853,-8.08161,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,0WRzCR8aiWhIByLcm1fo,,,True,1776809151690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,0ad2HPTQtiOkrd0zKFEV,,,True,1776809128091.0,Low-intensity movement cue,9d789fd91804129f
-1.9086,,device-523,,,115.76,0hVRPSV6OOIh8VIuMr3r,41.824813,-8.31365,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,0o8tGNUDbD4tDWOusp22,,,True,1776809124495.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,0pooAYsbmLXekCxT3DuI,,,True,1776809117891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,0r7DZugap8uP7fOVz1r6,,,True,1776809130490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,12Ge1GXBvmJr5LSlpjXa,,,True,1776809145691.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,1IWkH3kRTCRalV1SgQnm,,,True,1776809146890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,1OTEcu2ekM2fxg4rXhMl,,,True,1776809117092.0,Low-intensity movement cue,9d789fd91804129f
-1.0883,,device-683,,,75.62,1WEtPcxJPAP9orsHXhw6,41.867324,-8.71725,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,1hIgunBZGckRtk5pMf6O,,,True,1776809148092.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,1snVt4CfL14cvaIArZSS,,,True,1776809108490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,28ure7RIQya5IHbbH84I,,,True,1776809121490.0,Low-intensity movement cue,9d789fd91804129f
-0.8878,,device-542,,,110.89,2dMDm27nIKDvgnYPxoe7,41.566533,-8.75715,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,2iCU0hINRXTrI6htxyRB,,,True,1776809147890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,2pf31qp7hAEXlV9H03B4,,,True,1776809151091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,2wImzM64NXFDrGryMrIv,,,True,1776809126691.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,3GQpsVCElHi5CSjOF8Au,,,True,1776809130091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,3Owwj96uc3GaXNtRnmCi,,,True,1776809103928.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,3YAYR893VGe38b5bejP8,,,True,1776809137490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,3gypuCjCUQpw0IRo45n0,,,True,1776809135890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,3kj0F6NIYiGtYLKjo1Pf,,,True,1776809104495.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,4fDYXwRldAbGsvTigpuM,,,True,1776809111091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,4ken56oANKXYgumT559E,,,True,1776809152890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,4s1GP3VUkEktPOjeVpfW,,,True,1776809132690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,52Eu8SPYhSoleVXyAEca,,,True,1776809117491.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,5NfDouyN1ogk0HgKxFXt,,,True,1776809122290.0,Low-intensity movement cue,9d789fd91804129f
-0.5149,,device-005,,,130.34,5T1qh5GBD35TxMKhzzfx,41.397106,-7.994025,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,5iqILzUYjOvor13MtmvL,,,True,1776809105690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,64zCfSGRIGuajBCneKXu,,,True,1776809138291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,67oWvllxf1lvBE2YxtsS,,,True,1776809153293.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,6HlbwDyKMGrhRw5wxVYL,,,True,1776809135490.0,Low-intensity movement cue,9d789fd91804129f
-1.3469,,device-876,,,92.82,6Xi6WgZBLXMoh6wMRs0n,41.752939,-7.999877,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,6bKYv42jsv20PKVbn8aJ,,,True,1776809106890.0,Low-intensity movement cue,9d789fd91804129f
-1.3698,,device-906,,,85.95,6jN6wp0Dg6NPmUtixVXe,41.838241,-8.638051,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,6oK5QIhpenBtWTHQrv1v,,,True,1776809157891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,6wNQNMTXnBIYEgqkNQJ9,,,True,1776809154091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,77CgAthqJEQ8mSe7clgG,,,True,1776809110490.0,Low-intensity movement cue,9d789fd91804129f
-1.5114,,device-732,,,100.84,78oX4yJUy4MuYlmqRuQV,42.148524,-8.635718,True,,,
-1.8304,,device-811,,,139.06,7DgIybcXJ34n1OKMnHUR,41.857422,-8.353669,True,,,
-0.8932,,device-742,,,96.98,7Gb2zzNQlJ6nJFljH5cw,42.130819,-7.907468,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,7Qubpf99xzmmm3BuOIRB,,,True,1776809128891.0,Low-intensity movement cue,9d789fd91804129f
-1.1671,,device-390,,,106.25,7bRhBAuTl3QONz9p7FBz,41.42215,-7.616828,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,7dT3qyWrRkW1Nf11G2eT,,,True,1776809123098.0,Low-intensity movement cue,9d789fd91804129f
-1.38,,device-226,,,81.08,7fxjgoOYZXbOFmOUfzF4,42.09804,-8.308749,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,7nee6GemnjqSM2wzHL48,,,True,1776809118895.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,7rDQ9rCiZSOYmhGuWtXA,,,True,1776809157291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,8BKTLfD0OrceXhpT1e0e,,,True,1776809146692.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,8GmyyFTyU5TrPwKouDs2,,,True,1776809104097.0,Low-intensity movement cue,9d789fd91804129f
-0.8084,,device-386,,,110.21,8NKkZYjSnEBkEiLwp0db,42.031995,-8.19665,True,,,
-0.7455,,device-275,,,134.33,8OppqqmshO0p5kdL2n2a,41.50295,-8.254235,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,8Sp1Bg0XVDznBDN4ekOj,,,True,1776809158091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,8Ve8upVcVnAvzLdxL5DX,,,True,1776809141491.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,8dK1WJM5sExN4hPoZHcq,,,True,1776809147492.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,8jFQ2wnZjPk5HBcyFUiJ,,,True,1776809153890.0,Low-intensity movement cue,9d789fd91804129f
-0.6794,,device-381,,,107.58,8kdiwKHjAGrxAOMrhryo,41.969236,-8.610816,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,8ng3zY4dTQzx9EcuHdLb,,,True,1776809151290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,8r94TRGLnbmWMborR0CL,,,True,1776809107290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,92NP4eiCehtszwYaDuxG,,,True,1776809128690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,942IcPROwkV9QpHdMWQ6,,,True,1776809132490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,9LnNd61D2H4AQdpSt6M6,,,True,1776809124092.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,9ZFgooD7pMIubP38sMcy,,,True,1776809149090.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,9qFzErZl6s66RcHcN3Ne,,,True,1776809134694.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ATGxnTFDkg7WCHLJGWz2,,,True,1776809158290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,AiIRCmv0CWredivOrs9o,,,True,1776809129693.0,Low-intensity movement cue,9d789fd91804129f
-0.4582,,device-583,,,72.45,B0srmDPzME1uOYSkR7gJ,42.039158,-8.188012,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,BKqM1vUkwtNPab0aiFg2,,,True,1776809125092.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,BZSJ83KMFYIpGRFHX9BW,,,True,1776809132890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,BcGoIgIMx830h0mXE4zh,,,True,1776809109291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,BfuxIoN2h9eGbYkkObkN,,,True,1776809111492.0,Low-intensity movement cue,9d789fd91804129f
-1.9803,,device-264,,,86.96,BnCaTqDA3OqYF0M4cW3I,41.704133,-8.086487,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Buu5ua6UnrWrtm8oRQsq,,,True,1776809129290.0,Low-intensity movement cue,9d789fd91804129f
-0.6728,,device-220,,,68.13,Bxw5xcM4ylRscgRB06dl,41.531082,-8.072114,True,,,
-0.4534,,device-929,,,136.13,C09CxqdJoavWi8WyD0eP,41.230169,-8.072111,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,CEFMzM5oVZvQvoTfs685,,,True,1776809134091.0,Low-intensity movement cue,9d789fd91804129f
-0.9335,,device-179,,,93.89,CHy20l7s7Mx110SqTh2H,41.060861,-7.787303,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,CIJiTdVk9EhRWPGTWbVW,,,True,1776809146096.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,CqbW5WuI2BbH9UnBi0Ds,,,True,1776809136490.0,Low-intensity movement cue,9d789fd91804129f
-0.1733,,device-485,,,94.2,D1FqUOsbLKod4QlFLw3B,42.415586,-8.60677,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,D9N7NWTjnZLFsZLS8toP,,,True,1776809129092.0,Low-intensity movement cue,9d789fd91804129f
-1.2717,,device-867,,,139.27,DGDI6ytKHAtp4yQMTAvP,41.819752,-7.704376,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,DVNSHvc7Sno0YsQxGvnt,,,True,1776809123492.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,DXYVboObmikVk2aISX5N,,,True,1776809128490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,DucJHHOS6CC5xh2n3t9V,,,True,1776809155692.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,EcRvZ4CBGb53QbYg2UWM,,,True,1776809114890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,EjBgimADKVknsw3pdOPc,,,True,1776809116090.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,EkApinFugbmVFTB5tQ7U,,,True,1776809152690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,EqE6jyx5ZrV15xtCRM7c,,,True,1776809113892.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,EyDCpXScAaBKkuXrgCqB,,,True,1776809125290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,F0r5NUY2zg7Rwfvypjt5,,,True,1776809138494.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,FL1pt2EupnUpo95wBg28,,,True,1776809111290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,GLSP8DhbE49Rw5eRJGDt,,,True,1776809156891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,GbvXmeOtSPayJz64WZTN,,,True,1776809110694.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Glr1vZmzsLWGfdynzuRx,,,True,1776809144891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,GnDu67LsdVEWgULbC3Vs,,,True,1776809103946.0,Low-intensity movement cue,9d789fd91804129f
-1.0175,,device-500,,,116.8,H5jwVcnkyfKhifL6khG1,41.128643,-8.617654,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,HFwRPMzA3OSXtHkNwfH5,,,True,1776809109092.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,HGzi8PEYr3qUBYeZuvMg,,,True,1776809124292.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,HTMdYNPWHSmsoH8R1ww0,,,True,1776809137290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,HgQ7yjXm9LQ1a1dEGvgt,,,True,1776809148290.0,Low-intensity movement cue,9d789fd91804129f
-0.8564,,device-079,,,63.61,HqVOk5PORiVejbxjCJDA,42.231139,-7.710173,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,HxJSJ9mI6qMg0EeJyveG,,,True,1776809143692.0,Low-intensity movement cue,9d789fd91804129f
-1.1716,,device-662,,,121.75,HyFoiUPmPqB9PsI1gAqq,41.480404,-8.345147,True,,,
-1.0834,,device-360,,,71.03,I3fFdo4zKSbjWfomKCK4,41.295462,-8.236174,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,IIQiVCtSNT7V2hNKoRXo,,,True,1776809123891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,IKCHVJPcUKlsDeyvUb5N,,,True,1776809139291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ILTfajofQ8h0NAjOLM0x,,,True,1776809125892.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,IOHlp7fLlBGU0KiKrsv3,,,True,1776809131290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ISqifiiTDcILeFUREuVz,,,True,1776809125492.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,IT8qi36jjzfARjn79ffj,,,True,1776809147691.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Io4gqdCYZ4xk0mT1qK2A,,,True,1776809108893.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,J9XO3VcWo6KD1i7UTJwy,,,True,1776809116891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,JJwlaIJU4sfi2tC8iRHT,,,True,1776809106290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,JK1kuFjzgMw0YZevA1s7,,,True,1776809149490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,JPZphUunPuQQe7kVIHRk,,,True,1776809154293.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,JmDTjFY3kYLbIRCoaQki,,,True,1776809130694.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,KC7tXv0Kt1wjYRfiom2Y,,,True,1776809111890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,KHXxJGFUBAjiaMRHskqB,,,True,1776809131490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,KJ8m4ueF4JkCGQPWOgyW,,,True,1776809106131.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,KLvsAZKDaA06couJt1J0,,,True,1776809146291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,KQZNudRqFe9GYYNMLyMS,,,True,1776809110291.0,Low-intensity movement cue,9d789fd91804129f
-0.6262,,device-362,,,104.34,KUNRb4sg6WahOlRvx0tF,42.090433,-7.996575,True,,,
-0.4343,,device-514,,,85.81,KbNlZ4ampOLmffZ7uscT,41.715001,-8.486434,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,KcWaFWVrZX7FnA8Q5AHG,,,True,1776809125692.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,KtRruT4Q1Vu2bBtPEo6h,,,True,1776809151490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,KxBvATqQrfOAAPBJQekl,,,True,1776809111690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,L21P5QzxTYejIJ6a2yK8,,,True,1776809109490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,L2uQvfx55qfwvk2gROrh,,,True,1776809126490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,L9GLRmDdADlcw4CPI9Gq,,,True,1776809103991.0,Low-intensity movement cue,9d789fd91804129f
-1.937,,device-896,,,55.02,LACnFGiOcEiGdXz0arH2,41.055282,-7.922106,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,LLuaOkT7YxyhEHCDA0bC,,,True,1776809139692.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,LSyFqxTZMn6pFIfL9Wop,,,True,1776809138092.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,LUpFKHAll6J5xGTjTySr,,,True,1776809114094.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,LcrS3MoKBTf5C5eh0MQE,,,True,1776809150690.0,Low-intensity movement cue,9d789fd91804129f
-0.6592,,device-474,,,75.49,Ld9ZWCSBK7J7JI6rSwBZ,42.073869,-8.020954,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,LiZYRsXluMN7FZDWjdO8,,,True,1776809136090.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,LoXwXM3OmZvptrocXTQZ,,,True,1776809131089.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,LxTL5XIc26iIbdzbHiY5,,,True,1776809153691.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,M2wVfmOXVIDNmQwnm3yN,,,True,1776809139899.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,MEwQRj7qHD5pIB6IrpnK,,,True,1776809116491.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,MQCCQzLN8taZvwaDC0XP,,,True,1776809145294.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,MSU1ubVYZA9HPXqF7yjT,,,True,1776809112891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,MVAjjKT66qfui9axc8qU,,,True,1776809141892.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Ma8VvKFhTqm0e2O9hMCr,,,True,1776809127495.0,Low-intensity movement cue,9d789fd91804129f
-1.1612,,device-380,,,108.69,MbH6eUiyVhWHCDJPB0QH,41.20884,-8.638251,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,MoQ05Gruk1Ltvwv3YEcE,,,True,1776809114492.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,MwhH3LK5Gu0EhZOpcKer,,,True,1776809116290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,N051uU5BTYT8dv19UFei,,,True,1776809136892.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,N2jtTmVzE0eFpdKfo5PC,,,True,1776809129891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,N3Sdqob2o7tci9FRhFqM,,,True,1776809134293.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,NMUuyudOaC5ZBgugvkP7,,,True,1776809144696.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,NamlzckspWuU7dywDOHd,,,True,1776809130890.0,Low-intensity movement cue,9d789fd91804129f
-1.0307,,device-189,,,105.88,Ng1JpwUjG3ukAAWgwsHe,41.119805,-8.400045,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,NlNrusIicRKJYYrbdj6i,,,True,1776809121691.0,Low-intensity movement cue,9d789fd91804129f
-1.8218,,device-624,,,134.28,NoEZY2YFfUocJJoZ4hZf,41.948529,-7.847293,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,NvSr6NoWJcoY9EHcqIvw,,,True,1776809134890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,NyNLHGouON5X4QTpznZj,,,True,1776809115291.0,Low-intensity movement cue,9d789fd91804129f
-0.9224,,device-565,,,106.65,Nze8tsAmr3gcqT83Xhsx,42.252974,-8.524004,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,OAOjcAJarEi75W5jFXSn,,,True,1776809117291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,OEVK4Ic5UbumUHEVxs7h,,,True,1776809149290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,OtnefkDvyiAUOw4NQZg8,,,True,1776809143091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,P8J4uL01NRzSze4P4ZwI,,,True,1776809106490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,PJrZi4SxELAmqXXlkL5N,,,True,1776809138891.0,Low-intensity movement cue,9d789fd91804129f
-1.6597,,device-725,,,95.78,Pc9xlLwOGbaVOt1EMchQ,41.029132,-8.28934,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,PgtBrUaObAWDmQAadblS,,,True,1776809122490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,PhSh2wGkn0oIuRmbEV9J,,,True,1776809152290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,QCgQv6siNxspZxL7QGew,,,True,1776809145893.0,Low-intensity movement cue,9d789fd91804129f
-1.001,,device-721,,,106.3,QO7HERpXiKWO0jnUSh3J,41.969181,-8.299874,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,QdFbyJ71Jn3YcJHGUcv5,,,True,1776809120091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Qq8NCXa5E7S7OGiwgf0D,,,True,1776809118091.0,Low-intensity movement cue,9d789fd91804129f
-1.903,,device-509,,,122.62,QrTJBI62wQIjsH0Ok2fK,41.507916,-8.471462,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Qvhb8gjH77Z917FYYnQY,,,True,1776809137692.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,QxmNEDrvg6I5pm8NvMMk,,,True,1776809150291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,QzweRDNur4HFudCAkI9Z,,,True,1776809104692.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,R3tyYj4f6SIrShyGthKn,,,True,1776809115491.0,Low-intensity movement cue,9d789fd91804129f
-0.5462,,device-872,,,118.72,R456BC2wyrLgSClLnyLI,41.103641,-8.494083,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,RXtp1U7DrhLHHyLxd7ln,,,True,1776809156092.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,RfswLoZn3ZTsHEdGPsk0,,,True,1776809148695.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,RhSn1r5erc8jUT2gwOfc,,,True,1776809140091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Rrc81wgGPluO2dzen7J3,,,True,1776809114290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,RrkHuUbRx9RJ5gC63TBI,,,True,1776809152490.0,Low-intensity movement cue,9d789fd91804129f
-0.6812,,device-019,,,112.82,SFTjlbPIJlBs86gvBo6G,42.473305,-8.083262,True,,,
-0.1328,,device-685,,,105.23,SO0BmJSy5vO05dhHdJLb,41.094825,-8.62126,True,,,
-1.0512,,device-188,,,112.67,SSBa5hklGK8euKqFs6ME,42.306801,-8.614805,True,,,
-1.8994,,device-891,,,61.78,STq6UlSXy9qOb6ke3J7t,42.178177,-8.593878,True,,,
-1.1853,,device-658,,,134.45,SZZK6lIsGWXy8wNtoGkv,41.514108,-8.049391,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,SdQVsJY5ShvasY3yXQTh,,,True,1776809120491.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,SrGPVPc3oIix60vEH81f,,,True,1776809102370.0,Low-intensity movement cue,9d789fd91804129f
-1.0156,,device-250,,,72.44,SzJHdvtKsGVtNUWWzqsP,41.70847,-8.110687,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,T0NccnOHSJ8E0LB3eHVZ,,,True,1776809108693.0,Low-intensity movement cue,9d789fd91804129f
-1.8921,,device-928,,,73.59,T0eBYbwXz0MiOVsp3Sj3,42.090096,-8.654657,True,,,
-1.9584,,device-345,,,93.36,TFaV492UOFLpDw7gMEev,41.47096,-7.928849,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,TGOIyIM3DDfbg1ekGagT,,,True,1776809139091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,TJcrIW9Vbi6ESfWedJqY,,,True,1776809127094.0,Low-intensity movement cue,9d789fd91804129f
-1.5931,,device-081,,,62.42,TNG7wK27wrg1VRZuW8oB,41.773716,-8.592373,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,TXMVmupJBpc0yZZIqjuZ,,,True,1776809107891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,TYuEtGgCSpbc7T2tqKBP,,,True,1776809107091.0,Low-intensity movement cue,9d789fd91804129f
-0.6032,,device-353,,,96.46,TjhOxWeNVL7cf4z6fii2,41.408346,-8.49897,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Tl0qZnwX7FyYhz4Pymad,,,True,1776809109695.0,Low-intensity movement cue,9d789fd91804129f
-1.0225,,device-220,,,73.78,UJSYGqLXZF1VxrwSp05v,41.807987,-8.182056,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,UKsNry14A7V39dvbjBQY,,,True,1776809114691.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ULZDjjLJjyOv6JGUZiPg,,,True,1776809123691.0,Low-intensity movement cue,9d789fd91804129f
-0.1689,,device-740,,,130.31,UQQ0sn1uDyp69zAjJyFQ,41.460078,-8.022828,True,,,
-1.544,,device-275,,,87.77,UYi52shjeZJLfKIIBQrg,42.362901,-8.305373,True,,,
-1.9499,,device-619,,,97.57,VHNSCL1LvmclrdDnLvkN,41.894542,-7.841674,True,,,
-1.3986,,device-270,,,109.36,VHS2CSiHy4gVFxIQqvDd,41.730142,-7.979671,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,VMJaz73GsWwroUWB5h0j,,,True,1776809140891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,VWbMnus9cf79oQ8lkDQI,,,True,1776809154491.0,Low-intensity movement cue,9d789fd91804129f
-0.0504,,device-146,,,63.16,Vhl1bzmkM6BTzzNY8AhH,42.017763,-7.754909,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,W1HhKBy3CLLzEyMLYI6L,,,True,1776809119117.0,Low-intensity movement cue,9d789fd91804129f
-1.7789,,device-425,,,81.55,W5UTf0TC3LSsa72s1an1,41.174344,-8.739398,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,WAwtakLe3vOdTUWeoKEL,,,True,1776809144291.0,Low-intensity movement cue,9d789fd91804129f
-0.4692,,device-788,,,95.1,WiovLSFlYqffpv04RIyQ,41.260853,-8.677714,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,WjOmnK8Zu0DUYFIcGNwP,,,True,1776809152091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,XDmiVRWuYJ0t9DbFSrXT,,,True,1776809130291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,XKWZaoUle9jcCLSXIhRn,,,True,1776809120894.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,XVaSNj5cnMGcK6FZGRXz,,,True,1776809107690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Xhodcouo09zZ0cMEDRiH,,,True,1776809142092.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Xn3xEaCeE83u20NPwKHj,,,True,1776809113091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,XpZT4Q9SXMHiutwXgiXW,,,True,1776809146490.0,Low-intensity movement cue,9d789fd91804129f
-0.6774,,device-917,,,92.47,Y8HySrcUYPXstCBrKjMg,41.443635,-8.07339,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,YDrZ7r8LqxkbNHSJ2NkT,,,True,1776809135690.0,Low-intensity movement cue,9d789fd91804129f
-1.8175,,device-510,,,138.98,YE0TkKobPm0lzATeGmOO,41.976225,-8.744526,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,YLoBW2tM9AvjaSjObP05,,,True,1776809120690.0,Low-intensity movement cue,9d789fd91804129f
-1.279,,device-590,,,118.66,YMpzr6r8umxaw61Lk2RI,41.955998,-8.169674,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,Yxyi2YcgM1JSVq877Ybl,,,True,1776809121890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ZMWac5qz4jE0VXkjQXqG,,,True,1776809112690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ZO5zk4MQ1PbYTUzmNoXE,,,True,1776809156691.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ZRuSJE8Y8jC3YE2nRdA2,,,True,1776809127890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ZU4BYEHJQT4fd13qhKjK,,,True,1776809128290.0,Low-intensity movement cue,9d789fd91804129f
-1.181,,device-771,,,80.47,Zh7MphC4L1yZFOW8OZbh,42.081251,-8.488013,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ZrdjSVdEGSVJy1FInXJ4,,,True,1776809105890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ZsqInSbWh8p9rWRvqsS6,,,True,1776809153492.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,a3LfAbwc0PQezEV8cTL9,,,True,1776809109890.0,Low-intensity movement cue,9d789fd91804129f
-1.0055,,device-199,,,139.65,aFis2nhyLwMaDKQjSibl,41.884972,-8.133257,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,aXmVyyLUf9BeJ9wiqPxs,,,True,1776809115093.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,agjDQoajRYf6nltfYfJj,,,True,1776809106690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,au4R2Bo9NaoaF6AsnU4G,,,True,1776809155293.0,Low-intensity movement cue,9d789fd91804129f
-1.3233,,device-322,,,132.66,axjRVQJJSqynNhVVpRfC,42.368881,-8.359402,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,bJFa6MXgUgqfF6aJPMh3,,,True,1776809121091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,bONWyOT2MTvirdge6a5v,,,True,1776809133892.0,Low-intensity movement cue,9d789fd91804129f
-1.9268,,device-981,,,96.54,br6GNnDRN4GWeE6hEcFx,41.005641,-8.63005,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,c80hqmLXCJZKdlwGx84c,,,True,1776809133090.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,c9iziPYPcc4NCGuVk0Q5,,,True,1776809116694.0,Low-intensity movement cue,9d789fd91804129f
-0.9305,,device-499,,,61.89,cEbKFjyF40RXfnfrtOfP,41.35131,-8.383768,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,cRUI2mqXQy6J3MUQNZHr,,,True,1776809124692.0,Low-intensity movement cue,9d789fd91804129f
-1.4535,,device-177,,,99.12,cVvZwsGVOjnSOHcunkza,42.188744,-8.647804,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,cXcY0s00Ul1cjIqZadvS,,,True,1776809103942.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,cXlF4BI26DiUhrE0DpXc,,,True,1776809117690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,coXFc2WkIYxTXuiHeIWu,,,True,1776809105494.0,Low-intensity movement cue,9d789fd91804129f
-1.2285,,device-709,,,62.52,cxytqidxjQyIg72gcpRc,41.013079,-8.463058,True,,,
-0.0005,,device-088,,,113.86,d20rO7bYGELbiDXSpm2r,41.295802,-7.700779,True,,,
-0.532,,device-985,,,88.15,dCaOsjiwTJDnLJUTxeiw,41.952849,-8.7943,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,dHtGtU0YRCQ5OftHSDOl,,,True,1776809112490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,dSsdstS49ZM93gtkIkKP,,,True,1776809154893.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,dayZ68AsN0vOUjKNRJI1,,,True,1776809137091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,dbAdYg2Fv7JMPaExNxgP,,,True,1776809151891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,dgowlN3hmZy5Xn3WjclC,,,True,1776809157090.0,Low-intensity movement cue,9d789fd91804129f
-0.0865,,device-647,,,60.99,doRycyYPRx0DCWm0nfcO,41.529717,-7.944063,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,e8uJbjZ9VZWxAq88manQ,,,True,1776809142893.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ePQZWQYFKZiA016lWvR8,,,True,1776809122694.0,Low-intensity movement cue,9d789fd91804129f
-0.2301,,device-215,,,90.59,ejgEATz9kCSzpgzB5MRR,41.824848,-7.774503,True,,,
-0.8565,,device-775,,,95.87,elxyHAvggjtco2utG8kJ,41.659496,-7.889102,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,eyYGEgBB2r8n1uqeNQcu,,,True,1776809122093.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,f7lohxiECXXf805YoIBf,,,True,1776809155891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,fYaXbKeOXlCjDQEUgGeX,,,True,1776809145494.0,Low-intensity movement cue,9d789fd91804129f
-0.0536,,device-472,,,99.48,fqVZpWYAfOQjILg6KnuK,41.028183,-7.722759,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,fzb1G8SR03DtEO9N6SJQ,,,True,1776809133694.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,g4MDSJ8cdLfEma5goiGT,,,True,1776809129491.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,gPiMzjFQKfaQyOdQ4qAk,,,True,1776809139491.0,Low-intensity movement cue,9d789fd91804129f
-1.6559,,device-070,,,80.24,gVMykEDhQMDjK4ZH8xjD,42.194635,-8.3537,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,geHwgYoAIThrQHXfObk9,,,True,1776809121292.0,Low-intensity movement cue,9d789fd91804129f
-0.8142,,device-038,,,115.84,grxPXMTF4z4AamK6yLqa,41.277094,-8.138675,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,gsaq032CosC5DZLgIajw,,,True,1776809149690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,h3x79vRVzsaX4SVbcayz,,,True,1776809119491.0,Low-intensity movement cue,9d789fd91804129f
-0.4066,,device-848,,,75.29,h7EFqBpo0sXFprWLRI7F,41.116526,-7.813301,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,h9OQmZa55NQ0DMSSQj8B,,,True,1776809154693.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,hXQfTeS2XR99PKPonvnX,,,True,1776809132096.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,hdhK4sPjBZVVrQ9FQqqu,,,True,1776809105090.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,i52XCtkS6zYCbveQxATe,,,True,1776809110090.0,Low-intensity movement cue,9d789fd91804129f
-1.2716,,device-503,,,67.27,iDWiwbDZl82mGvos626U,41.683265,-7.634959,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,iDjQJEXd1k5NgBrtxuUW,,,True,1776809103953.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,iEOxt1bq9oprx6RExux9,,,True,1776809127690.0,Low-intensity movement cue,9d789fd91804129f
-1.2511,,device-859,,,99.75,iJn2BMnmAtlbLISi72ut,41.629484,-8.67018,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,iNhBjarCX07QNnifTDH9,,,True,1776809148890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,iPJKYeVKmgk5aVOkgFXm,,,True,1776809119294.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,iXhZs9C0suQEubkeS6S7,,,True,1776809115891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,iZa3HOgy3seVVX4A4w93,,,True,1776809134490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,igIg3GXxZ0GZ4X3Gt7Qg,,,True,1776809119692.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,jHzdbjPlUiXk2R1vXTA9,,,True,1776809133291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,jN1bLELTYXVAld8yZkND,,,True,1776809135290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,jYdJxc5k9Bwkq8VKhQLe,,,True,1776809144102.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,jZY2kLiogGKq3PpjIVMv,,,True,1776809107491.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,jdTwyaznY6Rx3xabCdsr,,,True,1776809113291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,jkoKeUjbEjkIyrRTcZBG,,,True,1776809141092.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,jz5gL82zj7NB7d1LZdec,,,True,1776809153092.0,Low-intensity movement cue,9d789fd91804129f
-0.2651,,device-462,,,60.63,kMBrxN5wsxYARgIV4bW9,41.875371,-7.730833,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,kRzyJOULDvfcTeUt8n0H,,,True,1776809141294.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,kajNOBUV7wMKxAX8Y8UG,,,True,1776809126290.0,Low-intensity movement cue,9d789fd91804129f
-1.6633,,device-427,,,98.68,kdxGpcnywtMn9sqk3jS7,42.044312,-8.458385,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ki3NbT0HJ5hpCriQ3PaB,,,True,1776809132290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,kqAYqiEr5xh5sYD2lOKV,,,True,1776809142692.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,lA6aHbncJhRZADOwZkny,,,True,1776809133501.0,Low-intensity movement cue,9d789fd91804129f
-1.2041,,device-412,,,86.55,lQ29VE5FHALhfFA3c2e9,41.870668,-7.757775,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,lWbzN8FhcpKA2KQj0YtP,,,True,1776809142292.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,lb2zm4X0JaYXhvVwMyIT,,,True,1776809131690.0,Low-intensity movement cue,9d789fd91804129f
-0.0029,,device-046,,,85.36,lg00wtBup5VplQVYPUAS,41.170494,-8.7595,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,mRApJ4Hi4bvalFRGtN71,,,True,1776809123291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,maWJfJxmMEmkdDcTZPN3,,,True,1776809140691.0,Low-intensity movement cue,9d789fd91804129f
-0.9441,,device-098,,,90.17,mcsWsyeq01GrDK53PfjH,42.375339,-8.689609,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,mhCLHFpwImsLFj7ij3O4,,,True,1776809108290.0,Low-intensity movement cue,9d789fd91804129f
-0.5322,,device-290,,,89.42,mn17JZqRX7bhP9Fvq5v1,41.391435,-8.623521,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,nIE77Q1SilSN6OkPiYjO,,,True,1776809157490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,nQg3cVDZ0XAl1iTPsudm,,,True,1776809141690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,nUoFxNFBPX9DOehoShc6,,,True,1776809138692.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,nZXDLQO3KMLpdF92fqkr,,,True,1776809103971.0,Low-intensity movement cue,9d789fd91804129f
-0.6821,,device-103,,,73.51,ngO3OQ9psEwlmTjZo6ar,41.577648,-8.311652,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,np8gcnPbgqJgvdxON7u3,,,True,1776809150094.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,nzeXvpY12ZzeSwo4UlKe,,,True,1776809115691.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,oFfo1ytznDPcOdBnk8H1,,,True,1776809108091.0,Low-intensity movement cue,9d789fd91804129f
-0.8349,,device-290,,,106.83,oNbidFyKLrTmek7yzV6f,41.937875,-8.166355,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,oO9ssOcc7FU6jW2KM0ii,,,True,1776809150891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,oaqENVRlBdDfB0Vz0tdH,,,True,1776809103961.0,Low-intensity movement cue,9d789fd91804129f
-0.1787,,device-844,,,99.98,oiBvBbnezTAtrq8w2qrH,41.800759,-8.78916,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,oiIsnho390GVY14ltnPe,,,True,1776809105290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,oiLnt17IXS4505vTLhLh,,,True,1776809135098.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,p2RHxmNFTwZ77zCgA2XG,,,True,1776809142491.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,pMYm6UT4tnkszHmJy2wT,,,True,1776809136291.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,pYa7pwvgXQSlsQD2rn0X,,,True,1776809143891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,pfUG7oAWiBqzTTwwG6Ai,,,True,1776809155492.0,Low-intensity movement cue,9d789fd91804129f
-1.1462,,device-563,,,117.33,q5MOO0zkwJPTqgN7H3u8,41.456375,-8.156961,True,,,
-1.8175,,device-530,,,95.4,qg1iTFpQI0pgeUrhMnCz,41.078735,-8.556111,True,,,
-1.9078,,device-072,,,87.73,qgb4uNP1yxZJnhu5p0eG,41.876889,-8.188458,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,rG1v44Ynmwwf4gRD1XAA,,,True,1776809113691.0,Low-intensity movement cue,9d789fd91804129f
-1.0436,,device-629,,,96.29,rL2e0ZkxRJWuxQ0CZLws,42.446552,-7.835211,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,rOzmJSNMHr77pB7B2ZT8,,,True,1776809131890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,rPO5LRnw7gmwWjm6IK64,,,True,1776809150490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,rRpgCcFuJKjxwvvcWc3l,,,True,1776809143491.0,Low-intensity movement cue,9d789fd91804129f
-0.361,,device-930,,,112.73,rS4JKIdDst0OgiF8Wqbd,42.25867,-8.240565,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,rVuwxRKjRaM0WyCv8kLF,,,True,1776809119890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,s2MBH3dztdluozmaBr78,,,True,1776809140492.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,s3A6F9Gna3uO8jmzSoUo,,,True,1776809104294.0,Low-intensity movement cue,9d789fd91804129f
-0.5505,,device-606,,,128.94,sfjBf04fj8AcqKNNyCpJ,41.541337,-8.509848,True,,,
-1.2824,,device-230,,,70.9,sqnhYbF7EQMMkJHQa0fz,41.331768,-7.96971,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,sygkyJudU6aH9iLXHmPp,,,True,1776809156491.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,t0tVQoudpNQPySkSAjc1,,,True,1776809156296.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,t6WloXEh764ui6P69EIh,,,True,1776809110897.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,t7YKetv0hYRttefCdSn3,,,True,1776809140291.0,Low-intensity movement cue,9d789fd91804129f
-1.8104,,device-881,,,128.45,tCRV7xIsCYGA0U5ju6Yl,41.818294,-8.160321,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,tMc2qyV2vOtU3o99dRod,,,True,1776809118491.0,Low-intensity movement cue,9d789fd91804129f
-0.9836,,device-700,,,94.71,tOc9UmLtJoX1SWztNmdy,42.172087,-7.706364,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,tW3hdso3VMNseyu1Q1u4,,,True,1776809118294.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,tqK9Xxf426s1vmPni2Zk,,,True,1776809147092.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,tt9LmN97TQsSBrWgSWwF,,,True,1776809113491.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,u9GDyHXpD0TIpUkNrDOw,,,True,1776809155093.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,uIvY6eg1OoEvYlGGUh7v,,,True,1776809104890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,uYc1A11lKC2UcuW2bZKB,,,True,1776809148491.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,udd40KdyyEE6PcQRzg6H,,,True,1776809118690.0,Low-intensity movement cue,9d789fd91804129f
-0.5345,,device-989,,,74.81,um8V2tyMeMilzCjGi6Id,41.178147,-8.133593,True,,,
-0.0272,,device-481,,,76.2,uuYaMSgYCsa1ehu9M2lv,41.448902,-7.922755,True,,,
-0.6262,,device-615,,,65.44,uzy441NEr79Wj5axE2Gt,41.647048,-8.729256,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,vXqZEQSR9Erp7LeprZhu,,,True,1776809112290.0,Low-intensity movement cue,9d789fd91804129f
-1.6988,,device-567,,,119.85,w6rT6MOQ9vMmSGlKrU2t,41.182379,-7.773739,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,wIS1k44774ZN1fXCoGlY,,,True,1776809145091.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,wX28b1SJEIW5IF9H7XZ3,,,True,1776809144490.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,wgPAKxidvGEbzmKvNY8u,,,True,1776809143290.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,wm5tHCHenuxB6Px6pFsa,,,True,1776809136690.0,Low-intensity movement cue,9d789fd91804129f
-1.461,,device-476,,,86.01,wmxpp6xYVbhAfV8tRWsK,42.152993,-8.516624,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,x63Rx04tsGWKGZyZfSB2,,,True,1776809157690.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,xCW1rP80NneL9QKQduZR,,,True,1776809149890.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,xWyWfRdvA0wwejzLzEk4,,,True,1776809122894.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,xcJLiX8k3JcIvpVaQGWF,,,True,1776809124892.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,xipBRGX8njNU95JrDErO,,,True,1776809112091.0,Low-intensity movement cue,9d789fd91804129f
-0.1883,,device-450,,,139.1,xjubJmZuNIQDNLcMFukm,41.982253,-7.990298,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,xjwxVumibExJvMfbpkuf,,,True,1776809137891.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,xmzm6ZqCtzi0pIsfeJt8,,,True,1776809103923.0,Low-intensity movement cue,9d789fd91804129f
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,xnehuzgoAQbZfqChAX57,,,True,1776809126895.0,Low-intensity movement cue,9d789fd91804129f
-0.9383,,device-758,,,71.78,xvnFgBPMeaXS2V1ov9cW,42.33264,-8.274945,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,yXMEglrnuMIXZFNzhcmH,,,True,1776809147290.0,Low-intensity movement cue,9d789fd91804129f
-0.8779,,device-104,,,100.85,yYrCaZEKyjFNQx1oQl0l,41.768413,-8.27028,True,,,
-0.7959,,device-370,,,104.73,z1COFTEqif4G3bOoTzYJ,41.020736,-8.469788,True,,,
-1.5777,,device-441,,,114.86,zftpzdUn3M01TG4ohbK3,41.556079,-8.024731,True,,,
-0.4532,,device-026,,,72.79,zqwFVfcmAhO43LZzwQHH,41.813153,-7.831009,True,,,
-,low_intensity,,2.0,A gentle move keeps momentum without overload.,,ztcZ5wAsmP8D4dVK4JjD,,,True,1776809120291.0,Low-intensity movement cue,9d789fd91804129f
+actionId,date,durationMinutes,encouragementMessage,id,recommendation,timestamp,title,userId
+low_intensity,09-05-2026 17:30:50,2,Um ritmo mais leve será benéfico para o seu bem-estar.,161EhjSmHth9s4nEsNQs,True,,Ritmo Baixo,9d789fd91804129f
+low_intensity,07-05-2026,2,Um ritmo mais leve será benéfico para o seu bem-estar.,1ldp8y0jjytpc8UIQn8U,True,,Ritmo Baixo,9d789fd91804129f
+low_intensity,08-05-2026 22:05:28,2,Um ritmo mais leve será benéfico para o seu bem-estar.,1pzqk4nW2VCAbFN2yGpn,True,,Ritmo Baixo,72bd2672c948d2cb
+medium_intensity,15-05-2026 00:09:06,5,Este nível de atividade é ideal para o seu bem-estar.,2S7atHcCiSbzKT9vD1nV,True,,Ritmo Saudável,72bd2672c948d2cb
+medium_intensity,09-05-2026 16:53:05,5,Este nível de atividade é ideal para o seu bem-estar.,2oA6r8yfZgD2iQYQfaLp,True,,Ritmo Saudável,9d789fd91804129f
+high_intensity,08-05-2026 22:19:25,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,46M3wn9p3134qjVEVSRp,True,,Ritmo Elevado,72bd2672c948d2cb
+medium_intensity,09-05-2026 17:33:06,5,Este nível de atividade é ideal para o seu bem-estar.,54R2Iq229sKOuS7VzALh,True,,Ritmo Saudável,9d789fd91804129f
+medium_intensity,09-05-2026 16:13:04,5,Este nível de atividade é ideal para o seu bem-estar.,59uRZI60wVSCtoeN0QWZ,True,,Ritmo Saudável,9d789fd91804129f
+low_intensity,09-05-2026 16:11:09,2,Um ritmo mais leve será benéfico para o seu bem-estar.,5oZ6L4OAe9SBtCbVUcRz,True,,Ritmo Baixo,9d789fd91804129f
+low_intensity,08-05-2026 21:55:28,2,Um ritmo mais leve será benéfico para o seu bem-estar.,74IaXXdXiL0dYyZ1R8fl,True,,Ritmo Baixo,72bd2672c948d2cb
+low_intensity,09-05-2026 15:59:29,2,Um ritmo mais leve será benéfico para o seu bem-estar.,75E3FeXxjkhpC2Ww5uxI,True,,Ritmo Baixo,9d789fd91804129f
+low_intensity,09-05-2026 16:40:49,2,Um ritmo mais leve será benéfico para o seu bem-estar.,8jUwAvim8lHiDSh9CUhf,True,,Ritmo Baixo,9d789fd91804129f
+high_intensity,08-05-2026 22:31:53,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,9czysxUQg5pWtwMPqJ0g,True,,Ritmo Elevado,72bd2672c948d2cb
+high_intensity,09-05-2026 18:47:50,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,Alb7nIoeFdiFKJq0zRpF,True,,Ritmo Elevado,9d789fd91804129f
+high_intensity,2026-05-05 23:50:49.372209+00:00,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,BNRnCuZKPlRRblQtcPu9,True,1778021444167.0,Ritmo Elevado,9d789fd91804129f
+medium_intensity,14-05-2026 23:59:19,5,Este nível de atividade é ideal para o seu bem-estar.,CQEdkOyvxSXEc9117vxF,True,,Ritmo Saudável,9d789fd91804129f
+medium_intensity,09-05-2026 17:08:06,5,Este nível de atividade é ideal para o seu bem-estar.,D0LmW46Wkzurh77AFY20,True,,Ritmo Saudável,9d789fd91804129f
+low_intensity,09-05-2026 17:25:50,2,Um ritmo mais leve será benéfico para o seu bem-estar.,D9sVvY8c4Z1AJS3M36lK,True,,Ritmo Baixo,9d789fd91804129f
+medium_intensity,08-05-2026 22:33:38,5,Este nível de atividade é ideal para o seu bem-estar.,DHPgbb8vWFKUgCALhOZS,True,,Ritmo Saudável,72bd2672c948d2cb
+medium_intensity,09-05-2026 17:23:06,5,Este nível de atividade é ideal para o seu bem-estar.,DQvZNULxraSmv5hyWoh7,True,,Ritmo Saudável,9d789fd91804129f
+low_intensity,07-05-2026 23:01:38,2,Um ritmo mais leve será benéfico para o seu bem-estar.,DmqViD0UanF7EsScplXd,True,,Ritmo Baixo,9d789fd91804129f
+low_intensity,08-05-2026 21:48:17,2,Um ritmo mais leve será benéfico para o seu bem-estar.,EFzmPDp3lCuScXrl0DRD,True,,Ritmo Baixo,9d789fd91804129f
+medium_intensity,08-05-2026 21:50:47,5,Este nível de atividade é ideal para o seu bem-estar.,EQy972ZooEbihrNSf55K,True,,Ritmo Saudável,72bd2672c948d2cb
+medium_intensity,08-05-2026 22:29:54,5,Este nível de atividade é ideal para o seu bem-estar.,ETZMsX0XUNJGaRmXRCTB,True,,Ritmo Saudável,72bd2672c948d2cb
+low_intensity,09-05-2026 17:00:50,2,Um ritmo mais leve será benéfico para o seu bem-estar.,EXTQK34WSI1yt5pdhYSO,True,,Ritmo Baixo,9d789fd91804129f
+low_intensity,08-05-2026 21:46:47,2,Um ritmo mais leve será benéfico para o seu bem-estar.,EeYkk1zRSY4hY3bzd0YE,True,,Ritmo Baixo,72bd2672c948d2cb
+low_intensity,11-05-2026 22:52:10,2,Um ritmo mais leve será benéfico para o seu bem-estar.,FR399HtHzW8Qm4LBDyH4,True,,Ritmo Baixo,9d789fd91804129f
+medium_intensity,09-05-2026 16:58:05,5,Este nível de atividade é ideal para o seu bem-estar.,HYclZubvfsCOzmNWIbai,True,,Ritmo Saudável,9d789fd91804129f
+low_intensity,09-05-2026 17:10:50,2,Um ritmo mais leve será benéfico para o seu bem-estar.,I8wgm2fLNI46HvZd7wUP,True,,Ritmo Baixo,9d789fd91804129f
+high_intensity,15-05-2026 00:11:20,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,IAu74sst3JGGK4efBWDV,True,,Ritmo Elevado,72bd2672c948d2cb
+medium_intensity,09-05-2026 16:28:05,5,Este nível de atividade é ideal para o seu bem-estar.,JNz03aYjpPEcuydEOwvR,True,,Ritmo Saudável,9d789fd91804129f
+medium_intensity,08-05-2026 22:31:54,5,Este nível de atividade é ideal para o seu bem-estar.,KFq25zeffBxRgrcv8PKK,True,,Ritmo Saudável,72bd2672c948d2cb
+low_intensity,09-05-2026 16:20:49,2,Um ritmo mais leve será benéfico para o seu bem-estar.,KGEOFmHR4iSUvvFS689p,True,,Ritmo Baixo,9d789fd91804129f
+medium_intensity,08-05-2026 21:44:57,5,Este nível de atividade é ideal para o seu bem-estar.,KOXFK5yU31xSAmyhL7zi,True,,Ritmo Saudável,9d789fd91804129f
+low_intensity,09-05-2026 17:05:50,2,Um ritmo mais leve será benéfico para o seu bem-estar.,L1E2OYig1q7oXamBbgHg,True,,Ritmo Baixo,9d789fd91804129f
+high_intensity,15-05-2026 00:02:37,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,LKH0d6SZiz6iMReIHCaI,True,,Ritmo Elevado,9d789fd91804129f
+medium_intensity,09-05-2026 16:38:05,5,Este nível de atividade é ideal para o seu bem-estar.,MccmGXo2brhEq4WbwiOL,True,,Ritmo Saudável,9d789fd91804129f
+high_intensity,08-05-2026 22:53:13,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,MzklEp5Hz3GQZscGtFzG,True,,Ritmo Elevado,72bd2672c948d2cb
+low_intensity,09-05-2026 16:15:49,2,Um ritmo mais leve será benéfico para o seu bem-estar.,Ni9KOWK7dONoSW90W2Wk,True,,Ritmo Baixo,9d789fd91804129f
+high_intensity,2026-05-05 23:56:08.093932+00:00,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,OREVtspf82oPeGmiEsfn,True,1778021764992.0,Ritmo Elevado,9d789fd91804129f
+medium_intensity,08-05-2026 21:53:32,5,Este nível de atividade é ideal para o seu bem-estar.,OhX84AGPpvO5E7Oa6sg8,True,,Ritmo Saudável,72bd2672c948d2cb
+low_intensity,15-05-2026 00:14:06,2,Um ritmo mais leve será benéfico para o seu bem-estar.,P0qcbKDcysbYAXkzgU1I,True,,Ritmo Baixo,72bd2672c948d2cb
+high_intensity,15-05-2026 00:00:33,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,PdpabvDVvuMDxpNZ1Owb,True,,Ritmo Elevado,9d789fd91804129f
+high_intensity,,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,Qv0avylToi96bqcEdpI7,True,1778185587927.0,Ritmo Elevado,9d789fd91804129f
+medium_intensity,09-05-2026 17:03:05,5,Este nível de atividade é ideal para o seu bem-estar.,RnfUsTGV9fX6ss5272SH,True,,Ritmo Saudável,9d789fd91804129f
+medium_intensity,08-05-2026 22:21:30,5,Este nível de atividade é ideal para o seu bem-estar.,SNy7xVOt0ualVRvDTOp9,True,,Ritmo Saudável,72bd2672c948d2cb
+medium_intensity,09-05-2026 16:43:05,5,Este nível de atividade é ideal para o seu bem-estar.,SeBMeBMEWzI30LxbbvuZ,True,,Ritmo Saudável,9d789fd91804129f
+low_intensity,09-05-2026 16:35:49,2,Um ritmo mais leve será benéfico para o seu bem-estar.,TG4lxeWjRIwCLtrkNKOn,True,,Ritmo Baixo,9d789fd91804129f
+medium_intensity,08-05-2026 21:47:37,5,Este nível de atividade é ideal para o seu bem-estar.,TPSginnRmqnVqZkmheDE,True,,Ritmo Saudável,9d789fd91804129f
+medium_intensity,,5,Este nível de atividade é ideal para o seu bem-estar.,U7smm3OMhuFgRMTeU0pQ,True,1778019099015.0,Ritmo Saudável,9d789fd91804129f
+low_intensity,07-05-2026 23:02:19,2,Um ritmo mais leve será benéfico para o seu bem-estar.,UroG3e38PSXMKaQiXsvC,True,,Ritmo Baixo,9d789fd91804129f
+high_intensity,15-05-2026 00:06:21,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,Vf7Zmdgj3hRBuHcmvi65,True,,Ritmo Elevado,72bd2672c948d2cb
+high_intensity,08-05-2026 22:22:48,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,WUznUq1LO3VmSpNvRNNm,True,,Ritmo Elevado,72bd2672c948d2cb
+medium_intensity,09-05-2026 16:48:05,5,Este nível de atividade é ideal para o seu bem-estar.,ZZ7LYp5ujZ5d1vDUY7lU,True,,Ritmo Saudável,9d789fd91804129f
+medium_intensity,09-05-2026 17:28:06,5,Este nível de atividade é ideal para o seu bem-estar.,axlk2JMRofmlSmSuDlqC,True,,Ritmo Saudável,9d789fd91804129f
+high_intensity,2026-05-05 23:55:24.729941+00:00,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,bC9H96vzs5UyKLO7SNup,True,1778021724016.0,Ritmo Elevado,6dc424e629c7e3ad
+medium_intensity,09-05-2026 16:18:05,5,Este nível de atividade é ideal para o seu bem-estar.,bG0YNrNkwrxB99lqxO1n,True,,Ritmo Saudável,9d789fd91804129f
+medium_intensity,08-05-2026 21:57:41,5,Este nível de atividade é ideal para o seu bem-estar.,bKk7bPN7QMiMzhY1I0o6,True,,Ritmo Saudável,72bd2672c948d2cb
+high_intensity,09-05-2026 18:55:41,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,ceBTDM1sjkZwAKA3tHqH,True,,Ritmo Elevado,9d789fd91804129f
+medium_intensity,08-05-2026 21:46:07,5,Este nível de atividade é ideal para o seu bem-estar.,cqiu08uIoQmibyMLMnRw,True,,Ritmo Saudável,72bd2672c948d2cb
+high_intensity,08-05-2026 21:47:40,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,d91YI7KuoCCBelH4falR,True,,Ritmo Elevado,72bd2672c948d2cb
+high_intensity,08-05-2026 21:42:42,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,dWGcZz413laaJTMgX1DO,True,,Ritmo Elevado,72bd2672c948d2cb
+high_intensity,08-05-2026 21:45:30,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,e1BuXDRFasbPkNLlMdx9,True,,Ritmo Elevado,9d789fd91804129f
+low_intensity,08-05-2026 22:22:10,2,Um ritmo mais leve será benéfico para o seu bem-estar.,eNxCZpHNHlM5n0fhcVkS,True,,Ritmo Baixo,72bd2672c948d2cb
+high_intensity,11-05-2026 22:44:55,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,euaVrn1tS0y0XkkvSZGF,True,,Ritmo Elevado,9d789fd91804129f
+medium_intensity,07-05-2026 23:01:56,5,Este nível de atividade é ideal para o seu bem-estar.,fBfkFFtKitU3tcSZxVrt,True,,Ritmo Saudável,9d789fd91804129f
+high_intensity,2026-05-05 23:25:13.261131+00:00,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,fYkWbAYv05BxIpjTpQOh,True,1777077379839.0,Ritmo Elevado,bb80f878cef35322
+low_intensity,09-05-2026 16:26:09,2,Um ritmo mais leve será benéfico para o seu bem-estar.,gRS1tk1qoSzyvJ60kpob,True,,Ritmo Baixo,9d789fd91804129f
+medium_intensity,09-05-2026 17:18:06,5,Este nível de atividade é ideal para o seu bem-estar.,hXkor4WmpWuAhi1ry5S9,True,,Ritmo Saudável,9d789fd91804129f
+low_intensity,08-05-2026 21:51:27,2,Um ritmo mais leve será benéfico para o seu bem-estar.,hrgOdhIUYyBXK8knU1AH,True,,Ritmo Baixo,72bd2672c948d2cb
+low_intensity,09-05-2026 17:15:50,2,Um ritmo mais leve será benéfico para o seu bem-estar.,hsPKtvzW4q6pqnmkDCzi,True,,Ritmo Baixo,9d789fd91804129f
+high_intensity,08-05-2026 21:52:40,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,jnAsdRM9MvsQnEr3nhWc,True,,Ritmo Elevado,72bd2672c948d2cb
+high_intensity,07-05-2026 22:57:52,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,kKs2uXYppbWRtrdarrbB,True,,Ritmo Elevado,9d789fd91804129f
+medium_intensity,09-05-2026 16:03:04,5,Este nível de atividade é ideal para o seu bem-estar.,kgmn6MHZbZ3sl7VYZWqI,True,,Ritmo Saudável,9d789fd91804129f
+low_intensity,09-05-2026 16:55:50,2,Um ritmo mais leve será benéfico para o seu bem-estar.,lLdI4BG1A1GdgIWs2B73,True,,Ritmo Baixo,9d789fd91804129f
+low_intensity,08-05-2026 22:10:28,2,Um ritmo mais leve será benéfico para o seu bem-estar.,ljpyxUrVxKKajRl0rL5r,True,,Ritmo Baixo,72bd2672c948d2cb
+low_intensity,14-05-2026 23:59:59,2,Um ritmo mais leve será benéfico para o seu bem-estar.,mNwZlfu68t0sLMefdA3A,True,,Ritmo Baixo,9d789fd91804129f
+low_intensity,09-05-2026 16:30:49,2,Um ritmo mais leve será benéfico para o seu bem-estar.,nIeiJOVJ9OKtcH4Fsuu8,True,,Ritmo Baixo,9d789fd91804129f
+low_intensity,15-05-2026 00:09:46,2,Um ritmo mais leve será benéfico para o seu bem-estar.,pG6OZWaJjSRLjJGkt6JL,True,,Ritmo Baixo,72bd2672c948d2cb
+medium_intensity,09-05-2026 16:33:05,5,Este nível de atividade é ideal para o seu bem-estar.,pJmrjA3AFdPV7jVgsVPC,True,,Ritmo Saudável,9d789fd91804129f
+medium_intensity,08-05-2026 22:07:41,5,Este nível de atividade é ideal para o seu bem-estar.,pwx4QnSqRpowyMSS40xW,True,,Ritmo Saudável,72bd2672c948d2cb
+medium_intensity,,5,Este nível de atividade é ideal para o seu bem-estar.,qgm9i717nxp4Ov7tIGqj,True,1778104386247.0,Ritmo Saudável,9d789fd91804129f
+high_intensity,,2,Aumentar o nível de atividade será benéfico para o seu bem-estar.,qolkiXfDnHYApx8IzVIg,True,1778103737669.0,Ritmo Elevado,9d789fd91804129f
+low_intensity,08-05-2026 22:31:34,2,Um ritmo mais leve será benéfico para o seu bem-estar.,rr21YL0CLLD7NOQM5f1s,True,,Ritmo Baixo,72bd2672c948d2cb
+low_intensity,09-05-2026 16:45:49,2,Um ritmo mais leve será benéfico para o seu bem-estar.,ry1tKFRCuoUoropveb7W,True,,Ritmo Baixo,9d789fd91804129f
+low_intensity,08-05-2026 22:00:28,2,Um ritmo mais leve será benéfico para o seu bem-estar.,siXKz4f5R3xy6CoerRLx,True,,Ritmo Baixo,72bd2672c948d2cb
+medium_intensity,09-05-2026 17:13:06,5,Este nível de atividade é ideal para o seu bem-estar.,swnouSHYgMKj4va0blEF,True,,Ritmo Saudável,9d789fd91804129f
+low_intensity,09-05-2026 16:50:50,2,Um ritmo mais leve será benéfico para o seu bem-estar.,sxtnLeMo9jVhgd9aEIfA,True,,Ritmo Baixo,9d789fd91804129f
+medium_intensity,09-05-2026 16:08:04,5,Este nível de atividade é ideal para o seu bem-estar.,t1F3YpUSJthCdkEstdnk,True,,Ritmo Saudável,9d789fd91804129f
+medium_intensity,15-05-2026 00:13:27,5,Este nível de atividade é ideal para o seu bem-estar.,ttEChZvaZjr6vzVmKEdC,True,,Ritmo Saudável,72bd2672c948d2cb
+low_intensity,09-05-2026 16:05:49,2,Um ritmo mais leve será benéfico para o seu bem-estar.,uxObjpQSL31qsPkruoiM,True,,Ritmo Baixo,9d789fd91804129f
+medium_intensity,08-05-2026 22:02:41,5,Este nível de atividade é ideal para o seu bem-estar.,votdkiQ7HTagzXIDvsPl,True,,Ritmo Saudável,72bd2672c948d2cb
+low_intensity,09-05-2026 17:21:10,2,Um ritmo mais leve será benéfico para o seu bem-estar.,wv1WbpGU4jk3x4vrCw9A,True,,Ritmo Baixo,9d789fd91804129f
+medium_intensity,09-05-2026 16:23:05,5,Este nível de atividade é ideal para o seu bem-estar.,yTcTy6wKuEQj6aCiqSpI,True,,Ritmo Saudável,9d789fd91804129f
+low_intensity,08-05-2026 22:50:52,2,Um ritmo mais leve será benéfico para o seu bem-estar.,ypkMRVtIi1XRq9Dry8l5,True,,Ritmo Baixo,72bd2672c948d2cb

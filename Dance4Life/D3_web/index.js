@@ -542,11 +542,11 @@ const svg = d3.select("#graph")
             "link",
             d3.forceLink(graph.links)
                 .id(d => d.id)
-                .distance(90)
+                .distance(200)
         )
         .force(
             "charge",
-            d3.forceManyBody().strength(-80)
+            d3.forceManyBody().strength(-250)
         )
         .force(
             "center",
@@ -1011,7 +1011,7 @@ function startAutoRefresh() {
             );
         }
 
-    }, 10000); // 10 segundos
+    }, 60000); // 10 segundos
 }
 
 loadUserData();

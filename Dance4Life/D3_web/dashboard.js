@@ -26,7 +26,7 @@ Promise.all([
   const activityCount      = d3.rollup(activity, v => v.length, d => d.userId);
   const invitationTotal    = d3.rollup(invitation, v => v.length, d => d.userId);
   const invitationAccepted = d3.rollup(
-    invitation.filter(d => d.status === "accepted"),
+    invitation.filter(d => d.status === "accepted" || d.status === "true"),
     v => v.length, d => d.userId
   );
   const matchingCount = d3.rollup(matching, v => v.length, d => d.userId);
@@ -300,6 +300,7 @@ Promise.all([
     const query = document.getElementById("search-input").value.trim().toLowerCase();
     const user  = window.dataset.find(d => d.userId.toLowerCase() === query);
 
+    document.getElementById("ranking-link").href = `index.html?userid=${query}`;
     if (!user) {
       alert("Utilizador não encontrado!");
       return;
@@ -364,7 +365,6 @@ Promise.all([
     document.getElementById("search-input").value = userIdFromUrl;
     searchUser();
   }
-
       document.getElementById("ranking-link").href =
         `index.html?userid=${userIdFromUrl}`;
 });

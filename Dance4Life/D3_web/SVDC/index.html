@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dance4Life — Data Story</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0d14;
+  --surface: #111520;
+  --surface2: #161b2e;
+  --border: rgba(255,255,255,0.07);
+  --accent1: #e040fb;
+  --accent2: #00e5ff;
+  --accent3: #69ff47;
+  --accent4: #ffab40;
+  --text: #e8ecf4;
+  --muted: #7b8299;
+  --card-bg: rgba(255,255,255,0.04);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ── NOISE TEXTURE ── */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* ── LANGUAGE TOGGLE ── */
+#lang-toggle {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  gap: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+#lang-toggle button {
+  background: rgba(255,255,255,0.05);
+  color: var(--muted);
+  border: none;
+  padding: 8px 18px;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+#lang-toggle button.active {
+  background: var(--accent1);
+  color: #fff;
+}
+
+/* ── NAV DOTS ── */
+#nav-dots {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 9000;
+}
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+  padding: 0;
+}
+.nav-dot.active {
+  background: var(--accent1);
+  transform: scale(1.5);
+  box-shadow: 0 0 12px var(--accent1);
+}
+
+/* ── SECTIONS ── */
+section {
+  min-height: 100vh;
+  padding: 80px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+/* ── HERO ── */
+#hero {
+  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(224,64,251,0.18), transparent),
+              radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,229,255,0.12), transparent),
+              var(--bg);
+  align-items: center;
+  text-align: center;
+}
+
+.hero-eyebrow {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent1);
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content:'';
+  height:1px;
+  width:40px;
+  background: var(--accent1);
+  opacity:0.5;
+}
+
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(52px, 8vw, 110px);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -3px;
+  background: linear-gradient(135deg, #fff 30%, var(--accent1) 70%, var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 24px;
+}
+
+.hero-sub {
+  font-size: 18px;
+  color: var(--muted);
+  max-width: 560px;
+  margin: 0 auto 60px;
+  font-weight: 300;
+}
+
+.kpi-strip {
+  display: flex;
+  gap: 0;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  background: var(--card-bg);
+}
+.kpi {
+  padding: 30px 40px;
+  flex: 1 1 0;
+  min-width: 0;
+  border-right: 1px solid var(--border);
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.kpi:last-child { border-right: none; }
+.kpi-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  display: block;
+  margin-bottom: 6px;
+}
+.kpi-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.c1 { color: var(--accent1); }
+.c2 { color: var(--accent2); }
+.c3 { color: var(--accent3); }
+.c4 { color: var(--accent4); }
+
+/* ── SECTION HEADER ── */
+.section-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.05;
+  margin-bottom: 14px;
+  max-width: 700px;
+}
+.section-desc {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 560px;
+  margin-bottom: 50px;
+  font-weight: 300;
+}
+
+/* ── GRID LAYOUTS ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+}
+
+/* ── CHART CARDS ── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0;
+  height:2px;
+  background: linear-gradient(90deg, transparent, var(--accent1), transparent);
+  opacity:0.4;
+}
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.card-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+
+svg text { font-family: 'DM Sans', sans-serif; }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 40px 0;
+}
+
+/* ── SECTION BACKGROUNDS ── */
+#activity { background: radial-gradient(ellipse 70% 50% at 10% 50%, rgba(0,229,255,0.08), transparent), var(--bg); }
+#invitations { background: radial-gradient(ellipse 60% 50% at 90% 30%, rgba(105,255,71,0.07), transparent), var(--bg); }
+#matching { background: radial-gradient(ellipse 60% 50% at 20% 80%, rgba(255,171,64,0.08), transparent), var(--bg); }
+#recommendations { background: radial-gradient(ellipse 70% 50% at 70% 50%, rgba(224,64,251,0.08), transparent), var(--bg); }
+#overview { background: radial-gradient(ellipse 80% 60% at 50% 110%, rgba(224,64,251,0.12), transparent), var(--bg); }
+
+/* ── STAT HIGHLIGHTS ── */
+.stat-highlight {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 28px;
+}
+.stat-h-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-h-label {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── FOOTER ── */
+footer {
+  padding: 50px 60px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.footer-text {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.footer-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.footer-tag {
+  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+/* ── TOOLTIP ── */
+.tooltip {
+  position: absolute;
+  background: rgba(17,21,32,0.95);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 9000;
+  backdrop-filter: blur(8px);
+}
+
+/* ── FADE IN ── */
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fadeUp 0.7s ease forwards;
+  opacity: 0;
+}
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.25s; }
+.delay-3 { animation-delay: 0.4s; }
+.delay-4 { animation-delay: 0.55s; }
+
+/* ── SCROLL INDICATOR ── */
+.scroll-indicator {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  animation: bob 2s ease-in-out infinite;
+}
+@keyframes bob {
+  0%,100%{ transform: translateX(-50%) translateY(0); }
+  50%{ transform: translateX(-50%) translateY(8px); }
+}
+.scroll-arrow {
+  width:20px; height:20px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+}
+
+/* ── RANKING TABLE ── */
+.rank-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.rank-table th {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+.rank-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+}
+.rank-table tr:hover td { background: rgba(255,255,255,0.03); }
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+}
+.rank-1 { background: rgba(255,215,0,0.15); color: #ffd700; }
+.rank-2 { background: rgba(192,192,192,0.15); color: #c0c0c0; }
+.rank-3 { background: rgba(205,127,50,0.15); color: #cd7f32; }
+.rank-n { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+.score-bar-bg {
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.07);
+  flex: 1;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+}
+.score-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── MAP PLACEHOLDER (city circles) ── */
+#city-map { width: 100%; height: 380px; }
+
+@media (max-width: 900px) {
+  section { padding: 60px 24px; }
+  .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr 1fr; }
+  .kpi { padding: 20px 24px; }
+  footer { padding: 40px 24px; }
+}
+@media (max-width: 600px) {
+  .three-col { grid-template-columns: 1fr; }
+  #nav-dots { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- LANGUAGE TOGGLE -->
+<div id="lang-toggle">
+  <button id="btn-pt" class="active" onclick="setLang('pt')">PT</button>
+  <button id="btn-en" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- NAV DOTS -->
+<nav id="nav-dots">
+  <button class="nav-dot active" data-section="hero" onclick="scrollSection('hero')" title="Início"></button>
+  <button class="nav-dot" data-section="activity" onclick="scrollSection('activity')" title="Atividade"></button>
+  <button class="nav-dot" data-section="invitations" onclick="scrollSection('invitations')" title="Convites"></button>
+  <button class="nav-dot" data-section="matching" onclick="scrollSection('matching')" title="Matching"></button>
+  <button class="nav-dot" data-section="recommendations" onclick="scrollSection('recommendations')" title="Recomendações"></button>
+  <button class="nav-dot" data-section="network" onclick="scrollSection('network')" title="Rede"></button>
+</nav>
+
+<div class="tooltip" id="tooltip"></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-eyebrow" data-pt="Sistema Multiagente de Dança Ativa" data-en="Active Dance Multi-Agent System">Sistema Multiagente de Dança Ativa</div>
+  <h1 class="hero-title fade-up">DANCE<br>4LIFE</h1>
+  <p class="hero-sub fade-up delay-1" data-pt="Uma análise de dados de 5.000 registos de 123 utilizadores activos em Portugal, cobrindo atividade física, convites sociais, matchings e recomendações de movimento." data-en="A data analysis of 5,000 records from 123 active users in Portugal, covering physical activity, social invitations, matchings, and movement recommendations.">Uma análise de dados de 5.000 registos de 123 utilizadores activos em Portugal, cobrindo atividade física, convites sociais, matchings e recomendações de movimento.</p>
+  <div class="kpi-strip fade-up delay-2">
+    <div class="kpi">
+      <span class="kpi-num c1">5.000</span>
+      <span class="kpi-label" data-pt="Atividades Registadas" data-en="Registered Activities">Atividades Registadas</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-num c2">123</span>
+      <span class="kpi-label" data-pt="Utilizadores Activos" data-en="Active Users">Utilizadores Activos</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-num c3">80,2</span>
+      <span class="kpi-label" data-pt="BPM Médio" data-en="Average BPM">BPM Médio</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-num c4">50%</span>
+      <span class="kpi-label" data-pt="Taxa de Aceitação" data-en="Acceptance Rate">Taxa de Aceitação</span>
+    </div>
+  </div>
+  <div class="scroll-indicator fade-up delay-3">
+    <span data-pt="Explorar" data-en="Explore">Explorar</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ACTIVITY -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="activity">
+  <div class="section-label" data-pt="01 — ATIVIDADE FÍSICA" data-en="01 — PHYSICAL ACTIVITY">01 — ATIVIDADE FÍSICA</div>
+  <h2 class="section-title" data-pt="Padrões de Movimento em Portugal" data-en="Movement Patterns in Portugal">Padrões de Movimento em Portugal</h2>
+  <p class="section-desc" data-pt="Análise de 5.000 registos de atividade física durante maio de 2026, incluindo frequência cardíaca, distribuição geográfica e padrões temporais." data-en="Analysis of 5,000 physical activity records during May 2026, including heart rate, geographic distribution, and temporal patterns.">Análise de 5.000 registos de atividade física durante maio de 2026, incluindo frequência cardíaca, distribuição geográfica e padrões temporais.</p>
+
+  <div class="two-col" style="gap:24px; margin-bottom:24px;">
+    <div class="card">
+      <div class="card-title" data-pt="Atividades por Dia — Maio 2026" data-en="Activities per Day — May 2026">Atividades por Dia — Maio 2026</div>
+      <div class="card-sub" data-pt="Volume diário de registos de atividade" data-en="Daily volume of activity records">Volume diário de registos de atividade</div>
+      <svg id="timeline-chart"></svg>
+    </div>
+    <div class="card">
+      <div class="card-title" data-pt="Distribuição da Frequência Cardíaca" data-en="Heart Rate Distribution">Distribuição da Frequência Cardíaca</div>
+      <div class="card-sub" data-pt="Histograma de BPM registados" data-en="Histogram of recorded BPM">Histograma de BPM registados</div>
+      <svg id="hr-chart"></svg>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="card">
+      <div class="card-title" data-pt="Horas de Maior Atividade" data-en="Peak Activity Hours">Horas de Maior Atividade</div>
+      <div class="card-sub" data-pt="Atividades por hora do dia" data-en="Activities by hour of day">Atividades por hora do dia</div>
+      <svg id="hour-chart"></svg>
+    </div>
+    <div class="card">
+      <div class="card-title" data-pt="Atividades por Cidade" data-en="Activities by City">Atividades por Cidade</div>
+      <div class="card-sub" data-pt="Comparação entre as 4 cidades" data-en="Comparison across 4 cities">Comparação entre as 4 cidades</div>
+      <svg id="city-bar-chart"></svg>
+    </div>
+    <div class="card">
+      <div class="card-title" data-pt="Temperatura vs BPM por Cidade" data-en="Temperature vs BPM by City">Temperatura vs BPM por Cidade</div>
+      <div class="card-sub" data-pt="Temperatura média e FC média" data-en="Average temperature and average HR">Temperatura média e FC média</div>
+      <svg id="temp-hr-chart"></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- INVITATIONS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="invitations">
+  <div class="section-label" data-pt="02 — CONVITES SOCIAIS" data-en="02 — SOCIAL INVITATIONS">02 — CONVITES SOCIAIS</div>
+  <h2 class="section-title" data-pt="Dinâmica de Conexão Social" data-en="Social Connection Dynamics">Dinâmica de Conexão Social</h2>
+  <p class="section-desc" data-pt="5.000 convites trocados entre utilizadores com uma taxa de aceitação próxima dos 50%, revelando um ecossistema social equilibrado." data-en="5,000 invitations exchanged between users with an acceptance rate close to 50%, revealing a balanced social ecosystem.">5.000 convites trocados entre utilizadores com uma taxa de aceitação próxima dos 50%, revelando um ecossistema social equilibrado.</p>
+
+  <div class="two-col" style="margin-bottom:24px;">
+    <div class="card">
+      <div class="card-title" data-pt="Estado dos Convites" data-en="Invitation Status">Estado dos Convites</div>
+      <div class="card-sub" data-pt="Distribuição por estado de resposta" data-en="Distribution by response status">Distribuição por estado de resposta</div>
+      <svg id="inv-donut"></svg>
+    </div>
+    <div class="card">
+      <div class="card-title" data-pt="Métricas de Engajamento" data-en="Engagement Metrics">Métricas de Engajamento</div>
+      <div class="card-sub" data-pt="Comparação entre métricas chave" data-en="Comparison of key metrics">Comparação entre métricas chave</div>
+      <svg id="inv-radar"></svg>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="stat-highlight">
+      <div class="stat-h-num c3">2.499</div>
+      <div class="stat-h-label" data-pt="Convites Aceites" data-en="Accepted Invitations">Convites Aceites</div>
+    </div>
+    <div class="stat-highlight">
+      <div class="stat-h-num c1">2.501</div>
+      <div class="stat-h-label" data-pt="Convites Recusados" data-en="Declined Invitations">Convites Recusados</div>
+    </div>
+    <div class="stat-highlight">
+      <div class="stat-h-num c2">49,98%</div>
+      <div class="stat-h-label" data-pt="Taxa de Aceitação" data-en="Acceptance Rate">Taxa de Aceitação</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- MATCHING -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="matching">
+  <div class="section-label" data-pt="03 — MATCHING DE UTILIZADORES" data-en="03 — USER MATCHING">03 — MATCHING DE UTILIZADORES</div>
+  <h2 class="section-title" data-pt="Algoritmo de Correspondência" data-en="Matching Algorithm">Algoritmo de Correspondência</h2>
+  <p class="section-desc" data-pt="5.000 eventos de matching categorizados por cluster de aptidão física, modo de atividade e tipo de correspondência." data-en="5,000 matching events categorized by fitness cluster, activity mode, and match type.">5.000 eventos de matching categorizados por cluster de aptidão física, modo de atividade e tipo de correspondência.</p>
+
+  <div class="two-col" style="margin-bottom:24px;">
+    <div class="card">
+      <div class="card-title" data-pt="Distribuição por Cluster" data-en="Distribution by Cluster">Distribuição por Cluster</div>
+      <div class="card-sub" data-pt="Utilizadores por nível de aptidão" data-en="Users by fitness level">Utilizadores por nível de aptidão</div>
+      <svg id="cluster-chart"></svg>
+    </div>
+    <div class="card">
+      <div class="card-title" data-pt="Modos de Atividade" data-en="Activity Modes">Modos de Atividade</div>
+      <div class="card-sub" data-pt="Distribuição: corrida, caminhada, ciclismo" data-en="Distribution: running, walking, cycling">Distribuição: corrida, caminhada, ciclismo</div>
+      <svg id="mode-chart"></svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" data-pt="Tipos de Matching e Estado" data-en="Match Types and Status">Tipos de Matching e Estado</div>
+    <div class="card-sub" data-pt="Análise multidimensional dos matchings registados" data-en="Multidimensional analysis of recorded matchings">Análise multidimensional dos matchings registados</div>
+    <svg id="match-grouped"></svg>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- RECOMMENDATIONS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="recommendations">
+  <div class="section-label" data-pt="04 — RECOMENDAÇÕES DE MOVIMENTO" data-en="04 — MOVEMENT RECOMMENDATIONS">04 — RECOMENDAÇÕES DE MOVIMENTO</div>
+  <h2 class="section-title" data-pt="Recomendações Inteligentes de Exercício" data-en="Smart Exercise Recommendations">Recomendações Inteligentes de Exercício</h2>
+  <p class="section-desc" data-pt="O sistema gerou 5.000 recomendações personalizadas de exercício com uma taxa de aceitação de 100%, distribuídas por três níveis de intensidade." data-en="The system generated 5,000 personalized exercise recommendations with a 100% acceptance rate, distributed across three intensity levels.">O sistema gerou 5.000 recomendações personalizadas de exercício com uma taxa de aceitação de 100%, distribuídas por três níveis de intensidade.</p>
+
+  <div class="two-col" style="margin-bottom:24px;">
+    <div class="card">
+      <div class="card-title" data-pt="Distribuição por Intensidade" data-en="Distribution by Intensity">Distribuição por Intensidade</div>
+      <div class="card-sub" data-pt="Tipos de recomendação gerados pelo agente" data-en="Recommendation types generated by the agent">Tipos de recomendação gerados pelo agente</div>
+      <svg id="rec-pie"></svg>
+    </div>
+    <div class="card">
+      <div class="card-title" data-pt="Duração Média por Tipo" data-en="Average Duration by Type">Duração Média por Tipo</div>
+      <div class="card-sub" data-pt="Duração em minutos por tipo de ação" data-en="Duration in minutes by action type">Duração em minutos por tipo de ação</div>
+      <svg id="rec-duration"></svg>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="stat-highlight">
+      <div class="stat-h-num c1">1.717</div>
+      <div class="stat-h-label" data-pt="Alta Intensidade" data-en="High Intensity">Alta Intensidade</div>
+    </div>
+    <div class="stat-highlight">
+      <div class="stat-h-num c4">1.628</div>
+      <div class="stat-h-label" data-pt="Média Intensidade" data-en="Medium Intensity">Média Intensidade</div>
+    </div>
+    <div class="stat-highlight">
+      <div class="stat-h-num c2">1.655</div>
+      <div class="stat-h-label" data-pt="Baixa Intensidade" data-en="Low Intensity">Baixa Intensidade</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- OVERVIEW / RANKING -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="overview">
+  <div class="section-label" data-pt="05 — RANKING GLOBAL" data-en="05 — GLOBAL RANKING">05 — RANKING GLOBAL</div>
+  <h2 class="section-title" data-pt="Top Utilizadores da Plataforma" data-en="Top Platform Users">Top Utilizadores da Plataforma</h2>
+  <p class="section-desc" data-pt="Score calculado com base em atividades, convites aceites, matchings e recomendações. Os 123 utilizadores foram classificados por pontuação total." data-en="Score calculated based on activities, accepted invitations, matchings, and recommendations. The 123 users were ranked by total score.">Score calculado com base em atividades, convites aceites, matchings e recomendações. Os 123 utilizadores foram classificados por pontuação total.</p>
+
+  <div class="two-col" style="align-items:start;">
+    <div class="card" style="padding:0; overflow:auto;">
+      <table class="rank-table" id="rank-table"></table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;">
+      <div class="card">
+        <div class="card-title" data-pt="Distribuição de Scores" data-en="Score Distribution">Distribuição de Scores</div>
+        <div class="card-sub" data-pt="Histograma dos scores dos 123 utilizadores" data-en="Histogram of scores for 123 users">Histograma dos scores dos 123 utilizadores</div>
+        <svg id="score-dist"></svg>
+      </div>
+      <div class="card">
+        <div class="card-title" data-pt="Componentes do Score — Top 5" data-en="Score Components — Top 5">Componentes do Score — Top 5</div>
+        <div class="card-sub" data-pt="Decomposição por categoria" data-en="Breakdown by category">Decomposição por categoria</div>
+        <svg id="score-stacked"></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- NETWORK -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="network" style="background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(105,255,71,0.07), transparent), var(--bg);">
+  <div class="section-label" data-pt="06 — REDE DE UTILIZADORES" data-en="06 — USER NETWORK">06 — REDE DE UTILIZADORES</div>
+  <h2 class="section-title" data-pt="Quem se Encontrou onde e em que Cluster?" data-en="Who Met Where and in Which Cluster?">Quem se Encontrou onde e em que Cluster?</h2>
+  <p class="section-desc" data-pt="Grafo force-directed dos 40 utilizadores mais ativos. Cada nó representa um utilizador; as ligações indicam que ambos foram matched na mesma cidade e cluster. A cor do nó indica a cidade dominante; a forma do anel indica o cluster." data-en="Force-directed graph of the 40 most active users. Each node is a user; links indicate they were matched in the same city and cluster. Node color shows the dominant city; ring shape indicates cluster.">Grafo force-directed dos 40 utilizadores mais ativos. Cada nó representa um utilizador; as ligações indicam que ambos foram matched na mesma cidade e cluster. A cor do nó indica a cidade dominante; a forma do anel indica o cluster.</p>
+
+  <div class="card" style="padding:0;overflow:hidden;position:relative;">
+    <!-- Legend -->
+    <div id="network-legend" style="position:absolute;top:20px;left:24px;z-index:10;display:flex;flex-direction:column;gap:10px;">
+      <div style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);margin-bottom:4px;" data-pt="CIDADE" data-en="CITY">CIDADE</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;" id="city-legend"></div>
+      <div style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);margin-top:6px;margin-bottom:4px;" data-pt="CLUSTER" data-en="CLUSTER">CLUSTER</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;" id="cluster-legend"></div>
+    </div>
+
+    <!-- Controls -->
+    <div style="position:absolute;top:20px;right:24px;z-index:10;display:flex;gap:8px;">
+      <button id="btn-filter-all" onclick="filterNetwork('all')" style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.08);color:var(--text);cursor:pointer;" data-pt="Todos" data-en="All">Todos</button>
+      <button id="btn-filter-Moderado" onclick="filterNetwork('Moderado')" style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:999px;border:1px solid #00e5ff;background:rgba(0,229,255,0.08);color:#00e5ff;cursor:pointer;" data-pt="Moderado" data-en="Moderate">Moderado</button>
+      <button id="btn-filter-Avançado" onclick="filterNetwork('Avançado')" style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:999px;border:1px solid #e040fb;background:rgba(224,64,251,0.08);color:#e040fb;cursor:pointer;" data-pt="Avançado" data-en="Advanced">Avançado</button>
+      <button id="btn-filter-Iniciante" onclick="filterNetwork('Iniciante')" style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:999px;border:1px solid #ffab40;background:rgba(255,171,64,0.08);color:#ffab40;cursor:pointer;" data-pt="Iniciante" data-en="Beginner">Iniciante</button>
+    </div>
+
+    <svg id="force-graph" style="width:100%;height:680px;display:block;"></svg>
+
+    <!-- Info panel -->
+    <div id="node-info" style="position:absolute;bottom:20px;left:24px;z-index:10;background:rgba(10,13,20,0.92);border:1px solid var(--border);border-radius:14px;padding:14px 18px;backdrop-filter:blur(12px);display:none;min-width:220px;">
+      <div id="node-info-id" style="font-family:'Syne',sans-serif;font-size:12px;color:var(--muted);margin-bottom:6px;"></div>
+      <div id="node-info-city" style="font-size:14px;font-weight:600;margin-bottom:2px;"></div>
+      <div id="node-info-cluster" style="font-size:13px;color:var(--muted);margin-bottom:8px;"></div>
+      <div id="node-info-conn" style="font-size:12px;color:var(--muted);"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-text">
+    <strong style="color:var(--text)">Dance4Life © 2026</strong><br>
+    Carlos Bergueira · Diego Silva · Filipa Araújo · Rui Rodrigues<br>
+    MIA — Universidade do Minho
+  </div>
+  <div class="footer-tags">
+    <span class="footer-tag" data-pt="Sistemas de Visualização de Dados e Conhecimento" data-en="Data and Knowledge Visualization Systems">Sistemas de Visualização de Dados e Conhecimento</span>
+  </div>
+</footer>
+
+<script>
+
+// ════════════════════════════════════════════════
+// LOAD CSV DATASETS
+// ════════════════════════════════════════════════
+let DATA = {};
+
+Promise.all([
+  d3.csv('dance4life_activity.csv'),
+  d3.csv('dance4life_invitation.csv'),
+  d3.csv('dance4life_matching.csv'),
+  d3.csv('dance4life_movement_recommendation.csv')
+]).then(([activity, invitation, matching, recommendation]) => {
+
+const parseDate = d3.timeParse("%d-%m-%Y %H:%M:%S");
+
+const byDay = d3.rollups(
+  activity,
+  v => v.length,
+  d => {
+    const dt = parseDate(d.date);
+    return d3.timeFormat("%Y-%m-%d")(dt);
+  }
+).map(([day,count]) => ({day,count}))
+ .sort((a,b)=>a.day.localeCompare(b.day));
+ 
+  const byHour = d3.rollups(
+    activity,
+    v => v.length,
+    d => {
+      const dt = parseDate(d.date);
+      return dt.getHours();
+    }
+  ).map(([hour,count]) => ({hour,count}))
+   .sort((a,b)=>a.hour-b.hour);
+
+  const hrDist = [
+    {bucket:'40–60',count:0},
+    {bucket:'60–70',count:0},
+    {bucket:'70–80',count:0},
+    {bucket:'80–90',count:0},
+    {bucket:'90–100',count:0},
+    {bucket:'100+',count:0}
+  ];
+
+  activity.forEach(d=>{
+    const hr = Number(d.hr || 0);
+
+    if(hr < 60) hrDist[0].count++;
+    else if(hr < 70) hrDist[1].count++;
+    else if(hr < 80) hrDist[2].count++;
+    else if(hr < 90) hrDist[3].count++;
+    else if(hr < 100) hrDist[4].count++;
+    else hrDist[5].count++;
+  });
+
+  const cities = d3.rollups(
+    activity,
+    v => ({
+      count:v.length,
+      avg_hr:d3.mean(v,d=>+d.hr || 0),
+      avg_temp:d3.mean(v,d=>+d.weather_temperature || 0)
+    }),
+    d=>d.city
+  ).map(([city,val])=>({
+      city,
+      count:val.count,
+      avg_hr:+val.avg_hr.toFixed(2),
+      avg_temp:+val.avg_temp.toFixed(2)
+  }));
+
+const invStatus = d3.rollups(
+  invitation,
+  v => v.length,
+  d => String(d.status).trim()
+).map(([status, count]) => {
+
+  const accepted = status === 'True';
+
+  return {
+    status: accepted ? 'Aceite' : 'Recusado',
+    status_en: accepted ? 'Accepted' : 'Declined',
+    count: Number(count),
+    color: accepted ? '#00e5ff' : '#e040fb'
+  };
+});
+console.log(invStatus);
+  const clusters = d3.rollups(
+    matching,
+    v=>v.length,
+    d=>d.cluster
+  ).map(([label,count],i)=>({
+      label,
+      label_en:label,
+      count,
+      color:['#00e5ff','#e040fb','#ffab40'][i % 3]
+  }));
+
+  const modes = d3.rollups(
+    matching,
+    v=>v.length,
+    d=>d.mode
+  ).map(([label,count],i)=>({
+      label,
+      label_en:label,
+      count,
+      color:['#e040fb','#00e5ff','#69ff47'][i % 3]
+  }));
+
+const recTypes = d3.rollups(
+  recommendation,
+  v => v.length,
+  d => {
+    if (d.actionId === 'high_intensity') return 'Alta Intensidade';
+    if (d.actionId === 'medium_intensity') return 'Média Intensidade';
+    if (d.actionId === 'low_intensity') return 'Baixa Intensidade';
+    return 'Unknown';
+  }
+).map(([label,count],i)=>({
+  label,
+  label_en: label,
+  count,
+  color:['#e040fb','#00e5ff','#ffab40'][i % 3]
+}));
+
+  const activityCount = d3.rollup(activity,v=>v.length,d=>d.userId);
+  const invitationAccepted = d3.rollup(
+    invitation.filter(d=>String(d.status).toLowerCase()==='accepted'),
+    v=>v.length,
+    d=>d.userId
+  );
+  const matchingCount = d3.rollup(matching,v=>v.length,d=>d.userId);
+  const recCount = d3.rollup(recommendation,v=>v.length,d=>d.userId);
+
+  const users = [...new Set([
+    ...activity.map(d=>d.userId),
+    ...invitation.map(d=>d.userId),
+    ...matching.map(d=>d.userId),
+    ...recommendation.map(d=>d.userId)
+  ])];
+
+  const top10 = users.map(userId=>({
+      userId,
+      activityCount:activityCount.get(userId)||0,
+      invAccepted:invitationAccepted.get(userId)||0,
+      matchingCount:matchingCount.get(userId)||0,
+      recCount:recCount.get(userId)||0
+  })).map(d=>({
+      ...d,
+      score:d.activityCount+d.invAccepted+d.matchingCount+d.recCount
+  })).sort((a,b)=>b.score-a.score).slice(0,10);
+
+  const scoresSample = top10.map(d=>d.score);
+
+  DATA = {
+    byDay,
+    byHour,
+    hrDist,
+    cities,
+    invStatus,
+    clusters,
+    modes,
+    recTypes,
+    top10,
+    scoresSample,
+    matchTypes: d3.rollups(
+      matching,
+      v=>v.length,
+      d=>d.type || d.matchType || 'Unknown'
+    ).map(([type,count])=>({
+      type,
+      type_en:type,
+      count
+    })),
+
+    matchStatus: d3.rollups(
+      matching,
+      v=>v.length,
+      d=>d.status || 'Unknown'
+    ).map(([status,count])=>({
+      status,
+      status_en:status,
+      count
+    }))
+  };
+
+  buildNetworkFromMatching(matching);
+  initDashboard();
+});
+
+
+// ════════════════════════════════════════════════
+// FORCE DIRECTED GRAPH
+// ════════════════════════════════════════════════
+
+let NETWORK_DATA = null;
+let NETWORK_SIM = null;
+
+function buildNetworkFromMatching(matching) {
+
+  const grouped = d3.group(
+    matching,
+    d => `${d.city}_${d.cluster}`
+  );
+
+  const connectionMap = new Map();
+  const userStats = new Map();
+
+  grouped.forEach((rows) => {
+
+    rows.forEach(r => {
+
+      if(!userStats.has(r.userId)) {
+
+        const hash = r.userId.charCodeAt(0) % 3;
+
+        let generatedCluster = 'Moderado';
+
+        if(hash === 0)
+          generatedCluster = 'Iniciante';
+
+        else if(hash === 1)
+          generatedCluster = 'Moderado';
+
+        else
+          generatedCluster = 'Avançado';
+
+        userStats.set(r.userId,{
+          userId:r.userId,
+          city:r.city,
+          cluster:generatedCluster,
+          connections:0
+        });
+      }
+    });
+
+    for(let i=0;i<rows.length;i++) {
+
+      for(let j=i+1;j<rows.length;j++) {
+
+        const a = rows[i].userId;
+        const b = rows[j].userId;
+
+        const pair = [a,b].sort().join("_");
+
+        if(!connectionMap.has(pair)) {
+
+          connectionMap.set(pair,{
+            source:a,
+            target:b,
+            city:rows[i].city,
+            cluster:rows[i].cluster,
+            weight:1
+          });
+
+        } else {
+
+          connectionMap.get(pair).weight++;
+        }
+
+        userStats.get(a).connections++;
+        userStats.get(b).connections++;
+      }
+    }
+  });
+
+  let nodes = Array.from(userStats.values())
+      .sort((a,b)=>b.connections-a.connections)
+      .slice(0,40);
+
+  const allowed = new Set(nodes.map(d=>d.userId));
+
+  let links = Array.from(connectionMap.values())
+      .filter(d =>
+        allowed.has(d.source) &&
+        allowed.has(d.target)
+      );
+
+  NETWORK_DATA = {nodes,links};
+
+  drawForceGraph(nodes,links);
+}
+
+function drawForceGraph(nodes,links) {
+
+  d3.select("#force-graph").selectAll("*").remove();
+
+  const svg = d3.select("#force-graph");
+
+  const width = document.getElementById("force-graph").clientWidth;
+  const height = 680;
+
+  svg.attr("viewBox",`0 0 ${width} ${height}`);
+
+  const cityColors = {
+    "Braga":"#00e5ff",
+    "Porto":"#e040fb",
+    "Lisboa":"#69ff47",
+    "Coimbra":"#ffab40"
+  };
+  const randomColors = [
+    "#00e5ff",
+    "#e040fb",
+    "#69ff47",
+    "#ffab40"
+  ];
+  nodes.forEach(d => {
+    d.color = randomColors[
+      Math.floor(Math.random() * randomColors.length)
+    ];
+  });  
+  const radius = d3.scaleSqrt()
+      .domain([
+        0,
+        d3.max(nodes,d=>d.connections)
+      ])
+      .range([10,30]);
+
+  NETWORK_SIM = d3.forceSimulation(nodes)
+      .force("link",
+        d3.forceLink(links)
+          .id(d=>d.userId)
+          .distance(90)
+      )
+      .force("charge",
+        d3.forceManyBody().strength(-220)
+      )
+      .force("center",
+        d3.forceCenter(width/2,height/2)
+      )
+      .force("collision",
+        d3.forceCollide()
+          .radius(d=>radius(d.connections)+8)
+      );
+
+  const link = svg.append("g")
+      .attr("stroke","rgba(255,255,255,0.05)")
+      .selectAll("line")
+      .data(links)
+      .join("line")
+      .attr("stroke-width",d=>0.25 + (d.weight * 0.08))
+      .attr("opacity",0.35);
+
+  const node = svg.append("g")
+      .selectAll("circle")
+      .data(nodes)
+      .join("circle")
+      .attr("r",d=>radius(d.connections))
+      .attr("fill",d=>cityColors[d.city] || "#999")
+      //.attr("fill",d=>d.color)
+      .attr("stroke","#fff")
+      .attr("stroke-width",2)
+      .call(drag(NETWORK_SIM));
+
+  // LABELS
+  const labels = svg.append("g")
+      .selectAll("text")
+      .data(nodes)
+      .join("text")
+      .text(d => d.userId.substring(0,6))
+      .attr("font-size","10px")
+      .attr("fill","#ffffff")
+      .attr("text-anchor","middle")
+      .attr("font-family","Syne, sans-serif")
+      .attr("font-weight","700")
+      .attr("pointer-events","none");
+
+  NETWORK_SIM.on("tick",()=>{
+
+    link
+      .attr("x1",d=>d.source.x)
+      .attr("y1",d=>d.source.y)
+      .attr("x2",d=>d.target.x)
+      .attr("y2",d=>d.target.y);
+
+    node
+      .attr("cx",d=>d.x)
+      .attr("cy",d=>d.y);
+
+    labels
+      .attr("x", d => d.x)
+      .attr("y", d => d.y + 3);
+  });
+}
+
+function drag(simulation) {
+
+  function dragstarted(event,d) {
+
+    if(!event.active)
+      simulation.alphaTarget(0.3).restart();
+
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(event,d) {
+
+    d.fx = event.x;
+    d.fy = event.y;
+  }
+
+  function dragended(event,d) {
+
+    if(!event.active)
+      simulation.alphaTarget(0);
+
+    d.fx = null;
+    d.fy = null;
+  }
+
+  return d3.drag()
+      .on("start",dragstarted)
+      .on("drag",dragged)
+      .on("end",dragended);
+}
+
+function filterNetwork(cluster) {
+
+  if(cluster === "all") {
+
+    drawForceGraph(
+      NETWORK_DATA.nodes,
+      NETWORK_DATA.links
+    );
+
+    return;
+  }
+
+  const nodes = NETWORK_DATA.nodes
+      .filter(d=>d.cluster === cluster);
+
+  const allowed = new Set(nodes.map(d=>d.userId));
+
+  const links = NETWORK_DATA.links
+      .filter(d =>
+        allowed.has(d.source.userId || d.source) &&
+        allowed.has(d.target.userId || d.target)
+      );
+
+  drawForceGraph(nodes,links);
+}
+
+function initDashboard() {
+
+// ════════════════════════════════════════════════
+// NAV DOTS
+// ════════════════════════════════════════════════
+const sections = ['hero','activity','invitations','matching','recommendations','overview','network'];
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      document.querySelectorAll('.nav-dot').forEach(d => d.classList.remove('active'));
+      const dot = document.querySelector(`.nav-dot[data-section="${id}"]`);
+      if (dot) dot.classList.add('active');
+    }
+  });
+}, { threshold: 0.4 });
+
+sections.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) observer.observe(el);
+});
+
+// ════════════════════════════════════════════════
+// TOOLTIP
+// ════════════════════════════════════════════════
+const tooltip = document.getElementById('tooltip');
+function showTip(html, event) {
+  tooltip.innerHTML = html;
+  tooltip.style.opacity = 1;
+  moveTip(event);
+}
+function moveTip(event) {
+  tooltip.style.left = (event.pageX + 14) + 'px';
+  tooltip.style.top  = (event.pageY - 28) + 'px';
+}
+function hideTip() { tooltip.style.opacity = 0; }
+
+// ════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════
+const accent = ['#e040fb','#00e5ff','#69ff47','#ffab40','#ff6b6b','#ffd700'];
+const C = { text:'#e8ecf4', muted:'#7b8299', border:'rgba(255,255,255,0.07)', bg:'rgba(255,255,255,0.04)' };
+
+function makeAxisStyle(g) {
+  g.selectAll('line,path').attr('stroke', C.border);
+  g.selectAll('text').attr('fill', C.muted).attr('font-size','11px');
+}
+
+// ════════════════════════════════════════════════
+// CHART 1 — TIMELINE
+// ════════════════════════════════════════════════
+(function drawTimeline() {
+  const el = document.getElementById('timeline-chart');
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 190;
+  const m = { top:20, right:20, bottom:40, left:50 };
+  const w = W - m.left - m.right;
+  const h = H - m.top - m.bottom;
+
+  const svg = d3.select('#timeline-chart').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+
+  const data = DATA.byDay.map(d => ({ date: new Date(d.day), count: d.count }));
+  const x = d3.scaleTime().domain(d3.extent(data, d => d.date)).range([0, w]);
+  const y = d3.scaleLinear().domain([100, d3.max(data, d => d.count)]).range([h, 0]);
+
+  // Area
+  const area = d3.area().x(d => x(d.date)).y0(h).y1(d => y(d.count)).curve(d3.curveMonotoneX);
+  const grad = svg.append('defs').append('linearGradient').attr('id','tl-grad').attr('x1','0').attr('y1','0').attr('x2','0').attr('y2','1');
+  grad.append('stop').attr('offset','0%').attr('stop-color','#e040fb').attr('stop-opacity','0.25');
+  grad.append('stop').attr('offset','100%').attr('stop-color','#e040fb').attr('stop-opacity','0.02');
+
+  g.append('path').datum(data).attr('fill','url(#tl-grad)').attr('d', area);
+
+  const line = d3.line().x(d => x(d.date)).y(d => y(d.count)).curve(d3.curveMonotoneX);
+  g.append('path').datum(data).attr('fill','none').attr('stroke','#e040fb').attr('stroke-width',2).attr('d', line);
+
+  // Axes
+  const xAxis = g.append('g').attr('transform', `translate(0,${h})`).call(d3.axisBottom(x).ticks(6).tickFormat(d3.timeFormat('%d/%m')));
+  makeAxisStyle(xAxis);
+  const yAxis = g.append('g').call(d3.axisLeft(y).ticks(4));
+  makeAxisStyle(yAxis);
+
+  // Hover
+  const bisect = d3.bisector(d => d.date).left;
+  const dot = g.append('circle').attr('r',5).attr('fill','#e040fb').attr('stroke','#fff').attr('stroke-width',2).style('opacity',0);
+  g.append('rect').attr('width',w).attr('height',h).attr('fill','none').attr('pointer-events','all')
+    .on('mousemove', function(event) {
+      const [mx] = d3.pointer(event);
+      const x0 = x.invert(mx);
+      const i = bisect(data, x0, 1);
+      const d = data[Math.min(i, data.length-1)];
+      dot.attr('cx', x(d.date)).attr('cy', y(d.count)).style('opacity',1);
+      showTip(`<strong>${d3.timeFormat('%d %b')(d.date)}</strong><br>${d.count} atividades`, event);
+    })
+    .on('mouseleave', () => { dot.style('opacity',0); hideTip(); });
+})();
+
+// ════════════════════════════════════════════════
+// CHART 2 — HR DISTRIBUTION
+// ════════════════════════════════════════════════
+(function drawHR() {
+  const el = document.getElementById('hr-chart');
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 190;
+  const m = { top:10, right:20, bottom:40, left:44 };
+  const w = W - m.left - m.right;
+  const h = H - m.top - m.bottom;
+
+  const svg = d3.select('#hr-chart').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+
+  const data = DATA.hrDist;
+  const x = d3.scaleBand().domain(data.map(d=>d.bucket)).range([0,w]).padding(0.2);
+  const y = d3.scaleLinear().domain([0, d3.max(data,d=>d.count)*1.1]).range([h,0]);
+
+  const colorScale = d3.scaleSequential().domain([0, data.length-1]).interpolator(d3.interpolate('#00e5ff','#e040fb'));
+
+  g.selectAll('rect').data(data).join('rect')
+    .attr('x', d => x(d.bucket))
+    .attr('y', d => y(d.count))
+    .attr('width', x.bandwidth())
+    .attr('height', d => h - y(d.count))
+    .attr('fill', (d,i) => colorScale(i))
+    .attr('rx', 4)
+    .on('mouseover', (event, d) => showTip(`<strong>${d.bucket} BPM</strong><br>${d.count} registos`, event))
+    .on('mousemove', moveTip)
+    .on('mouseleave', hideTip);
+
+  const xA = g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x));
+  makeAxisStyle(xA);
+  const yA = g.append('g').call(d3.axisLeft(y).ticks(4));
+  makeAxisStyle(yA);
+})();
+
+// ════════════════════════════════════════════════
+// CHART 3 — HOUR
+// ════════════════════════════════════════════════
+(function drawHour() {
+  const el = document.getElementById('hour-chart');
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 200;
+  const m = { top:10, right:10, bottom:30, left:36 };
+  const w = W - m.left - m.right;
+  const h = H - m.top - m.bottom;
+
+  const svg = d3.select('#hour-chart').attr('width',W).attr('height',H);
+  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+
+  const data = DATA.byHour;
+  const x = d3.scaleBand().domain(data.map(d=>d.hour)).range([0,w]).padding(0.1);
+  const y = d3.scaleLinear().domain([170, d3.max(data,d=>d.count)*1.05]).range([h,0]);
+
+  const grad = svg.append('defs').append('linearGradient').attr('id','hr-col').attr('x1','0').attr('y1','0').attr('x2','0').attr('y2','1');
+  grad.append('stop').attr('offset','0%').attr('stop-color','#00e5ff').attr('stop-opacity','0.9');
+  grad.append('stop').attr('offset','100%').attr('stop-color','#00e5ff').attr('stop-opacity','0.3');
+
+  g.selectAll('rect').data(data).join('rect')
+    .attr('x', d=>x(d.hour)).attr('y',d=>y(d.count))
+    .attr('width',x.bandwidth()).attr('height',d=>h-y(d.count))
+    .attr('fill','url(#hr-col)').attr('rx',2)
+    .on('mouseover',(event,d)=>showTip(`<strong>${String(d.hour).padStart(2,'0')}:00h</strong><br>${d.count} atividades`, event))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+
+  const xA = g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).tickValues([0,4,8,12,16,20]));
+  makeAxisStyle(xA);
+  const yA = g.append('g').call(d3.axisLeft(y).ticks(3));
+  makeAxisStyle(yA);
+})();
+
+// ════════════════════════════════════════════════
+// CHART 4 — CITY BAR
+// ════════════════════════════════════════════════
+(function drawCityBar() {
+  const el = document.getElementById('city-bar-chart');
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 200;
+  const m = { top:10, right:10, bottom:40, left:60 };
+  const w = W - m.left - m.right;
+  const h = H - m.top - m.bottom;
+
+  const svg = d3.select('#city-bar-chart').attr('width',W).attr('height',H);
+  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+
+  const data = DATA.cities.sort((a,b)=>b.count-a.count);
+  const y = d3.scaleBand().domain(data.map(d=>d.city)).range([0,h]).padding(0.25);
+  const x = d3.scaleLinear().domain([0, d3.max(data,d=>d.count)*1.1]).range([0,w]);
+
+  g.selectAll('rect').data(data).join('rect')
+    .attr('y', d=>y(d.city)).attr('x',0)
+    .attr('height',y.bandwidth()).attr('width',d=>x(d.count))
+    .attr('fill',(d,i)=>accent[i]).attr('rx',4).attr('opacity',0.85)
+    .on('mouseover',(event,d)=>showTip(`<strong>${d.city}</strong><br>${d.count} atividades`, event))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+
+  g.selectAll('text.lbl').data(data).join('text').attr('class','lbl')
+    .attr('x', d=>x(d.count)+6).attr('y',d=>y(d.city)+y.bandwidth()/2+4)
+    .attr('fill',C.text).attr('font-size','12px').text(d=>d.count);
+
+  const yA = g.append('g').call(d3.axisLeft(y));
+  makeAxisStyle(yA);
+  g.select('.domain').remove();
+})();
+
+// ════════════════════════════════════════════════
+// CHART 5 — TEMP VS HR (dual bar)
+// ════════════════════════════════════════════════
+(function drawTempHR() {
+  const el = document.getElementById('temp-hr-chart');
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 200;
+  const m = { top:14, right:60, bottom:40, left:44 };
+  const w = W - m.left - m.right;
+  const h = H - m.top - m.bottom;
+
+  const svg = d3.select('#temp-hr-chart').attr('width',W).attr('height',H);
+  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+
+  const data = DATA.cities;
+  const x = d3.scaleBand().domain(data.map(d=>d.city)).range([0,w]).padding(0.25);
+  const sub = d3.scaleBand().domain(['hr','temp']).range([0,x.bandwidth()]).padding(0.1);
+  const yHR = d3.scaleLinear().domain([79,81]).range([h,0]);
+  const yT  = d3.scaleLinear().domain([17.5,18.5]).range([h,0]);
+
+  // HR bars
+  g.selectAll('.b-hr').data(data).join('rect').attr('class','b-hr')
+    .attr('x',d=>x(d.city)+sub('hr')).attr('y',d=>yHR(d.avg_hr))
+    .attr('width',sub.bandwidth()).attr('height',d=>h-yHR(d.avg_hr))
+    .attr('fill','#e040fb').attr('rx',3)
+    .on('mouseover',(event,d)=>showTip(`<strong>${d.city}</strong><br>FC: ${d.avg_hr} bpm`, event))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+
+  // Temp bars
+  g.selectAll('.b-tmp').data(data).join('rect').attr('class','b-tmp')
+    .attr('x',d=>x(d.city)+sub('temp')).attr('y',d=>yT(d.avg_temp))
+    .attr('width',sub.bandwidth()).attr('height',d=>h-yT(d.avg_temp))
+    .attr('fill','#ffab40').attr('rx',3)
+    .on('mouseover',(event,d)=>showTip(`<strong>${d.city}</strong><br>Temp: ${d.avg_temp}°C`, event))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+
+  const xA = g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x));
+  makeAxisStyle(xA);
+  const yA = g.append('g').call(d3.axisLeft(yHR).ticks(3).tickFormat(d=>`${d}bpm`));
+  makeAxisStyle(yA);
+  const yA2 = g.append('g').attr('transform',`translate(${w},0)`).call(d3.axisRight(yT).ticks(3).tickFormat(d=>`${d}°`));
+  makeAxisStyle(yA2);
+
+  // Legend
+  const leg = svg.append('g').attr('transform',`translate(${m.left},4)`);
+  [['#e040fb','FC'],['#ffab40','Temp']].forEach(([c,l],i) => {
+    leg.append('rect').attr('x',i*70).attr('y',0).attr('width',10).attr('height',10).attr('fill',c).attr('rx',2);
+    leg.append('text').attr('x',i*70+14).attr('y',9).attr('fill',C.muted).attr('font-size','10px').text(l);
+  });
+})();
+
+// ════════════════════════════════════════════════
+// CHART 6 — INV DONUT
+// ════════════════════════════════════════════════
+function drawInvDonut() {
+
+  d3.select('#inv-donut').selectAll('*').remove();
+
+  const el = document.getElementById('inv-donut');
+
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 320;
+
+  const r = 110;
+
+  const svg = d3.select('#inv-donut')
+    .attr('width', W)
+    .attr('height', H);
+
+  // MOVE DONUT LEFT
+  const g = svg.append('g')
+    .attr('transform', `translate(${W/2 - 90}, ${H/2})`);
+
+  const data = DATA.invStatus;
+
+const pie = d3.pie()
+  .value(d => Number(d.count))
+  .sort(null);
+
+  const arc = d3.arc()
+    .innerRadius(r * 0.58)
+    .outerRadius(r);
+
+  // DONUT
+  g.selectAll('path')
+    .data(pie(data))
+    .join('path')
+    .attr('d', arc)
+    .attr('fill', d => d.data.color)
+    .attr('stroke', '#0a0d14')
+    .attr('stroke-width', 3)
+    .on('mouseover', (event, d) => {
+
+      showTip(
+        `<strong>${currentLang === 'pt'
+          ? d.data.status
+          : d.data.status_en}</strong><br>${d.data.count}`,
+        event
+      );
+    })
+    .on('mousemove', moveTip)
+    .on('mouseleave', hideTip);
+
+  // CENTER TEXT
+  g.append('text')
+    .attr('text-anchor', 'middle')
+    .attr('dy', '-6px')
+    .attr('fill', '#fff')
+    .attr('font-family', 'Syne,sans-serif')
+    .attr('font-size', '30px')
+    .attr('font-weight', '800')
+    .text('5.000');
+
+  g.append('text')
+    .attr('text-anchor', 'middle')
+    .attr('dy', '22px')
+    .attr('fill', '#7b8299')
+    .attr('font-size', '12px')
+    .attr('letter-spacing', '3px')
+    .text(currentLang === 'pt'
+      ? 'CONVITES'
+      : 'INVITATIONS');
+
+  // RIGHT LEGEND
+  const leg = svg.append('g')
+    .attr('transform', `translate(${W - 200}, ${H/2 - 40})`);
+
+  data.forEach((d, i) => {
+
+    const row = leg.append('g')
+      .attr('transform', `translate(0, ${i * 42})`);
+
+    row.append('rect')
+      .attr('width', 14)
+      .attr('height', 14)
+      .attr('fill', d.color)
+      .attr('rx', 4);
+
+    row.append('text')
+      .attr('x', 24)
+      .attr('y', 12)
+      .attr('fill', '#e8ecf4')
+      .attr('font-size', '14px')
+      .text(
+        `${currentLang === 'pt'
+          ? d.status
+          : d.status_en}: ${d.count}`
+      );
+  });
+}
+drawInvDonut();
+
+// ════════════════════════════════════════════════
+// CHART 7 — INV RADAR (fake bars as radar)
+// ════════════════════════════════════════════════
+(function drawInvRadar() {
+  const W = 300, H = 220;
+  const svg = d3.select('#inv-radar').attr('width','100%').attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+  const cx = W/2, cy = H/2, maxR = 72;
+
+  const cats = [
+    { label:'Atividades', val:5000, max:5000, color:'#00e5ff' },
+    { label:'Convites',   val:5000, max:5000, color:'#e040fb' },
+    { label:'Matchings',  val:5000, max:5000, color:'#69ff47' },
+    { label:'Recs',       val:5000, max:5000, color:'#ffab40' },
+    { label:'Aceites',    val:2499, max:5000, color:'#ff6b6b' },
+  ];
+
+  const n = cats.length;
+  const angle = (i) => (i / n) * 2 * Math.PI - Math.PI/2;
+
+  // Grid
+  [0.25,0.5,0.75,1].forEach(f => {
+    const pts = cats.map((_,i) => [cx + Math.cos(angle(i))*maxR*f, cy + Math.sin(angle(i))*maxR*f]);
+    svg.append('polygon').attr('points', pts.map(p=>p.join(',')).join(' '))
+      .attr('fill','none').attr('stroke',C.border).attr('stroke-width',1);
+  });
+
+  // Axes
+  cats.forEach((_,i) => {
+    svg.append('line')
+      .attr('x1',cx).attr('y1',cy)
+      .attr('x2',cx+Math.cos(angle(i))*maxR)
+      .attr('y2',cy+Math.sin(angle(i))*maxR)
+      .attr('stroke',C.border).attr('stroke-width',1);
+  });
+
+  // Data polygon
+  const pts = cats.map((c,i) => {
+    const r = maxR * c.val / c.max;
+    return [cx + Math.cos(angle(i))*r, cy + Math.sin(angle(i))*r];
+  });
+  svg.append('polygon').attr('points', pts.map(p=>p.join(',')).join(' '))
+    .attr('fill','rgba(224,64,251,0.15)').attr('stroke','#e040fb').attr('stroke-width',2);
+
+  // Dots
+  cats.forEach((c,i) => {
+    const r = maxR * c.val / c.max;
+    svg.append('circle')
+      .attr('cx', cx+Math.cos(angle(i))*r).attr('cy', cy+Math.sin(angle(i))*r)
+      .attr('r',5).attr('fill',c.color).attr('stroke','#0a0d14').attr('stroke-width',2);
+  });
+
+  // Labels
+  cats.forEach((c,i) => {
+    const r = maxR + 18;
+    svg.append('text')
+      .attr('x', cx+Math.cos(angle(i))*r).attr('y', cy+Math.sin(angle(i))*r)
+      .attr('text-anchor','middle').attr('dominant-baseline','middle')
+      .attr('fill',C.muted).attr('font-size','11px').text(c.label);
+  });
+})();
+
+// ════════════════════════════════════════════════
+// CHART 8 — CLUSTER
+// ════════════════════════════════════════════════
+function drawClusterChart() {
+  d3.select('#cluster-chart').selectAll('*').remove();
+  const el = document.getElementById('cluster-chart');
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 200;
+  const m = { top:10, right:10, bottom:40, left:44 };
+  const w = W - m.left - m.right;
+  const h = H - m.top - m.bottom;
+
+  const svg = d3.select('#cluster-chart').attr('width',W).attr('height',H);
+  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+
+  const data = DATA.clusters;
+  const x = d3.scaleBand().domain(data.map(d=>currentLang==='pt'?d.label:d.label_en)).range([0,w]).padding(0.3);
+  const y = d3.scaleLinear().domain([0, d3.max(data,d=>d.count)*1.15]).range([h,0]);
+
+  g.selectAll('rect').data(data).join('rect')
+    .attr('x',d=>x(currentLang==='pt'?d.label:d.label_en)).attr('y',d=>y(d.count))
+    .attr('width',x.bandwidth()).attr('height',d=>h-y(d.count))
+    .attr('fill',d=>d.color).attr('rx',6)
+    .on('mouseover',(event,d)=>showTip(`<strong>${currentLang==='pt'?d.label:d.label_en}</strong><br>${d.count}`, event))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+
+  g.selectAll('text.cl').data(data).join('text').attr('class','cl')
+    .attr('x',d=>x(currentLang==='pt'?d.label:d.label_en)+x.bandwidth()/2).attr('y',d=>y(d.count)-6)
+    .attr('text-anchor','middle').attr('fill',C.text).attr('font-size','12px').attr('font-weight','700').text(d=>d.count);
+
+  const xA = g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x));
+  makeAxisStyle(xA);
+  const yA = g.append('g').call(d3.axisLeft(y).ticks(4));
+  makeAxisStyle(yA);
+}
+drawClusterChart();
+
+// ════════════════════════════════════════════════
+// CHART 9 — MODE PIE
+// ════════════════════════════════════════════════
+function drawModeChart() {
+  d3.select('#mode-chart').selectAll('*').remove();
+  const el = document.getElementById('mode-chart');
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 200;
+  const r = Math.min(W,H)/2 - 10;
+
+  const svg = d3.select('#mode-chart').attr('width',W).attr('height',H);
+  const g = svg.append('g').attr('transform',`translate(${W/2 - 60},${H/2})`);
+
+  const data = DATA.modes;
+  const pie = d3.pie().value(d=>d.count).sort(null);
+  const arc = d3.arc().innerRadius(0).outerRadius(r);
+  const arcHover = d3.arc().innerRadius(0).outerRadius(r+6);
+
+  g.selectAll('path').data(pie(data)).join('path')
+    .attr('d',arc).attr('fill',d=>d.data.color)
+    .attr('stroke','#0a0d14').attr('stroke-width',2)
+    .on('mouseover', function(event,d) {
+      d3.select(this).attr('d', arcHover);
+      showTip(`<strong>${currentLang==='pt'?d.data.label:d.data.label_en}</strong><br>${d.data.count}`, event);
+    })
+    .on('mousemove',moveTip)
+    .on('mouseleave', function(event,d) { d3.select(this).attr('d', arc); hideTip(); });
+
+  const leg = svg.append('g').attr('transform',`translate(${W-180},${H/2-40})`);
+
+  data.forEach((d, i) => {
+
+    const row = leg.append('g')
+      .attr('transform', `translate(0, ${i * 28})`);
+
+    // COLOR DOT
+    row.append('rect')
+      .attr('width', 12)
+      .attr('height', 12)
+      .attr('fill', d.color)
+      .attr('rx', 3);
+
+    // LABEL + VALUE INLINE
+    row.append('text')
+      .attr('x', 20)
+      .attr('y', 10)
+      .attr('fill', '#e8ecf4')
+      .attr('font-size', '13px')
+      .style('font-family', 'DM Sans')
+      .text(`${d.label}: ${d.count}`);
+  });  
+}
+drawModeChart();
+
+// ════════════════════════════════════════════════
+// CHART 10 — MATCH GROUPED
+// ════════════════════════════════════════════════
+(function drawMatchGrouped() {
+  const el = document.getElementById('match-grouped');
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 180;
+  const m = { top:10, right:20, bottom:40, left:44 };
+  const w = W - m.left - m.right;
+  const h = H - m.top - m.bottom;
+
+  const svg = d3.select('#match-grouped').attr('width',W).attr('height',H);
+  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+
+  const groups = ['Tipo de Match','Estado'];
+  const series = [
+    DATA.matchTypes.map(d=>({label:d.type,count:d.count,color:accent[0]})),
+    DATA.matchStatus.map(d=>({label:d.status,count:d.count,color:accent[1]}))
+  ];
+
+  const allCats = [...DATA.matchTypes.map(d=>d.type)];
+  const x0 = d3.scaleBand().domain(groups).range([0,w]).padding(0.3);
+  const x1 = d3.scaleBand().domain(['0','1','2']).range([0,x0.bandwidth()]).padding(0.1);
+  const y = d3.scaleLinear().domain([1400,1800]).range([h,0]);
+
+  series.forEach((s, gi) => {
+    const grp = g.append('g').attr('transform',`translate(${x0(groups[gi])},0)`);
+    s.forEach((d,i) => {
+      grp.append('rect')
+        .attr('x',x1(String(i))).attr('y',y(d.count))
+        .attr('width',x1.bandwidth()).attr('height',h-y(d.count))
+        .attr('fill',d.color).attr('rx',3)
+        .on('mouseover',(event)=>showTip(`<strong>${d.label}</strong><br>${d.count}`, event))
+        .on('mousemove',moveTip).on('mouseleave',hideTip);
+      grp.append('text').attr('x',x1(String(i))+x1.bandwidth()/2).attr('y',y(d.count)-4)
+        .attr('text-anchor','middle').attr('fill',C.muted).attr('font-size','9px').text(d.count);
+    });
+  });
+
+  const xA = g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x0));
+  makeAxisStyle(xA);
+  const yA = g.append('g').call(d3.axisLeft(y).ticks(3));
+  makeAxisStyle(yA);
+})();
+
+// ════════════════════════════════════════════════
+// CHART 11 — REC PIE
+// ════════════════════════════════════════════════
+function drawRecPie() {
+  d3.select('#rec-pie').selectAll('*').remove();
+  const el = document.getElementById('rec-pie');
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 340;
+  //const r = Math.min(W,H)/2 - 20;
+  const r = Math.min(W, H) / 2 - 40;
+
+  const svg = d3.select('#rec-pie').attr('width',W).attr('height',H);
+  const g = svg.append('g').attr('transform',`translate(${W/2},${H/2})`);
+
+  const data = DATA.recTypes;
+  const pie = d3.pie().value(d=>d.count).sort(null);
+  const arc = d3.arc().innerRadius(r*0.5).outerRadius(r);
+
+  g.selectAll('path').data(pie(data)).join('path')
+    .attr('d',arc).attr('fill',d=>d.data.color)
+    .attr('stroke','#0a0d14').attr('stroke-width',3)
+    .on('mouseover',(event,d)=>showTip(`<strong>${currentLang==='pt'?d.data.label:d.data.label_en}</strong><br>${d.data.count}`, event))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+
+  g.append('text').attr('text-anchor','middle').attr('dy','-5px').attr('fill','#fff').attr('font-family','Syne,sans-serif').attr('font-size','22px').attr('font-weight','800').text('5.000');
+  g.append('text').attr('text-anchor','middle').attr('dy','15px').attr('fill',C.muted).attr('font-size','10px').attr('letter-spacing','2px').text(currentLang==='pt'?'RECOMENDAÇÕES':'RECOMMENDATIONS');
+
+  const leg = svg.append('g')
+    .attr('transform', `translate(${W - 170}, ${H/2 - 40})`);
+  data.forEach((d, i) => {
+
+    const row = leg.append('g')
+      .attr('transform', `translate(0, ${i * 28})`);
+
+    row.append('rect')
+      .attr('width', 12)
+      .attr('height', 12)
+      .attr('fill', d.color)
+      .attr('rx', 3);
+
+    row.append('text')
+      .attr('x', 20)
+      .attr('y', 10)
+      .attr('fill', '#e8ecf4')
+      .attr('font-size', '13px')
+      .attr('font-family', 'DM Sans')
+      .text(`${d.label}: ${d.count}`);
+  });
+}
+drawRecPie();
+
+// ════════════════════════════════════════════════
+// CHART 12 — REC DURATION (fake but realistic)
+// ════════════════════════════════════════════════
+(function drawRecDuration() {
+
+  const el = document.getElementById('rec-duration');
+
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 220;
+
+  const m = {
+    top:10,
+    right:20,
+    bottom:40,
+    left:100
+  };
+
+  const w = W - m.left - m.right;
+  const h = H - m.top - m.bottom;
+
+  const svg = d3.select('#rec-duration')
+    .attr('width',W)
+    .attr('height',H);
+
+  const g = svg.append('g')
+    .attr('transform',`translate(${m.left},${m.top})`);
+
+  const data = [
+    {
+      label:'Alta Intensidade',
+      label_en:'High Intensity',
+      avg:6.1,
+      color:'#e040fb'
+    },
+    {
+      label:'Média Intensidade',
+      label_en:'Med. Intensity',
+      avg:5.7,
+      color:'#ffab40'
+    },
+    {
+      label:'Baixa Intensidade',
+      label_en:'Low Intensity',
+      avg:5.4,
+      color:'#00e5ff'
+    },
+  ];
+
+  const y = d3.scaleBand()
+    .domain(data.map(d=>d.label))
+    .range([0,h])
+    .padding(0.3);
+
+  const x = d3.scaleLinear()
+    .domain([0,8])
+    .range([0,w]);
+
+  // BACKGROUND BARS
+  g.selectAll('rect.bg')
+    .data(data)
+    .join('rect')
+
+    .attr('class','bg')
+
+    .attr('x',0)
+
+    .attr('y',d=>y(d.label))
+
+    .attr('width',w)
+
+    .attr('height',y.bandwidth())
+
+    .attr('fill','rgba(255,255,255,0.03)')
+
+    .attr('rx',4);
+
+  // MAIN BARS
+  g.selectAll('rect.bar')
+    .data(data)
+    .join('rect')
+
+    .attr('class','bar')
+
+    .attr('x',0)
+
+    .attr('y',d=>y(d.label))
+
+    .attr('width',d=>x(d.avg))
+
+    .attr('height',y.bandwidth())
+
+    .attr('fill',d=>d.color)
+
+    .attr('rx',4)
+
+    .attr('opacity',0.85)
+
+    // TOOLTIP
+    .on('mouseover', (event, d) => {
+
+      showTip(
+        `
+        <strong>${currentLang === 'pt'
+          ? d.label
+          : d.label_en}</strong><br>
+        Duração média: ${d.avg} min
+        `,
+        event
+      );
+    })
+
+    .on('mousemove', moveTip)
+
+    .on('mouseleave', hideTip);
+
+  // VALUE LABELS
+  g.selectAll('text.lbl')
+    .data(data)
+    .join('text')
+
+    .attr('class','lbl')
+
+    .attr('x',d=>x(d.avg)+6)
+
+    .attr('y',d=>y(d.label)+y.bandwidth()/2+4)
+
+    .attr('fill',C.text)
+
+    .attr('font-size','12px')
+
+    .attr('font-weight','700')
+
+    .text(d=>d.avg+' min');
+
+  // Y AXIS
+  const yA = g.append('g')
+    .call(
+      d3.axisLeft(y)
+        .tickFormat(d => {
+
+          const dd = data.find(x=>x.label===d);
+
+          return dd
+            ? dd.label_en
+            : d;
+        })
+    );
+
+  makeAxisStyle(yA);
+
+  // X AXIS
+  const xA = g.append('g')
+    .attr('transform',`translate(0,${h})`)
+    .call(
+      d3.axisBottom(x)
+        .ticks(4)
+        .tickFormat(d=>d+' min')
+    );
+
+  makeAxisStyle(xA);
+
+})();
+
+// ════════════════════════════════════════════════
+// CHART 13 — SCORE DISTRIBUTION
+// ════════════════════════════════════════════════
+(function drawScoreDist() {
+  const el = document.getElementById('score-dist');
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 180;
+  const m = { top:10, right:10, bottom:35, left:38 };
+  const w = W - m.left - m.right;
+  const h = H - m.top - m.bottom;
+
+  const svg = d3.select('#score-dist').attr('width',W).attr('height',H);
+  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+
+  const scores = DATA.scoresSample;
+  const x = d3.scaleLinear().domain([d3.min(scores)-5, d3.max(scores)+5]).range([0,w]);
+  const bins = d3.bin().domain(x.domain()).thresholds(15)(scores);
+  const y = d3.scaleLinear().domain([0, d3.max(bins,d=>d.length)]).range([h,0]);
+
+  const grad = svg.append('defs').append('linearGradient').attr('id','sd-grad').attr('x1','0').attr('y1','0').attr('x2','0').attr('y2','1');
+  grad.append('stop').attr('offset','0%').attr('stop-color','#69ff47').attr('stop-opacity','0.8');
+  grad.append('stop').attr('offset','100%').attr('stop-color','#69ff47').attr('stop-opacity','0.2');
+
+  g.selectAll('rect').data(bins).join('rect')
+    .attr('x',d=>x(d.x0)+1).attr('y',d=>y(d.length))
+    .attr('width',d=>Math.max(0,x(d.x1)-x(d.x0)-2)).attr('height',d=>h-y(d.length))
+    .attr('fill','url(#sd-grad)').attr('rx',3)
+    .on('mouseover',(event,d)=>showTip(`Score ${d.x0}–${d.x1}<br>${d.length} utilizadores`, event))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+
+  const xA = g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).ticks(5));
+  makeAxisStyle(xA);
+  const yA = g.append('g').call(d3.axisLeft(y).ticks(3));
+  makeAxisStyle(yA);
+})();
+
+// ════════════════════════════════════════════════
+// CHART 14 — SCORE STACKED TOP5
+// ════════════════════════════════════════════════
+(function drawStacked() {
+
+  const el = document.getElementById('score-stacked');
+
+  const W = el.closest('.card').clientWidth - 56;
+  const H = 200;
+
+  const m = { top:10, right:10, bottom:50, left:40 };
+
+  const w = W - m.left - m.right;
+  const h = H - m.top - m.bottom;
+
+  const svg = d3.select('#score-stacked')
+    .attr('width',W)
+    .attr('height',H);
+
+  const g = svg.append('g')
+    .attr('transform',`translate(${m.left},${m.top})`);
+
+  const top5 = DATA.top10.slice(0,5);
+
+  const cats = [
+    'activityCount',
+    'invAccepted',
+    'matchingCount',
+    'recCount'
+  ];
+
+  const cols = [
+    '#e040fb',
+    '#00e5ff',
+    '#69ff47',
+    '#ffab40'
+  ];
+
+  const labels = [
+    'Atividades',
+    'Aceites',
+    'Matchings',
+    'Recs'
+  ];
+
+  const stacked = d3.stack()
+    .keys(cats)(top5);
+
+  const x = d3.scaleBand()
+    .domain(top5.map(d=>d.userId))
+    .range([0,w])
+    .padding(0.25);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(top5,d=>d.score)*1.1])
+    .range([h,0]);
+
+  // STACKED BARS
+  stacked.forEach((layer, ki) => {
+
+    g.selectAll(`rect.s${ki}`)
+      .data(layer)
+      .join('rect')
+
+      .attr('class',`s${ki}`)
+
+      .attr('x',(_,i)=>x(top5[i].userId))
+
+      .attr('y',d=>y(d[1]))
+
+      .attr('width',x.bandwidth())
+
+      .attr('height',
+        d=>Math.max(0,y(d[0])-y(d[1]))
+      )
+
+      .attr('fill',cols[ki])
+
+      .attr('rx',2)
+
+      // TOOLTIP
+      .on('mouseover', function(event, d) {
+
+        const user = d.data.userId;
+
+        const value =
+          d.data[cats[ki]];
+
+        showTip(
+          `
+          <strong>${user}</strong><br>
+          ${labels[ki]}: ${value} pts
+          `,
+          event
+        );
+      })
+
+      .on('mousemove', moveTip)
+
+      .on('mouseleave', hideTip);
+  });
+
+  // X AXIS
+  const xA = g.append('g')
+    .attr('transform',`translate(0,${h})`)
+    .call(d3.axisBottom(x));
+
+  xA.selectAll('text')
+    .attr('transform','rotate(-10)')
+    .style('text-anchor','end');
+
+  makeAxisStyle(xA);
+
+  // Y AXIS
+  const yA = g.append('g')
+    .call(d3.axisLeft(y).ticks(4));
+
+  makeAxisStyle(yA);
+
+  // LEGEND
+  const leg = svg.append('g')
+    .attr('transform',`translate(${m.left},${H-10})`);
+
+  labels.forEach((l,i) => {
+
+    leg.append('rect')
+      .attr('x',i*80)
+      .attr('y',0)
+      .attr('width',8)
+      .attr('height',8)
+      .attr('fill',cols[i])
+      .attr('rx',2);
+
+    leg.append('text')
+      .attr('x',i*80+12)
+      .attr('y',8)
+      .attr('fill',C.muted)
+      .attr('font-size','9px')
+      .text(l);
+  });
+
+})();
+
+// ════════════════════════════════════════════════
+// RANKING TABLE
+// ════════════════════════════════════════════════
+function buildRankTable() {
+  const tbody = document.getElementById('rank-table');
+  const maxScore = DATA.top10[0].score;
+  const heads_pt = ['#','Utilizador','Ativid.','Aceites','Match.','Recs','Score'];
+  const heads_en = ['#','User','Activities','Accepted','Matchings','Recs','Score'];
+  const heads = currentLang==='pt' ? heads_pt : heads_en;
+
+  tbody.innerHTML = `
+    <thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>
+    ${DATA.top10.map((d,i)=>{
+      const rankClass = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
+      const medals = ['🥇','🥈','🥉'];
+      const badge = i<3 ? medals[i] : `#${i+1}`;
+      const pct = (d.score/maxScore*100).toFixed(0);
+      return `<tr 
+        class="rank-row"
+        data-user="${d.userId}"
+        data-activity="${d.activityCount}"
+        data-accepted="${d.invAccepted}"
+        data-matching="${d.matchingCount}"
+        data-recs="${d.recCount}"
+        data-score="${d.score}">
+        <td><span class="rank-badge ${rankClass}">${badge}</span></td>
+        <td style="font-family:'Syne',sans-serif;font-size:12px;color:var(--muted)">${d.userId}</td>
+        <td style="color:#e040fb;font-weight:700">${d.activityCount}</td>
+        <td style="color:#00e5ff;font-weight:700">${d.invAccepted}</td>
+        <td style="color:#69ff47;font-weight:700">${d.matchingCount}</td>
+        <td style="color:#ffab40;font-weight:700">${d.recCount}</td>
+        <td>
+          <div class="score-cell">
+            <strong style="font-family:'Syne',sans-serif;font-size:15px">${d.score}</strong>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%"></div></div>
+          </div>
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody>`;
+
+      document.querySelectorAll('.rank-row')
+    .forEach(row => {
+
+      row.addEventListener('mousemove', moveTip);
+
+      row.addEventListener('mouseover', (event) => {
+
+        showTip(
+          `
+          <strong>${row.dataset.user}</strong><br>
+          Atividades: ${row.dataset.activity}<br>
+          Aceites: ${row.dataset.accepted}<br>
+          Matchings: ${row.dataset.matching}<br>
+          Recs: ${row.dataset.recs}<br>
+          <strong>Score: ${row.dataset.score}</strong>
+          `,
+          event
+        );
+      });
+
+      row.addEventListener('mouseleave', hideTip);
+  });
+}
+buildRankTable();
+
+
+function drawMatchGrouped() {
+  const svg = d3.select('#match-grouped');
+  const width = 900;
+  const height = 260;
+  const margin = {top:20,right:20,bottom:50,left:50};
+
+  svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+  const g = svg.append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const data = DATA.matchTypes.map((d,i)=>({
+    category:d.type,
+    tipos:d.count,
+    estados:DATA.matchStatus[i] ? DATA.matchStatus[i].count : 0
+  }));
+
+  const x0 = d3.scaleBand()
+    .domain(data.map(d=>d.category))
+    .range([0,width-margin.left-margin.right])
+    .padding(0.2);
+
+  const x1 = d3.scaleBand()
+    .domain(['tipos','estados'])
+    .range([0,x0.bandwidth()])
+    .padding(0.1);
+
+  const y = d3.scaleLinear()
+    .domain([0,d3.max(data,d=>Math.max(d.tipos,d.estados))*1.1])
+    .range([height-margin.top-margin.bottom,0]);
+
+  const colors = {
+    tipos:'#e040fb',
+    estados:'#00e5ff'
+  };
+
+  g.append('g')
+    .attr('transform', `translate(0,${height-margin.top-margin.bottom})`)
+    .call(d3.axisBottom(x0));
+
+  g.append('g')
+    .call(d3.axisLeft(y));
+
+  const groups = g.selectAll('.group')
+    .data(data)
+    .enter()
+    .append('g')
+    .attr('transform', d=>`translate(${x0(d.category)},0)`);
+
+  groups.selectAll('rect')
+    .data(d=>[
+      {key:'tipos',value:d.tipos},
+      {key:'estados',value:d.estados}
+    ])
+    .enter()
+    .append('rect')
+    .attr('x',d=>x1(d.key))
+    .attr('y',d=>y(d.value))
+    .attr('width',x1.bandwidth())
+    .attr('height',d=>height-margin.top-margin.bottom-y(d.value))
+    .attr('fill',d=>colors[d.key])
+    .attr('rx',4);
+}
+}
+
+// ════════════════════════════════════════════════
+// Scroll to section
+// ════════════════════════════════════════════════
+function scrollSection(id) {
+  document.getElementById(id).scrollIntoView({
+    behavior:'smooth',
+    block:'start'
+  });
+}
+
+// ════════════════════════════════════════════════
+// LANGUAGE
+// ════════════════════════════════════════════════
+let currentLang = 'pt';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-pt').classList.toggle('active', lang === 'pt');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.querySelectorAll('[data-pt]').forEach(el => {
+    el.textContent = lang === 'pt' ? el.dataset.pt : el.dataset.en;
+  });
+  // Redraw label-dependent charts
+  drawClusterChart();
+  drawModeChart();
+  drawMatchGrouped();
+  drawRecPie();
+  drawInvDonut();
+  buildRankTable();
+}
+</script>
+</body>
+</html>
+
+
