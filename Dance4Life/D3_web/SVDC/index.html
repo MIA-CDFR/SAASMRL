@@ -198,9 +198,9 @@ section {
 }
 
 .c1 { color: var(--accent1); }
-.c2 { color: var(--accent2); }
+.c2 { color: var(--accent4); }
 .c3 { color: var(--accent3); }
-.c4 { color: var(--accent4); }
+.c4 { color: var(--accent2); }
 
 /* ── SECTION HEADER ── */
 .section-label {
@@ -491,7 +491,7 @@ footer {
 <section id="hero">
   <div class="hero-eyebrow" data-pt="Sistema Multiagente de Dança Ativa" data-en="Active Dance Multi-Agent System">Sistema Multiagente de Dança Ativa</div>
   <h1 class="hero-title fade-up">DANCE<br>4LIFE</h1>
-  <p class="hero-sub fade-up delay-1" data-pt="Uma análise de dados de 5.000 registos de 123 utilizadores activos em Portugal, cobrindo atividade física, convites sociais, matchings e recomendações de movimento." data-en="A data analysis of 5,000 records from 123 active users in Portugal, covering physical activity, social invitations, matchings, and movement recommendations.">Uma análise de dados de 5.000 registos de 123 utilizadores activos em Portugal, cobrindo atividade física, convites sociais, matchings e recomendações de movimento.</p>
+  <p class="hero-sub fade-up delay-1" data-pt="Uma análise de dados de 5.000 registos de 123 utilizadores ativos em Portugal, cobrindo atividade física, convites sociais, matchings e recomendações de movimento." data-en="A data analysis of 5,000 records from 123 active users in Portugal, covering physical activity, social invitations, matchings, and movement recommendations.">Uma análise de dados de 5.000 registos de 123 utilizadores activos em Portugal, cobrindo atividade física, convites sociais, matchings e recomendações de movimento.</p>
   <div class="kpi-strip fade-up delay-2">
     <div class="kpi">
       <span class="kpi-num c1">5.000</span>
@@ -499,7 +499,7 @@ footer {
     </div>
     <div class="kpi">
       <span class="kpi-num c2">123</span>
-      <span class="kpi-label" data-pt="Utilizadores Activos" data-en="Active Users">Utilizadores Activos</span>
+      <span class="kpi-label" data-pt="Utilizadores Ativos" data-en="Active Users">Utilizadores Ativos</span>
     </div>
     <div class="kpi">
       <span class="kpi-num c3">80,2</span>
@@ -579,7 +579,7 @@ footer {
 
   <div class="three-col">
     <div class="stat-highlight">
-      <div class="stat-h-num c3">2.499</div>
+      <div class="stat-h-num c4">2.499</div>
       <div class="stat-h-label" data-pt="Convites Aceites" data-en="Accepted Invitations">Convites Aceites</div>
     </div>
     <div class="stat-highlight">
@@ -705,9 +705,9 @@ footer {
     <!-- Controls -->
     <div style="position:absolute;top:20px;right:24px;z-index:10;display:flex;gap:8px;">
       <button id="btn-filter-all" onclick="filterNetwork('all')" style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.08);color:var(--text);cursor:pointer;" data-pt="Todos" data-en="All">Todos</button>
+      <button id="btn-filter-Iniciante" onclick="filterNetwork('Iniciante')" style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:999px;border:1px solid #ffab40;background:rgba(255,171,64,0.08);color:#ffab40;cursor:pointer;" data-pt="Iniciante" data-en="Beginner">Iniciante</button>
       <button id="btn-filter-Moderado" onclick="filterNetwork('Moderado')" style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:999px;border:1px solid #00e5ff;background:rgba(0,229,255,0.08);color:#00e5ff;cursor:pointer;" data-pt="Moderado" data-en="Moderate">Moderado</button>
       <button id="btn-filter-Avançado" onclick="filterNetwork('Avançado')" style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:999px;border:1px solid #e040fb;background:rgba(224,64,251,0.08);color:#e040fb;cursor:pointer;" data-pt="Avançado" data-en="Advanced">Avançado</button>
-      <button id="btn-filter-Iniciante" onclick="filterNetwork('Iniciante')" style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:999px;border:1px solid #ffab40;background:rgba(255,171,64,0.08);color:#ffab40;cursor:pointer;" data-pt="Iniciante" data-en="Beginner">Iniciante</button>
     </div>
 
     <svg id="force-graph" style="width:100%;height:680px;display:block;"></svg>
@@ -739,13 +739,15 @@ footer {
 // ════════════════════════════════════════════════
 // LOAD CSV DATASETS
 // ════════════════════════════════════════════════
+
+
 let DATA = {};
 
 Promise.all([
-  d3.csv('dance4life_activity.csv'),
-  d3.csv('dance4life_invitation.csv'),
-  d3.csv('dance4life_matching.csv'),
-  d3.csv('dance4life_movement_recommendation.csv')
+  d3.csv('dance4life_activity_network.csv'),
+  d3.csv('dance4life_invitation_network.csv'),
+  d3.csv('dance4life_matching_network.csv'),
+  d3.csv('dance4life_movement_recommendation_network.csv')
 ]).then(([activity, invitation, matching, recommendation]) => {
 
 const parseDate = d3.timeParse("%d-%m-%Y %H:%M:%S");
@@ -844,26 +846,60 @@ console.log(invStatus);
   }));
 
 const recTypes = d3.rollups(
+
   recommendation,
-  v => v.length,
+
+  v => ({
+    count: v.length,
+
+    avg: d3.mean(
+      v,
+      d => +d.durationMinutes
+    )
+  }),
+
   d => {
-    if (d.actionId === 'high_intensity') return 'Alta Intensidade';
-    if (d.actionId === 'medium_intensity') return 'Média Intensidade';
-    if (d.actionId === 'low_intensity') return 'Baixa Intensidade';
+
+    if (d.actionId === 'high_intensity')
+      return 'Alta Intensidade';
+
+    if (d.actionId === 'medium_intensity')
+      return 'Média Intensidade';
+
+    if (d.actionId === 'low_intensity')
+      return 'Baixa Intensidade';
+
     return 'Unknown';
   }
-).map(([label,count],i)=>({
+
+).map(([label, values], i) => ({
+
   label,
+
   label_en: label,
-  count,
-  color:['#e040fb','#00e5ff','#ffab40'][i % 3]
+
+  count: values.count,
+
+  avg: +values.avg.toFixed(1),
+
+  color: [
+    '#e040fb',
+    '#00e5ff',
+    '#ffab40'
+  ][i % 3]
+
 }));
 
   const activityCount = d3.rollup(activity,v=>v.length,d=>d.userId);
   const invitationAccepted = d3.rollup(
-    invitation.filter(d=>String(d.status).toLowerCase()==='accepted'),
-    v=>v.length,
-    d=>d.userId
+
+    invitation.filter(
+      d => String(d.status).trim() === 'True'
+    ),
+
+    v => v.length,
+
+    d => d.userId
   );
   const matchingCount = d3.rollup(matching,v=>v.length,d=>d.userId);
   const recCount = d3.rollup(recommendation,v=>v.length,d=>d.userId);
@@ -875,18 +911,87 @@ const recTypes = d3.rollups(
     ...recommendation.map(d=>d.userId)
   ])];
 
-  const top10 = users.map(userId=>({
-      userId,
-      activityCount:activityCount.get(userId)||0,
-      invAccepted:invitationAccepted.get(userId)||0,
-      matchingCount:matchingCount.get(userId)||0,
-      recCount:recCount.get(userId)||0
-  })).map(d=>({
-      ...d,
-      score:d.activityCount+d.invAccepted+d.matchingCount+d.recCount
-  })).sort((a,b)=>b.score-a.score).slice(0,10);
+  const allUsers = users.map(userId => ({
 
-  const scoresSample = top10.map(d=>d.score);
+    userId,
+
+    activityCount:
+      activityCount.get(userId) || 0,
+
+    invAccepted:
+      invitationAccepted.get(userId) || 0,
+
+    matchingCount:
+      matchingCount.get(userId) || 0,
+
+    recCount:
+      recCount.get(userId) || 0
+
+  }));
+
+  // NORMALIZAÇÃO
+  const maxActivity =
+    d3.max(allUsers, d => d.activityCount);
+
+  const maxInv =
+    d3.max(allUsers, d => d.invAccepted);
+
+  const maxMatching =
+    d3.max(allUsers, d => d.matchingCount);
+
+  const maxRec =
+    d3.max(allUsers, d => d.recCount);
+
+  // SCORE FINAL
+  const rankedUsers = allUsers.map(d => {
+
+    const score = (
+
+      (d.activityCount / maxActivity) * 0.35 +
+
+      (d.invAccepted / maxInv) * 0.25 +
+
+      (d.matchingCount / maxMatching) * 0.25 +
+
+      (d.recCount / maxRec) * 0.15
+
+    ) * 100;
+
+    return {
+      ...d,
+      score: +score.toFixed(1)
+    };
+
+  }).sort((a,b) => b.score - a.score);
+
+  // TOP 10
+  const top10 = rankedUsers.slice(0,10);
+
+  // DISTRIBUIÇÃO REAL
+  const scoresSample =
+    rankedUsers.map(d => d.score);
+
+  const totalActivities = activity.length;
+
+  const totalUsers = new Set([
+    ...activity.map(d => d.userId),
+    ...invitation.map(d => d.userId),
+    ...matching.map(d => d.userId),
+    ...recommendation.map(d => d.userId)
+  ]).size;
+
+  const avgBPM = d3.mean(
+    activity,
+    d => +d.hr
+  );
+
+  const acceptedInvitations =
+    invitation.filter(
+      d => String(d.status).trim() === 'True'
+    ).length;
+
+  const acceptanceRate =
+    (acceptedInvitations / invitation.length) * 100;
 
   DATA = {
     byDay,
@@ -899,6 +1004,11 @@ const recTypes = d3.rollups(
     recTypes,
     top10,
     scoresSample,
+    totalActivities,
+    totalUsers,
+    avgBPM: +avgBPM.toFixed(1),
+    acceptedInvitations,
+    acceptanceRate: +acceptanceRate.toFixed(1),    
     matchTypes: d3.rollups(
       matching,
       v=>v.length,
@@ -922,6 +1032,48 @@ const recTypes = d3.rollups(
 
   buildNetworkFromMatching(matching);
   initDashboard();
+
+  document.querySelector('.kpi:nth-child(1) .kpi-num')
+    .textContent = DATA.totalActivities.toLocaleString('pt-PT');
+
+  document.querySelector('.kpi:nth-child(2) .kpi-num')
+    .textContent = DATA.totalUsers;
+
+  document.querySelector('.kpi:nth-child(3) .kpi-num')
+    .textContent = DATA.avgBPM;
+
+  document.querySelector('.kpi:nth-child(4) .kpi-num')
+    .textContent = DATA.acceptanceRate + '%';  
+
+  const declined =
+    invitation.length - DATA.acceptedInvitations;
+
+  document.querySelectorAll('#invitations .stat-h-num')[0]
+    .textContent = DATA.acceptedInvitations;
+
+  document.querySelectorAll('#invitations .stat-h-num')[1]
+    .textContent = declined;
+
+  document.querySelectorAll('#invitations .stat-h-num')[2]
+    .textContent = DATA.acceptanceRate + '%';    
+
+  document.querySelectorAll('#recommendations .stat-h-num')[0]
+    .textContent =
+      DATA.recTypes.find(d =>
+        d.label === 'Alta Intensidade'
+      )?.count || 0;
+
+  document.querySelectorAll('#recommendations .stat-h-num')[1]
+    .textContent =
+      DATA.recTypes.find(d =>
+        d.label === 'Média Intensidade'
+      )?.count || 0;
+
+  document.querySelectorAll('#recommendations .stat-h-num')[2]
+    .textContent =
+      DATA.recTypes.find(d =>
+        d.label === 'Baixa Intensidade'
+      )?.count || 0;    
 });
 
 
@@ -948,31 +1100,35 @@ function buildNetworkFromMatching(matching) {
 
       if(!userStats.has(r.userId)) {
 
-        const hash = r.userId.charCodeAt(0) % 3;
+        // CLUSTER REAL MAIS FREQUENTE DO UTILIZADOR
+        const userCluster = d3.rollups(
+          matching.filter(x => x.userId === r.userId),
+          v => v.length,
+          d => d.cluster
+        )
+        .sort((a,b) => b[1] - a[1])[0]?.[0] || 'Unknown';
 
-        let generatedCluster = 'Moderado';
+        // CIDADE REAL MAIS FREQUENTE
+        const userCity = d3.rollups(
+          matching.filter(x => x.userId === r.userId),
+          v => v.length,
+          d => d.city
+        )
+        .sort((a,b) => b[1] - a[1])[0]?.[0] || 'Unknown';
 
-        if(hash === 0)
-          generatedCluster = 'Iniciante';
-
-        else if(hash === 1)
-          generatedCluster = 'Moderado';
-
-        else
-          generatedCluster = 'Avançado';
-
-        userStats.set(r.userId,{
-          userId:r.userId,
-          city:r.city,
-          cluster:generatedCluster,
-          connections:0
+        userStats.set(r.userId, {
+          userId: r.userId,
+          city: userCity,
+          cluster: userCluster,
+          connections: 0
         });
       }
     });
 
-    for(let i=0;i<rows.length;i++) {
+    // CRIAR LIGAÇÕES
+    for(let i = 0; i < rows.length; i++) {
 
-      for(let j=i+1;j<rows.length;j++) {
+      for(let j = i + 1; j < rows.length; j++) {
 
         const a = rows[i].userId;
         const b = rows[j].userId;
@@ -982,11 +1138,11 @@ function buildNetworkFromMatching(matching) {
         if(!connectionMap.has(pair)) {
 
           connectionMap.set(pair,{
-            source:a,
-            target:b,
-            city:rows[i].city,
-            cluster:rows[i].cluster,
-            weight:1
+            source: a,
+            target: b,
+            city: rows[i].city,
+            cluster: rows[i].cluster,
+            weight: 1
           });
 
         } else {
@@ -1000,11 +1156,35 @@ function buildNetworkFromMatching(matching) {
     }
   });
 
-  let nodes = Array.from(userStats.values())
-      .sort((a,b)=>b.connections-a.connections)
-      .slice(0,40);
+  // TOP 40 MAIS CONECTADOS
+  // garantir representação de todos os clusters
+  const allNodes = Array.from(userStats.values())
+      .sort((a,b)=>b.connections-a.connections);
 
-  const allowed = new Set(nodes.map(d=>d.userId));
+  const advancedNodes =
+    allNodes
+      .filter(d => d.cluster === 'Avançado')
+      .slice(0,12);
+
+  const beginnerNodes =
+    allNodes
+      .filter(d => d.cluster === 'Iniciante')
+      .slice(0,12);
+
+  const moderateNodes =
+    allNodes
+      .filter(d => d.cluster === 'Moderado')
+      .slice(0,16);
+
+  let nodes = [
+    ...advancedNodes,
+    ...beginnerNodes,
+    ...moderateNodes
+  ];
+
+  const allowed = new Set(
+    nodes.map(d=>d.userId)
+  );
 
   let links = Array.from(connectionMap.values())
       .filter(d =>
@@ -1022,6 +1202,7 @@ function drawForceGraph(nodes,links) {
   d3.select("#force-graph").selectAll("*").remove();
 
   const svg = d3.select("#force-graph");
+  
 
   const width = document.getElementById("force-graph").clientWidth;
   const height = 680;
@@ -1034,17 +1215,13 @@ function drawForceGraph(nodes,links) {
     "Lisboa":"#69ff47",
     "Coimbra":"#ffab40"
   };
-  const randomColors = [
-    "#00e5ff",
-    "#e040fb",
-    "#69ff47",
-    "#ffab40"
-  ];
-  nodes.forEach(d => {
-    d.color = randomColors[
-      Math.floor(Math.random() * randomColors.length)
-    ];
-  });  
+
+  const clusterStroke = {
+    "Iniciante":"#ffab40",
+    "Moderado":"#00e5ff",
+    "Avançado":"#e040fb"
+  };
+
   const radius = d3.scaleSqrt()
       .domain([
         0,
@@ -1056,10 +1233,10 @@ function drawForceGraph(nodes,links) {
       .force("link",
         d3.forceLink(links)
           .id(d=>d.userId)
-          .distance(90)
+          .distance(60)
       )
       .force("charge",
-        d3.forceManyBody().strength(-220)
+        d3.forceManyBody().strength(-100)
       )
       .force("center",
         d3.forceCenter(width/2,height/2)
@@ -1069,13 +1246,16 @@ function drawForceGraph(nodes,links) {
           .radius(d=>radius(d.connections)+8)
       );
 
-  const link = svg.append("g")
-      .attr("stroke","rgba(255,255,255,0.05)")
-      .selectAll("line")
-      .data(links)
-      .join("line")
-      .attr("stroke-width",d=>0.25 + (d.weight * 0.08))
-      .attr("opacity",0.35);
+const link = svg.append("g")
+    .attr("stroke","rgba(255,255,255,0.08)")
+    .attr("stroke-linecap","round")
+    .selectAll("line")
+    .data(links)
+    .join("line")
+    .attr("stroke-width", d =>
+      Math.max(0.35, 0.2 + d.weight * 0.04)
+    )
+    .attr("opacity",0.22);
 
   const node = svg.append("g")
       .selectAll("circle")
@@ -1084,7 +1264,10 @@ function drawForceGraph(nodes,links) {
       .attr("r",d=>radius(d.connections))
       .attr("fill",d=>cityColors[d.city] || "#999")
       //.attr("fill",d=>d.color)
-      .attr("stroke","#fff")
+      .attr(
+        "stroke",
+        d => clusterStroke[d.cluster] || "#fff"
+      )
       .attr("stroke-width",2)
       .call(drag(NETWORK_SIM));
 
@@ -1117,6 +1300,54 @@ function drawForceGraph(nodes,links) {
       .attr("x", d => d.x)
       .attr("y", d => d.y + 3);
   });
+
+  const cityLegend = d3.select("#city-legend");
+
+  cityLegend.selectAll("*").remove();
+
+  Object.entries(cityColors).forEach(([city,color]) => {
+
+    const item = cityLegend.append("div")
+      .style("display","flex")
+      .style("align-items","center")
+      .style("gap","8px");
+
+    item.append("div")
+      .style("width","10px")
+      .style("height","10px")
+      .style("border-radius","50%")
+      .style("background",color);
+
+    item.append("span")
+      .style("font-size","12px")
+      .style("color","#e8ecf4")
+      .text(city);
+  });
+
+  const clusterLegend = d3.select("#cluster-legend");
+
+  clusterLegend.selectAll("*").remove();
+
+  Object.entries(clusterStroke).forEach(([cluster,color]) => {
+
+    const item = clusterLegend.append("div")
+      .style("display","flex")
+      .style("align-items","center")
+      .style("gap","8px");
+
+    item.append("div")
+      .style("width","12px")
+      .style("height","12px")
+      .style("border-radius","50%")
+      .style("border",`3px solid ${color}`)
+      .style("background","transparent");
+
+    item.append("span")
+      .style("font-size","12px")
+      .style("color","#e8ecf4")
+      .text(cluster);
+  });
+
 }
 
 function drag(simulation) {
@@ -1242,7 +1473,9 @@ function makeAxisStyle(g) {
 
   const data = DATA.byDay.map(d => ({ date: new Date(d.day), count: d.count }));
   const x = d3.scaleTime().domain(d3.extent(data, d => d.date)).range([0, w]);
-  const y = d3.scaleLinear().domain([100, d3.max(data, d => d.count)]).range([h, 0]);
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(data,d=>d.count)*1.05])
+    .range([h,0]);
 
   // Area
   const area = d3.area().x(d => x(d.date)).y0(h).y1(d => y(d.count)).curve(d3.curveMonotoneX);
@@ -1317,35 +1550,98 @@ function makeAxisStyle(g) {
 // CHART 3 — HOUR
 // ════════════════════════════════════════════════
 (function drawHour() {
+
   const el = document.getElementById('hour-chart');
-  const W = el.closest('.card').clientWidth - 56;
+
+  const card = el.closest('.card');
+
+  const W = Math.max(
+    card.getBoundingClientRect().width - 56,
+    300
+  );
+
   const H = 200;
-  const m = { top:10, right:10, bottom:30, left:36 };
+
+  const m = {
+    top:10,
+    right:10,
+    bottom:30,
+    left:36
+  };
+
   const w = W - m.left - m.right;
   const h = H - m.top - m.bottom;
 
-  const svg = d3.select('#hour-chart').attr('width',W).attr('height',H);
-  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+  const svg = d3.select('#hour-chart')
+    .attr('width',W)
+    .attr('height',H);
 
+  const g = svg.append('g')
+    .attr('transform',`translate(${m.left},${m.top})`);
+
+  // ✅ DATA PRIMEIRO
   const data = DATA.byHour;
-  const x = d3.scaleBand().domain(data.map(d=>d.hour)).range([0,w]).padding(0.1);
-  const y = d3.scaleLinear().domain([170, d3.max(data,d=>d.count)*1.05]).range([h,0]);
 
-  const grad = svg.append('defs').append('linearGradient').attr('id','hr-col').attr('x1','0').attr('y1','0').attr('x2','0').attr('y2','1');
-  grad.append('stop').attr('offset','0%').attr('stop-color','#00e5ff').attr('stop-opacity','0.9');
-  grad.append('stop').attr('offset','100%').attr('stop-color','#00e5ff').attr('stop-opacity','0.3');
+  // ✅ STRING DOMAIN
+  const x = d3.scaleBand()
+    .domain(data.map(d => String(d.hour)))
+    .range([0,w])
+    .padding(0.1);
 
-  g.selectAll('rect').data(data).join('rect')
-    .attr('x', d=>x(d.hour)).attr('y',d=>y(d.count))
-    .attr('width',x.bandwidth()).attr('height',d=>h-y(d.count))
-    .attr('fill','url(#hr-col)').attr('rx',2)
-    .on('mouseover',(event,d)=>showTip(`<strong>${String(d.hour).padStart(2,'0')}:00h</strong><br>${d.count} atividades`, event))
-    .on('mousemove',moveTip).on('mouseleave',hideTip);
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(data,d=>d.count)*1.05])
+    .range([h,0]);
 
-  const xA = g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).tickValues([0,4,8,12,16,20]));
+  const grad = svg.append('defs')
+    .append('linearGradient')
+    .attr('id','hr-col')
+    .attr('x1','0')
+    .attr('y1','0')
+    .attr('x2','0')
+    .attr('y2','1');
+
+  grad.append('stop')
+    .attr('offset','0%')
+    .attr('stop-color','#00e5ff')
+    .attr('stop-opacity','0.9');
+
+  grad.append('stop')
+    .attr('offset','100%')
+    .attr('stop-color','#00e5ff')
+    .attr('stop-opacity','0.3');
+
+  g.selectAll('rect')
+    .data(data)
+    .join('rect')
+    .attr('x', d => x(String(d.hour)))
+    .attr('y', d => y(d.count))
+    .attr('width', x.bandwidth())
+    .attr('height', d => h - y(d.count))
+    .attr('fill','url(#hr-col)')
+    .attr('rx',2)
+    .on('mouseover',(event,d)=>
+      showTip(
+        `<strong>${String(d.hour).padStart(2,'0')}:00h</strong><br>${d.count} atividades`,
+        event
+      )
+    )
+    .on('mousemove',moveTip)
+    .on('mouseleave',hideTip);
+
+  const xA = g.append('g')
+    .attr('transform',`translate(0,${h})`)
+    .call(
+      d3.axisBottom(x)
+        .tickValues(['0','4','8','12','16','20'])
+    );
+
   makeAxisStyle(xA);
-  const yA = g.append('g').call(d3.axisLeft(y).ticks(3));
+
+  const yA = g.append('g')
+    .call(d3.axisLeft(y).ticks(3));
+
   makeAxisStyle(yA);
+
 })();
 
 // ════════════════════════════════════════════════
@@ -1399,8 +1695,19 @@ function makeAxisStyle(g) {
   const data = DATA.cities;
   const x = d3.scaleBand().domain(data.map(d=>d.city)).range([0,w]).padding(0.25);
   const sub = d3.scaleBand().domain(['hr','temp']).range([0,x.bandwidth()]).padding(0.1);
-  const yHR = d3.scaleLinear().domain([79,81]).range([h,0]);
-  const yT  = d3.scaleLinear().domain([17.5,18.5]).range([h,0]);
+  const yHR = d3.scaleLinear()
+    .domain([
+      d3.min(data,d=>d.avg_hr)-5,
+      d3.max(data,d=>d.avg_hr)+5
+    ])
+    .range([h,0]);
+
+  const yT = d3.scaleLinear()
+    .domain([
+      d3.min(data,d=>d.avg_temp)-2,
+      d3.max(data,d=>d.avg_temp)+2
+    ])
+    .range([h,0]);
 
   // HR bars
   g.selectAll('.b-hr').data(data).join('rect').attr('class','b-hr')
@@ -1542,13 +1849,59 @@ drawInvDonut();
   const svg = d3.select('#inv-radar').attr('width','100%').attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
   const cx = W/2, cy = H/2, maxR = 72;
 
-  const cats = [
-    { label:'Atividades', val:5000, max:5000, color:'#00e5ff' },
-    { label:'Convites',   val:5000, max:5000, color:'#e040fb' },
-    { label:'Matchings',  val:5000, max:5000, color:'#69ff47' },
-    { label:'Recs',       val:5000, max:5000, color:'#ffab40' },
-    { label:'Aceites',    val:2499, max:5000, color:'#ff6b6b' },
-  ];
+const acceptedInvitations =
+  DATA.invStatus.find(
+    d => d.status === 'Aceite'
+  )?.count || 0;
+
+const cats = [
+
+  {
+    label:'Atividades',
+    val: 5000,
+    color:'#00e5ff'
+  },
+
+  {
+    label:'Convites',
+    val: DATA.invStatus.reduce(
+      (a,b) => a + b.count,
+      0
+    ),
+    color:'#e040fb'
+  },
+
+  {
+    label:'Matchings',
+    val: DATA.matchTypes.reduce(
+      (a,b) => a + b.count,
+      0
+    ),
+    color:'#69ff47'
+  },
+
+  {
+    label:'Recomendações',
+    val: DATA.recTypes.reduce(
+      (a,b) => a + b.count,
+      0
+    ),
+    color:'#ffab40'
+  },
+
+  {
+    label:'Aceites',
+    val: acceptedInvitations,
+    color:'#ff6b6b'
+  }
+
+];
+
+const maxVal = d3.max(cats, d => d.val);
+
+cats.forEach(d => {
+  d.max = maxVal;
+});
 
   const n = cats.length;
   const angle = (i) => (i / n) * 2 * Math.PI - Math.PI/2;
@@ -1783,7 +2136,7 @@ function drawRecPie() {
 drawRecPie();
 
 // ════════════════════════════════════════════════
-// CHART 12 — REC DURATION (fake but realistic)
+// CHART 12 — REC DURATION
 // ════════════════════════════════════════════════
 (function drawRecDuration() {
 
@@ -1796,7 +2149,7 @@ drawRecPie();
     top:10,
     right:20,
     bottom:40,
-    left:100
+    left:140
   };
 
   const w = W - m.left - m.right;
@@ -1809,26 +2162,8 @@ drawRecPie();
   const g = svg.append('g')
     .attr('transform',`translate(${m.left},${m.top})`);
 
-  const data = [
-    {
-      label:'Alta Intensidade',
-      label_en:'High Intensity',
-      avg:6.1,
-      color:'#e040fb'
-    },
-    {
-      label:'Média Intensidade',
-      label_en:'Med. Intensity',
-      avg:5.7,
-      color:'#ffab40'
-    },
-    {
-      label:'Baixa Intensidade',
-      label_en:'Low Intensity',
-      avg:5.4,
-      color:'#00e5ff'
-    },
-  ];
+  const data = DATA.recTypes;
+  
 
   const y = d3.scaleBand()
     .domain(data.map(d=>d.label))
@@ -1836,7 +2171,10 @@ drawRecPie();
     .padding(0.3);
 
   const x = d3.scaleLinear()
-    .domain([0,8])
+    .domain([
+      0,
+      d3.max(data, d => d.avg) * 1.1
+    ])
     .range([0,w]);
 
   // BACKGROUND BARS
@@ -2023,7 +2361,7 @@ drawRecPie();
     'Atividades',
     'Aceites',
     'Matchings',
-    'Recs'
+    'Recusados'
   ];
 
   const stacked = d3.stack()
@@ -2130,18 +2468,33 @@ drawRecPie();
 function buildRankTable() {
   const tbody = document.getElementById('rank-table');
   const maxScore = DATA.top10[0].score;
-  const heads_pt = ['#','Utilizador','Ativid.','Aceites','Match.','Recs','Score'];
-  const heads_en = ['#','User','Activities','Accepted','Matchings','Recs','Score'];
-  const heads = currentLang==='pt' ? heads_pt : heads_en;
-
+  // const heads_pt = ['#','Utilizador','Ativid.','Aceites','Match.','Recs','Score'];
+  // const heads_en = ['#','User','Activities','Accepted','Matchings','Recs','Score'];
+  
+  // //const heads = currentLang==='pt' ? heads_pt : heads_en;
+  // const theadhtml = `<thead><tr>${heads_en.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`
+  // if(currentLang === 'PT'){
+  //   const theadhtml = `<thead><tr>${heads_pt.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`
+  // }
+  
   tbody.innerHTML = `
-    <thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+    <thead>
+      <tr>
+        <th id="th-rank">#</th>
+        <th id="th-user">Utilizador</th>
+        <th id="th-activity">Ativid.</th>
+        <th id="th-accepted">Aceites</th>
+        <th id="th-matching">Match.</th>
+        <th id="th-recs">Recs</th>
+        <th id="th-score">Score</th>
+      </tr>
+    </thead>
     <tbody>
     ${DATA.top10.map((d,i)=>{
       const rankClass = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
       const medals = ['🥇','🥈','🥉'];
       const badge = i<3 ? medals[i] : `#${i+1}`;
-      const pct = (d.score/maxScore*100).toFixed(0);
+      const pct = d.score.toFixed(1);
       return `<tr 
         class="rank-row"
         data-user="${d.userId}"
@@ -2158,7 +2511,7 @@ function buildRankTable() {
         <td style="color:#ffab40;font-weight:700">${d.recCount}</td>
         <td>
           <div class="score-cell">
-            <strong style="font-family:'Syne',sans-serif;font-size:15px">${d.score}</strong>
+            <strong style="font-family:'Syne',sans-serif;font-size:15px">${d.score.toFixed(1)}</strong>
             <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%"></div></div>
           </div>
         </td>
@@ -2173,17 +2526,33 @@ function buildRankTable() {
 
       row.addEventListener('mouseover', (event) => {
 
-        showTip(
-          `
-          <strong>${row.dataset.user}</strong><br>
-          Atividades: ${row.dataset.activity}<br>
-          Aceites: ${row.dataset.accepted}<br>
-          Matchings: ${row.dataset.matching}<br>
-          Recs: ${row.dataset.recs}<br>
-          <strong>Score: ${row.dataset.score}</strong>
-          `,
-          event
-        );
+      const labels = currentLang === 'pt'
+        ? {
+            activities: 'Atividades',
+            accepted: 'Aceites',
+            matching: 'Matchings',
+            recs: 'Recs',
+            score: 'Score'
+          }
+        : {
+            activities: 'Activities',
+            accepted: 'Accepted',
+            matching: 'Matchings',
+            recs: 'Recs',
+            score: 'Score'
+          };
+
+      showTip(
+        `
+        <strong>${row.dataset.user}</strong><br>
+        ${labels.activities}: ${row.dataset.activity}<br>
+        ${labels.accepted}: ${row.dataset.accepted}<br>
+        ${labels.matching}: ${row.dataset.matching}<br>
+        ${labels.recs}: ${row.dataset.recs}<br>
+        <strong>${labels.score}: ${Number(row.dataset.score).toFixed(1)}</strong>
+        `,
+        event
+      );
       });
 
       row.addEventListener('mouseleave', hideTip);
@@ -2274,13 +2643,27 @@ let currentLang = 'pt';
 
 function setLang(lang) {
   currentLang = lang;
+
+// TABLE HEADERS
+  document.getElementById('th-user').textContent =
+    lang === 'pt' ? 'Utilizador' : 'User';
+
+  document.getElementById('th-activity').textContent =
+    lang === 'pt' ? 'Ativid.' : 'Activities';
+
+  document.getElementById('th-accepted').textContent =
+    lang === 'pt' ? 'Aceites' : 'Accepted';
+
+  document.getElementById('th-matching').textContent =
+    lang === 'pt' ? 'Match.' : 'Matchings';
+
   document.getElementById('btn-pt').classList.toggle('active', lang === 'pt');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   document.querySelectorAll('[data-pt]').forEach(el => {
     el.textContent = lang === 'pt' ? el.dataset.pt : el.dataset.en;
   });
   // Redraw label-dependent charts
-  drawClusterChart();
+  
   drawModeChart();
   drawMatchGrouped();
   drawRecPie();
