@@ -1714,7 +1714,7 @@ function makeAxisStyle(g) {
     .attr('x',d=>x(d.city)+sub('hr')).attr('y',d=>yHR(d.avg_hr))
     .attr('width',sub.bandwidth()).attr('height',d=>h-yHR(d.avg_hr))
     .attr('fill','#e040fb').attr('rx',3)
-    .on('mouseover',(event,d)=>showTip(`<strong>${d.city}</strong><br>FC: ${d.avg_hr} bpm`, event))
+    .on('mouseover',(event,d)=>showTip(`<strong>${d.city}</strong><br>${d.avg_hr} bpm`, event))
     .on('mousemove',moveTip).on('mouseleave',hideTip);
 
   // Temp bars
@@ -1722,7 +1722,7 @@ function makeAxisStyle(g) {
     .attr('x',d=>x(d.city)+sub('temp')).attr('y',d=>yT(d.avg_temp))
     .attr('width',sub.bandwidth()).attr('height',d=>h-yT(d.avg_temp))
     .attr('fill','#ffab40').attr('rx',3)
-    .on('mouseover',(event,d)=>showTip(`<strong>${d.city}</strong><br>Temp: ${d.avg_temp}°C`, event))
+    .on('mouseover',(event,d)=>showTip(`<strong>${d.city}</strong><br>${d.avg_temp}°C`, event))
     .on('mousemove',moveTip).on('mouseleave',hideTip);
 
   const xA = g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x));
@@ -1734,7 +1734,7 @@ function makeAxisStyle(g) {
 
   // Legend
   const leg = svg.append('g').attr('transform',`translate(${m.left},4)`);
-  [['#e040fb','FC'],['#ffab40','Temp']].forEach(([c,l],i) => {
+  [['#e040fb','bpm'],['#ffab40','Temp °C']].forEach(([c,l],i) => {
     leg.append('rect').attr('x',i*70).attr('y',0).attr('width',10).attr('height',10).attr('fill',c).attr('rx',2);
     leg.append('text').attr('x',i*70+14).attr('y',9).attr('fill',C.muted).attr('font-size','10px').text(l);
   });
