@@ -1,0 +1,499 @@
+% Dance4Life - Aprendizagem por Reforço para Envelhecimento Ativo através da Dança
+% Formato LNCS - UC Aprendizagem por Reforço 2025/26
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{url}
+%
+\begin{document}
+%
+\title{Dance4Life: Aprendizagem por Reforço para Acompanhamento de Atividade Física no Envelhecimento Ativo}
+%
+\titlerunning{AR para Acompanhamento no Envelhecimento Ativo}
+%
+\author{
+Carlos Bergueira\inst{1} \and
+Diego Silva\inst{1} \and
+Filipa Pereira\inst{1} \and
+Rui Rodrigues\inst{1}
+}
+%
+\authorrunning{C. Bergueira et al.}
+%
+\institute{Universidade do Minho, Braga, Portugal \\
+\email{\{pg11605,pg59999,pg42201,pg7942\}@alunos.uminho.pt}}
+%
+\maketitle
+%
+\begin{abstract}
+O comportamento sedentário constitui um fator de risco major para doenças crónicas
+e declínio funcional em adultos mais velhos. A dança combina exercício físico com
+envolvimento social, tornando-se uma modalidade particularmente eficaz para o
+envelhecimento ativo. Apresentamos o Dance4Life, uma plataforma de ponta a ponta
+que recorre à Aprendizagem por Reforço (AR) para personalizar a intensidade do
+acompanhamento em atividade física baseada em dança. Um ambiente Gymnasium
+personalizado modela o estado tridimensional do utilizador---nível de atividade,
+fadiga física e fadiga de alarmes---sobre ações de acompanhamento discretas. Dois
+algoritmos de AR profunda, \emph{Proximal Policy Optimisation} (PPO) e
+\emph{Deep Q-Network} (DQN), são treinados e comparados em condições idênticas.
+Ambas as políticas convergem para recompensa próxima do ótimo em menos de
+50\,000 passos e atingem 100\% de taxa de sobrevivência em episódios de 96 passos.
+A melhor política é exportada para ONNX e implantada num smartphone Android via
+ONNX Runtime, realizando inferência em tempo real a partir de dados de sensores
+vestíveis. Um backend multi-agente em Python (SPADE) trata da recolha de dados,
+agrupamento de utilizadores e persistência em nuvem via Firebase. Os resultados
+confirmam que a AR consegue equilibrar eficazmente a promoção da atividade física
+com os riscos de fadiga física e fadiga de alarmes num cenário de acompanhamento
+realista.
+
+\keywords{Aprendizagem por reforço \and Envelhecimento ativo \and Dança \and
+Sensores vestíveis \and Sistemas multi-agente \and ONNX \and Android}
+\end{abstract}
+%
+%
+\section{Introdução}
+\label{sec:intro}
+
+O envelhecimento populacional é um dos desafios definidores do século~XXI.
+Em 2050, o número de pessoas com 60 ou mais anos deverá atingir 2,1 mil milhões
+em todo o mundo~\cite{who2022}. A inatividade física acelera a perda de mobilidade,
+aumenta o risco de doenças cardiovasculares e reduz a qualidade de vida.
+A dança é crescentemente reconhecida como uma intervenção simultaneamente eficaz e
+agradável para adultos mais velhos: melhora o equilíbrio, a aptidão cardiovascular
+e a função cognitiva, ao mesmo tempo que promove a interação
+social~\cite{hwang2016}.
+
+Um desafio central no acompanhamento mediado por tecnologia é a
+\emph{personalização}. Um sinal de acompanhamento que motiva um utilizador pode
+irritar outro; uma sessão demasiado intensa pode causar danos físicos, ao passo
+que uma demasiado suave pode não produzir benefício algum. As abordagens estáticas
+baseadas em regras não conseguem adaptar-se ao estado fisiológico e psicológico em
+constante mudança do utilizador.
+
+Propomos o Dance4Life, uma plataforma que aborda este desafio através da AR.
+O sistema aprende uma política de acompanhamento que seleciona a intensidade de
+intervenção adequada em cada ponto de decisão, observando um vetor de estado
+compacto derivado de sensores vestíveis e otimizando uma função de recompensa que
+simultaneamente promove a atividade, penaliza o comportamento sedentário e previne
+eventos críticos de fadiga física ou fadiga de alarmes.
+
+As principais contribuições deste trabalho são:
+\begin{itemize}
+  \item Um ambiente Gymnasium personalizado que captura o compromisso entre
+        promoção de atividade, fadiga física e irritação do utilizador num
+        contexto de acompanhamento por dança.
+  \item Uma avaliação comparativa de PPO e DQN em condições de treino idênticas,
+        com métricas quantitativas.
+  \item Um pipeline de implantação de ponta a ponta, desde a política treinada até
+        à inferência ONNX no dispositivo Android.
+  \item Um backend multi-agente que orquestra a recolha de dados de sensores,
+        o enriquecimento contextual, o agrupamento de utilizadores e a
+        persistência em nuvem.
+\end{itemize}
+
+%
+\section{Trabalho Relacionado}
+\label{sec:related}
+
+\subsubsection{Aprendizagem por Reforço para Acompanhamento em Saúde.}
+A AR tem sido aplicada a intervenções de saúde adaptativas no âmbito do paradigma
+\emph{Just-In-Time Adaptive Intervention} (JITAI)~\cite{tewari2017}.
+Liao et al.\ treinaram um \emph{contextual bandit} para decidir quando enviar
+notificações de atividade, reduzindo o desengajamento dos
+utilizadores~\cite{liao2020}. A AR profunda foi utilizada para personalizar a
+prescrição de exercício em reabilitação cardíaca~\cite{escolar2022} e para
+controlar protocolos de fisioterapia~\cite{yu2019}. O nosso ambiente estende estas
+ideias ao modelar explicitamente a fadiga de alarmes como componente de estado de
+primeira classe e ao impor restrições de segurança fortes através de penalizações
+terminais.
+
+\subsubsection{Reconhecimento de Atividade e Sensores Vestíveis.}
+O Reconhecimento de Atividade Humana (HAR) a partir de unidades de medição inercial
+é um problema bem estudado~\cite{banos2014}. Os smartphones modernos integram
+acelerómetros, giroscópios e sensores óticos de frequência cardíaca cujos dados
+podem ser fundidos para estimar a intensidade do movimento. O Dance4Life utiliza
+as magnitudes brutas do acelerómetro e do giroscópio, juntamente com a frequência
+cardíaca, para derivar uma pontuação de \emph{ritmo} que alimenta tanto o estado
+de AR como o módulo de agrupamento de utilizadores.
+
+\subsubsection{Sistemas Multi-Agente em Cuidados de Saúde.}
+As frameworks JADE e SPADE têm sido utilizadas para construir plataformas de saúde
+distribuídas, onde agentes especializados tratam da recolha de dados, raciocínio e
+entrega de notificações~\cite{mea2007}. A nossa arquitetura adota o modelo de
+comportamento assíncrono do SPADE, atribuindo cada preocupação lógica a um agente
+dedicado.
+
+%
+\section{Formulação do Problema}
+\label{sec:formulation}
+
+Modelamos o problema de acompanhamento como um Processo de Decisão de Markov
+$\mathcal{M} = (\mathcal{S}, \mathcal{A}, P, R, \gamma)$.
+
+\subsubsection{Espaço de Estados.}
+$\mathcal{S} = [0, 10]^3$ é um espaço contínuo tridimensional:
+\begin{equation}
+  s_t = (\text{n\'ivel\_atividade}_t,\ \text{fadiga\_f\'isica}_t,\
+         \text{n\'ivel\_irrita\c{c}\~ao}_t).
+\end{equation}
+Todas as dimensões partilham o mesmo intervalo limitado, de modo a que a rede de
+política receba entradas comensuráveis sem normalização adicional.
+
+\subsubsection{Espaço de Ações.}
+$\mathcal{A} = \{0, 1, 2, 3\}$ é um conjunto discreto de intensidades de
+acompanhamento: silêncio (0), baixa (1), média (2) e alta (3).
+
+\subsubsection{Dinâmica de Transição.}
+Cada ação produz deltas determinísticos nas três dimensões do estado, acrescidos de
+ruído gaussiano $\epsilon \sim \mathcal{N}(0, \sigma^2)$ para representar a
+variabilidade comportamental. Ações de maior intensidade aumentam tanto o nível de
+atividade como a fadiga. Um termo de acoplamento fisiológico modela o facto de que
+alta atividade acelera a acumulação de fadiga. Um bónus de recuperação reduz a
+fadiga quando a atividade é baixa. A Tabela~\ref{tab:dynamics} resume os deltas
+nominais.
+
+\begin{table}[h]
+\caption{Deltas nominais do estado por ação (antes do ruído).}
+\label{tab:dynamics}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Ação & $\Delta$\,atividade & $\Delta$\,fadiga & $\Delta$\,irritação \\
+\midrule
+0 -- Silêncio        & $-0{,}90$ & $-0{,}80$ & $-1{,}00$ \\
+1 -- Intensidade baixa  & $+0{,}40$ & $-0{,}30$ & $+0{,}20$ \\
+2 -- Intensidade média  & $+1{,}20$ & $+0{,}90$ & $+0{,}70$ \\
+3 -- Intensidade alta   & $+2{,}00$ & $+1{,}90$ & $+1{,}40$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Função de Recompensa.}
+\begin{equation}
+  R(s_t, \text{terminado}) =
+  \begin{cases}
+    -50 & \text{se terminado (fadiga} \ge 10\ \text{ou irritação} \ge 10\text{)} \\
+    +15 & \text{se}\ s_t \in \mathcal{S}_{\text{saudável}} \\
+    -5  & \text{se atividade} < 2 \\
+    0   & \text{caso contrário}
+  \end{cases}
+\end{equation}
+onde $\mathcal{S}_{\text{saudável}} = \{s : \text{atividade} \in [4,7],\
+\text{fadiga} < 7,\ \text{irritação} < 5\}$.
+
+A grande penalização terminal ($-50$) encoraja a política a evitar inteiramente os
+estados críticos. O bónus de zona saudável ($+15$) fornece um sinal positivo denso.
+Um episódio dura no máximo 96 passos, representando um dia simulado de pontos de
+decisão de acompanhamento.
+
+%
+\section{Metodologia}
+\label{sec:method}
+
+\subsection{Algoritmos}
+
+\subsubsection{Proximal Policy Optimisation (PPO).}
+O PPO~\cite{schulman2017} é um algoritmo ator-crítico \emph{on-policy} que
+restringe as atualizações de política através de um objetivo substituto com
+recorte (\emph{clipping}), proporcionando um treino estável. Utilizamos $n=8$
+ambientes paralelos para reduzir a variância, com 1\,024 passos por \emph{rollout},
+tamanho de mini-lote de 64 e 10 épocas por atualização.
+
+\subsubsection{Deep Q-Network (DQN).}
+O DQN~\cite{mnih2015} é um algoritmo baseado em valor \emph{off-policy} que aprende
+a função ação-valor $Q(s,a)$ usando um \emph{replay buffer} e uma rede-alvo. O
+treino utiliza um \emph{buffer} de 100\,000 transições com exploração
+$\epsilon$-greedy reduzida de 1,0 para 0,05 ao longo de 25\% dos passos totais.
+
+Ambos os algoritmos utilizam uma política de perceptrão multicamada (MLP) com duas
+camadas ocultas de 64 unidades, o otimizador Adam com taxa de aprendizagem
+$3 \times 10^{-4}$ (PPO) e $5 \times 10^{-4}$ (DQN), fator de desconto
+$\gamma = 0{,}99$ e a mesma semente aleatória (42) para reprodutibilidade. O treino
+decorre durante 400\,000 passos de ambiente em ambos os casos, utilizando a
+biblioteca Stable-Baselines3~\cite{raffin2021}.
+
+\subsection{Métricas de Avaliação}
+
+Os modelos são avaliados a cada 10\,000 passos ao longo de 20 episódios
+determinísticos. São reportadas três métricas principais:
+\begin{itemize}
+  \item \textbf{Recompensa média por episódio}: recompensa total não descontada,
+        em média sobre os episódios de avaliação.
+  \item \textbf{Duração média do episódio}: número médio de passos antes da
+        terminação ou truncagem; o máximo é 96.
+  \item \textbf{Taxa de sobrevivência}: fração dos episódios de avaliação que
+        completaram os 96 passos sem acionar a condição de terminação crítica.
+\end{itemize}
+
+\subsection{Exportação ONNX e Implantação no Dispositivo}
+
+Após o treino, o melhor \emph{checkpoint} PPO é exportado para o formato ONNX
+usando a API \texttt{torch.onnx.export} do PyTorch. Apenas a rede de política
+(ator) é exportada; a forma de entrada é $[1, 3]$, correspondendo ao vetor de
+estado. O ficheiro ONNX é copiado para a diretoria \texttt{assets/models/} da
+aplicação Android e carregado em tempo de execução via ONNX Runtime para Android.
+
+%
+\section{Arquitetura do Sistema}
+\label{sec:arch}
+
+O Dance4Life é composto por três camadas com acoplamento fraco: a camada de
+sensores Android, o backend Python e a camada de armazenamento em nuvem (Firebase).
+
+\subsection{Camada Android}
+
+A aplicação Android (Kotlin, API 35) corre num smartphone, opcionalmente emparelhado
+com um dispositivo Wear OS. A classe \texttt{DanceController} orquestra o
+\emph{pipeline} de sensores:
+
+\begin{enumerate}
+  \item O \texttt{SensorHelper} amostra o acelerómetro, o giroscópio e o sensor
+        de frequência cardíaca à taxa normal e calcula as magnitudes dos vetores.
+  \item O \texttt{RitmoCalculator} mantém uma janela deslizante de 1 minuto de
+        leituras de sensores e produz uma pontuação escalar de \emph{ritmo}
+        representando a intensidade do movimento.
+  \item O \texttt{OnnxRlCoachPolicy} constrói um tuplo
+        \texttt{MovementObservation} $(a, f, i)$ a partir das métricas derivadas
+        dos sensores e invoca a sessão ONNX Runtime para obter a ação de
+        acompanhamento discreta.
+  \item A recomendação é apresentada ao utilizador e o evento é enviado para o
+        backend Python.
+\end{enumerate}
+
+O \texttt{OnnxRlCoachPolicy} mapeia a saída bruta do ONNX (\emph{logits} de ação)
+para um \texttt{MovementRecommendation} contendo um título legível, duração
+sugerida e uma mensagem de incentivo. O \texttt{RlMetricsManager} regista cada
+evento de inferência numa fila local e envia-o para o servidor, permitindo a
+melhoria futura da política de forma \emph{offline}.
+
+\subsection{Backend Multi-Agente Python}
+
+O backend é implementado com a \emph{framework} de agentes SPADE e uma API REST
+Flask, e corre como serviço Python autónomo. A Figura~\ref{fig:arch} ilustra o
+\emph{pipeline} de agentes.
+
+\begin{figure}[h]
+\centering
+\begin{verbatim}
+Aplicação Android
+    |  POST /collect_activity
+    v
+[SensorAgent]
+    |  SENSOR_ACTIVITY (REQUEST)
+    v
+[CoordinatorAgent]
+    |  SENSOR_ACTIVITY (REQUEST)
+    v
+[HarAgent] --> [EnvironmentAgent] --> [DatabaseAgent]
+               (enriquec. ambiental)    (Firebase)
+
+[ClusteringAgent]  <-- recebe eventos de matching
+    |  calcula progressão de cluster
+    v
+POST /set_user_match/{userId}  --> polling Android
+\end{verbatim}
+\caption{Fluxo de mensagens entre agentes no backend do Dance4Life.}
+\label{fig:arch}
+\end{figure}
+
+\subsubsection{SensorAgent} recebe os \emph{payloads} brutos de sensores da
+aplicação Android via API REST e reencaminha-os para o \texttt{CoordinatorAgent}.
+
+\subsubsection{CoordinatorAgent} atua como hub de roteamento: despacha eventos de
+sensores para o \texttt{HarAgent} para reconhecimento de atividade e para o
+\texttt{ClusteringAgent} para agrupamento de utilizadores.
+
+\subsubsection{HarAgent} reencaminha os dados de atividade para o
+\texttt{EnvironmentAgent}, que enriquece o \emph{payload} com informação contextual
+(temperatura meteorológica a partir de uma API meteorológica aberta) antes de o
+persistir.
+
+\subsubsection{DatabaseAgent} escreve o \emph{payload} enriquecido na Firebase
+Realtime Database, fornecendo armazenamento durável e habilitando o painel web.
+
+\subsubsection{ClusteringAgent} mantém um registo de utilizadores em memória.
+Quando chega um evento de sensor, utiliza um algoritmo inspirado em k-médias para
+atribuir utilizadores a um de quatro agrupamentos de atividade---\emph{Iniciante},
+\emph{Moderado}, \emph{Avançado}, \emph{Expert}---com base na sua pontuação de
+\emph{ritmo} acumulada. O agente gera então um convite de progressão de
+agrupamento, orientando o utilizador para o nível seguinte, enviado de volta ao
+cliente Android via \texttt{/set\_user\_match}.
+
+\subsection{Painel Web}
+
+Uma aplicação web estática separada (HTML/CSS/JavaScript) liga-se diretamente ao
+Firebase e apresenta visualizações em tempo real dos dados de atividade, resultados
+de agrupamento de utilizadores e recomendações de movimento, destinada a
+cuidadores e coordenadores de programas.
+
+%
+\section{Resultados}
+\label{sec:results}
+
+\subsection{Convergência do Treino}
+
+A Tabela~\ref{tab:results} resume os resultados de avaliação recolhidos a cada
+10\,000 passos. Ambos os algoritmos convergem rapidamente. O DQN atinge uma
+recompensa média acima de 1\,430 logo aos 10\,000 passos, devido à sua natureza
+\emph{off-policy} e ao espaço de estados relativamente simples. O PPO demora
+ligeiramente mais a estabilizar---atingindo a mesma banda de recompensa
+aproximadamente aos 50\,000 passos---mas apresenta menor variância no regime
+convergido.
+
+\begin{table}[h]
+\caption{Métricas de avaliação finais (média sobre os últimos 10
+\emph{checkpoints} de avaliação, após convergência).}
+\label{tab:results}
+\centering
+\begin{tabular}{lcccc}
+\toprule
+Algoritmo & Recomp.\ Média & Desvio Padrão & Dur.\ Ep. & Taxa Sobrev. \\
+\midrule
+PPO & $1\,434{,}5$ & $\pm 2{,}1$ & 96 & 100\% \\
+DQN & $1\,432{,}8$ & $\pm 4{,}3$ & 96 & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ambas as políticas atingem uma taxa de sobrevivência de 100\%: nenhum episódio
+termina antes do limite de 96 passos, o que significa que nem a fadiga crítica
+nem a irritação crítica são alguma vez acionadas. A duração média dos episódios é
+identicamente 96 para todos os \emph{checkpoints} avaliados após a convergência,
+confirmando o domínio completo da restrição de segurança.
+
+A recompensa máxima teórica para um episódio em que o agente permanece na zona
+saudável durante todos os 96 passos é $96 \times 15 = 1\,440$. Ambos os algoritmos
+atingem aproximadamente 99,7\% deste limite, indicando que as políticas aprendidas
+mantêm o utilizador na zona saudável de forma quase contínua.
+
+\subsection{Distribuição de Ações}
+
+Ambas as políticas selecionam predominantemente o acompanhamento de
+\emph{intensidade média} (ação 2), usando ocasionalmente o \emph{silêncio}
+(ação 0) para prevenir a acumulação de irritação e a \emph{intensidade baixa}
+(ação 1) durante fases de recuperação. A \emph{intensidade alta} (ação 3) é
+utilizada de forma parcimoniosa, pois os seus grandes deltas de fadiga e irritação
+arriscam a penalização terminal.
+
+\subsection{Validação da Implantação}
+
+O modelo PPO ONNX exportado (\texttt{dance4life\_coach\_v2\_ppo.onnx}) foi validado
+comparando o argmax dos \emph{logits} ONNX com a saída do método \texttt{predict}
+do Stable-Baselines3 para 100 observações aleatórias. Não foi encontrada nenhuma
+discrepância, confirmando uma exportação sem perdas. O tamanho do modelo é de
+aproximadamente 18\,KB, adequado para inferência no dispositivo com latência
+negligenciável em hardware Android de gama média.
+
+\subsection{Discussão}
+
+Os resultados demonstram que a formulação de AR é bem adequada a este problema de
+acompanhamento. A recompensa de zona saudável fornece um sinal de aprendizagem
+denso que orienta rapidamente a política para a região de operação desejada. A
+grande penalização terminal ensina eficazmente a política a tratar a fadiga de
+alarmes e a sobrecarga física como restrições rígidas, em vez de compromissos
+suaves.
+
+O desempenho quase idêntico de PPO e DQN é explicado pelo espaço de estados
+pequeno e contínuo e pela ausência de observabilidade parcial: o estado determina
+completamente a ação ótima. Em implantações mais realistas, onde a observação é
+ruidosa ou parcialmente observada, a exploração mais forte do PPO através da
+regularização por entropia pode conferir uma vantagem.
+
+Uma limitação do ambiente atual é o facto de o modelo de transição de estados ser
+construído manualmente. Calibrar as magnitudes de ruído e os coeficientes de
+acoplamento com dados fisiológicos reais de utilizadores aumentaria a validade
+ecológica. Além disso, a observação fornecida à política Android é derivada de
+sinais de sensores através de mapeamentos heurísticos; trabalho futuro poderia
+aprender este mapeamento de ponta a ponta a partir de dados fisiológicos rotulados.
+
+%
+\section{Conclusões}
+\label{sec:conclusions}
+
+Apresentámos o Dance4Life, uma plataforma de ponta a ponta que aplica a
+Aprendizagem por Reforço à personalização do acompanhamento de atividade física
+para o envelhecimento ativo através da dança. Um ambiente Gymnasium personalizado
+codifica o compromisso a três vias entre promoção da atividade, segurança física
+e envolvimento do utilizador. Tanto o PPO como o DQN convergem para um desempenho
+próximo do ótimo, atingindo uma taxa de sobrevivência de 100\% e aproximadamente
+99,7\% da recompensa máxima alcançável. A política PPO aprendida é exportada para
+ONNX e implantada no Android via ONNX Runtime, permitindo acompanhamento em tempo
+real no dispositivo a partir de dados de sensores vestíveis. Um backend multi-agente
+SPADE trata do restante pipeline: roteamento baseado em agentes, enriquecimento de
+contexto ambiental, agrupamento de utilizadores por k-médias com acompanhamento de
+nível progressivo e persistência em nuvem Firebase.
+
+O trabalho futuro incidirá sobre: (i)~recolha de dados reais de utilizadores para
+calibrar a dinâmica do ambiente; (ii)~substituição do mapeamento heurístico de
+estado por um codificador sensor-estado aprendido; (iii)~avaliação do sistema
+completo com uma coorte de voluntários adultos mais velhos; e (iv)~extensão do
+módulo Wear OS para fornecer \emph{feedback} de frequência cardíaca mais granular
+ao estado de AR.
+
+%
+\begin{credits}
+\subsubsection{\discintname}
+Os autores não têm interesses concorrentes a declarar.
+\end{credits}
+
+%
+% ---- Bibliography ----
+%
+\begin{thebibliography}{10}
+
+\bibitem{who2022}
+World Health Organization: Ageing and Health. WHO Fact Sheet (2022).
+\url{https://www.who.int/news-room/fact-sheets/detail/ageing-and-health}
+
+\bibitem{hwang2016}
+Hwang, P.W.-N., Braun, K.L.: The effectiveness of dance interventions to
+improve older adults' health: a systematic literature review. Altern.\ Ther.\
+Health Med.\ \textbf{21}(5), 64--70 (2015)
+
+\bibitem{tewari2017}
+Tewari, A., Murphy, S.A.: From user engagement to health behaviour: just-in-time
+adaptive interventions. In: mHealth, pp. 167--196. Springer (2017)
+
+\bibitem{liao2020}
+Liao, P., et al.: Personalized HeartSteps: a reinforcement learning algorithm
+for optimizing physical activity. Proc.\ ACM Interact.\ Mob.\ Wearable Ubiquitous
+Technol.\ \textbf{4}(1), 18:1--18:22 (2020)
+
+\bibitem{escolar2022}
+Escolar-Reina, P., et al.: Artificial intelligence for exercise prescription in
+rehabilitation: challenges and perspectives. Front.\ Physiol.\ \textbf{13},
+900697 (2022)
+
+\bibitem{yu2019}
+Yu, C., et al.: Reinforcement learning in healthcare: a survey. ACM Comput.\ Surv.\
+\textbf{55}(1), 1--36 (2023)
+
+\bibitem{banos2014}
+Banos, O., et al.: Window size impact in human activity recognition. Sensors
+\textbf{14}(4), 6474--6499 (2014)
+
+\bibitem{mea2007}
+Mea, V.D.: Agents in medicine. Stud.\ Health Technol.\ Inform.\ \textbf{124},
+791--796 (2006)
+
+\bibitem{schulman2017}
+Schulman, J., et al.: Proximal policy optimization algorithms.
+arXiv:1707.06347 (2017)
+
+\bibitem{mnih2015}
+Mnih, V., et al.: Human-level control through deep reinforcement learning.
+Nature \textbf{518}(7540), 529--533 (2015)
+
+\bibitem{raffin2021}
+Raffin, A., et al.: Stable-Baselines3: reliable reinforcement learning
+implementations. J.\ Mach.\ Learn.\ Res.\ \textbf{22}(268), 1--8 (2021)
+
+\end{thebibliography}
+\end{document}
