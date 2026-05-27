@@ -16,17 +16,17 @@ showTab("tab-ranking");
 
 // ── CARREGAR CSVs ──────────────────────────────────────
 Promise.all([
-  d3.csv("dance4life_activity.csv"),
-  d3.csv("dance4life_invitation.csv"),
-  d3.csv("dance4life_matching.csv"),
-  d3.csv("dance4life_movement_recommendation.csv")
+  d3.csv("../SVDC/dance4life_activity_network.csv"),
+  d3.csv("../SVDC/dance4life_invitation_network.csv"),
+  d3.csv("../SVDC/dance4life_matching_network.csv"),
+  d3.csv("../SVDC/dance4life_movement_recommendation_network.csv")
 ]).then(([activity, invitation, matching, recommendation]) => {
 
   // ── AGREGAÇÃO POR UTILIZADOR ───────────────────────
   const activityCount      = d3.rollup(activity, v => v.length, d => d.userId);
   const invitationTotal    = d3.rollup(invitation, v => v.length, d => d.userId);
   const invitationAccepted = d3.rollup(
-    invitation.filter(d => d.status === "accepted" || d.status === "true"),
+    invitation.filter(d => d.status === "accepted" || d.status === "True"),
     v => v.length, d => d.userId
   );
   const matchingCount = d3.rollup(matching, v => v.length, d => d.userId);
@@ -124,60 +124,101 @@ Promise.all([
     });
 
   // ── LINHA TEMPORAL ─────────────────────────────────
-  const parseDate   = d3.timeParse("%Y-%m-%d %H:%M:%S");
-  const formatMonth = d3.timeFormat("%Y-%m");
+  // ── LINHA TEMPORAL POR DIA ─────────────────────────
 
-  const activityByMonth = d3.rollup(
-    activity,
-    v => v.length,
-    d => formatMonth(parseDate(d.date))
+const parseDate = d3.timeParse("%d-%m-%Y %H:%M:%S");
+const formatDay = d3.timeFormat("%Y-%m-%d");
+
+// Converter datas
+const validActivity = activity
+  .map(d => ({
+    ...d,
+    parsedDate: parseDate(d.date)
+  }))
+  .filter(d => d.parsedDate);
+
+// Agrupar por dia
+const activityByDay = d3.rollup(
+  validActivity,
+  v => v.length,
+  d => formatDay(d.parsedDate)
+);
+
+// Dados para gráfico
+const timelineData = Array.from(activityByDay, ([day, count]) => ({
+  date: new Date(day),
+  count
+})).sort((a, b) => a.date - b.date);
+
+// Dimensões
+const tmMargin = { top: 20, right: 30, bottom: 70, left: 50 };
+const tmWidth  = 900 - tmMargin.left - tmMargin.right;
+const tmHeight = 400 - tmMargin.top - tmMargin.bottom;
+
+// Limpar gráfico anterior
+d3.select("#timeline-chart").selectAll("*").remove();
+
+// SVG
+const tmSvg = d3.select("#timeline-chart")
+  .attr("width", tmWidth + tmMargin.left + tmMargin.right)
+  .attr("height", tmHeight + tmMargin.top + tmMargin.bottom)
+  .append("g")
+  .attr("transform", `translate(${tmMargin.left},${tmMargin.top})`);
+
+// Escalas
+const xTm = d3.scaleTime()
+  .domain(d3.extent(timelineData, d => d.date))
+  .range([0, tmWidth]);
+
+const yTm = d3.scaleLinear()
+  .domain([0, d3.max(timelineData, d => d.count)])
+  .nice()
+  .range([tmHeight, 0]);
+
+// Eixo X
+tmSvg.append("g")
+  .attr("transform", `translate(0,${tmHeight})`)
+  .call(
+    d3.axisBottom(xTm)
+      .ticks(12)
+      .tickFormat(d3.timeFormat("%d/%m"))
+  )
+  .selectAll("text")
+  .attr("transform", "rotate(-45)")
+  .style("text-anchor", "end");
+
+// Eixo Y
+tmSvg.append("g")
+  .call(d3.axisLeft(yTm));
+
+// Linha
+const line = d3.line()
+  .x(d => xTm(d.date))
+  .y(d => yTm(d.count));
+
+tmSvg.append("path")
+  .datum(timelineData)
+  .attr("fill", "none")
+  .attr("stroke", "#4a90d9")
+  .attr("stroke-width", 3)
+  .attr("d", line);
+
+// Pontos
+tmSvg.selectAll("circle.tm")
+  .data(timelineData)
+  .join("circle")
+  .attr("class", "tm")
+  .attr("cx", d => xTm(d.date))
+  .attr("cy", d => yTm(d.count))
+  .attr("r", 4)
+  .attr("fill", "#4a90d9");
+
+// Tooltip simples
+tmSvg.selectAll("circle.tm")
+  .append("title")
+  .text(d =>
+    `${d3.timeFormat("%d/%m/%Y")(d.date)}\nAtividades: ${d.count}`
   );
-
-  const timelineData = Array.from(activityByMonth, ([month, count]) => ({
-    date: new Date(month + "-01"),
-    count
-  })).sort((a, b) => a.date - b.date);
-
-  const tmMargin = { top: 20, right: 30, bottom: 50, left: 50 };
-  const tmWidth  = 700 - tmMargin.left - tmMargin.right;
-  const tmHeight = 350 - tmMargin.top  - tmMargin.bottom;
-
-  const tmSvg = d3.select("#timeline-chart")
-    .attr("width",  tmWidth  + tmMargin.left + tmMargin.right)
-    .attr("height", tmHeight + tmMargin.top  + tmMargin.bottom)
-    .append("g")
-    .attr("transform", `translate(${tmMargin.left},${tmMargin.top})`);
-
-  const xTm = d3.scaleTime()
-    .domain(d3.extent(timelineData, d => d.date))
-    .range([0, tmWidth]);
-
-  const yTm = d3.scaleLinear()
-    .domain([0, d3.max(timelineData, d => d.count)])
-    .range([tmHeight, 0]);
-
-  tmSvg.append("g").attr("transform", `translate(0,${tmHeight})`).call(d3.axisBottom(xTm).ticks(8));
-  tmSvg.append("g").call(d3.axisLeft(yTm));
-
-  const line = d3.line()
-    .x(d => xTm(d.date))
-    .y(d => yTm(d.count));
-
-  tmSvg.append("path")
-    .datum(timelineData)
-    .attr("fill", "none")
-    .attr("stroke", "#4a90d9")
-    .attr("stroke-width", 2.5)
-    .attr("d", line);
-
-  tmSvg.selectAll("circle.tm")
-    .data(timelineData)
-    .join("circle")
-    .attr("class", "tm")
-    .attr("cx", d => xTm(d.date))
-    .attr("cy", d => yTm(d.count))
-    .attr("r", 4)
-    .attr("fill", "#4a90d9");
 
   // ── MAPA LEAFLET — CIDADES ─────────────────────────
   const activityByCidade = d3.rollup(activity, v => v.length, d => d.city);
@@ -241,59 +282,97 @@ Promise.all([
   };
 
   // ── CONVITES ───────────────────────────────────────
-  const invStatuses = ["accepted", "declined", "pending"];
-  const invColors   = { accepted: "#2ecc71", declined: "#e74c3c", pending: "#f39c12" };
-  const invLabels   = { accepted: "Aceites", declined: "Recusados", pending: "Pendentes" };
+  // ── CONVITES ───────────────────────────────────────
 
-  const invByStatus = d3.rollup(invitation, v => v.length, d => d.status);
+// Normalizar estados
+const normalizedInvitation = invitation.map(d => ({
+  ...d,
+  status:
+    d.status === "True" || d.status === "accepted"
+      ? "accepted"
+      : d.status === "False" || d.status === "declined"
+      ? "declined"
+      : "pending"
+}));
 
-  const invData = invStatuses.map(s => ({
-    status: s,
-    count: invByStatus.get(s) || 0
-  }));
+const invStatuses = ["accepted", "declined", "pending"];
 
-  const invMargin = { top: 20, right: 20, bottom: 60, left: 50 };
-  const invWidth  = 400 - invMargin.left - invMargin.right;
-  const invHeight = 320 - invMargin.top  - invMargin.bottom;
+const invColors = {
+  accepted: "#2ecc71",
+  declined: "#e74c3c",
+  pending: "#f39c12"
+};
 
-  const invSvg = d3.select("#invites-chart")
-    .attr("width",  invWidth  + invMargin.left + invMargin.right)
-    .attr("height", invHeight + invMargin.top  + invMargin.bottom)
-    .append("g")
-    .attr("transform", `translate(${invMargin.left},${invMargin.top})`);
+const invLabels = {
+  accepted: "Aceites",
+  declined: "Recusados",
+  pending: "Pendentes"
+};
 
-  const xInv = d3.scaleBand()
-    .domain(invStatuses)
-    .range([0, invWidth])
-    .padding(0.3);
+// Contagem por estado
+const invByStatus = d3.rollup(
+  normalizedInvitation,
+  v => v.length,
+  d => d.status
+);
 
-  const yInv = d3.scaleLinear()
-    .domain([0, d3.max(invData, d => d.count)])
-    .range([invHeight, 0]);
+const invData = invStatuses.map(s => ({
+  status: s,
+  count: invByStatus.get(s) || 0
+}));
 
-  invSvg.append("g").attr("transform", `translate(0,${invHeight})`)
-    .call(d3.axisBottom(xInv).tickFormat(d => invLabels[d]));
+const invMargin = { top: 20, right: 20, bottom: 60, left: 50 };
+const invWidth  = 400 - invMargin.left - invMargin.right;
+const invHeight = 320 - invMargin.top  - invMargin.bottom;
 
-  invSvg.append("g").call(d3.axisLeft(yInv));
+const invSvg = d3.select("#invites-chart")
+  .attr("width",  invWidth  + invMargin.left + invMargin.right)
+  .attr("height", invHeight + invMargin.top  + invMargin.bottom)
+  .append("g")
+  .attr("transform", `translate(${invMargin.left},${invMargin.top})`);
 
-  invSvg.selectAll("rect")
-    .data(invData)
-    .join("rect")
-    .attr("x", d => xInv(d.status))
-    .attr("y", d => yInv(d.count))
-    .attr("width", xInv.bandwidth())
-    .attr("height", d => invHeight - yInv(d.count))
-    .attr("fill", d => invColors[d.status]);
+const xInv = d3.scaleBand()
+  .domain(invStatuses)
+  .range([0, invWidth])
+  .padding(0.3);
 
-  invSvg.selectAll("text.inv-label")
-    .data(invData)
-    .join("text")
-    .attr("class", "inv-label")
-    .attr("x", d => xInv(d.status) + xInv.bandwidth() / 2)
-    .attr("y", d => yInv(d.count) - 6)
-    .attr("text-anchor", "middle")
-    .style("font-weight", "bold")
-    .text(d => d.count);
+const yInv = d3.scaleLinear()
+  .domain([0, d3.max(invData, d => d.count)])
+  .nice()
+  .range([invHeight, 0]);
+
+// Eixo X
+invSvg.append("g")
+  .attr("transform", `translate(0,${invHeight})`)
+  .call(
+    d3.axisBottom(xInv)
+      .tickFormat(d => invLabels[d])
+  );
+
+// Eixo Y
+invSvg.append("g")
+  .call(d3.axisLeft(yInv));
+
+// Barras
+invSvg.selectAll("rect")
+  .data(invData)
+  .join("rect")
+  .attr("x", d => xInv(d.status))
+  .attr("y", d => yInv(d.count))
+  .attr("width", xInv.bandwidth())
+  .attr("height", d => invHeight - yInv(d.count))
+  .attr("fill", d => invColors[d.status]);
+
+// Labels acima das barras
+invSvg.selectAll("text.inv-label")
+  .data(invData)
+  .join("text")
+  .attr("class", "inv-label")
+  .attr("x", d => xInv(d.status) + xInv.bandwidth() / 2)
+  .attr("y", d => yInv(d.count) - 8)
+  .attr("text-anchor", "middle")
+  .style("font-weight", "bold")
+  .text(d => d.count);
 
   // ── PESQUISA DE UTILIZADOR ─────────────────────────
   window.searchUser = function () {
