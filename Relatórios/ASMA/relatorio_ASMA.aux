@@ -43,56 +43,56 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Protocolos de Comunicação e Performativas FIPA-ACL}{6}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Diagrama de classes AUML do sistema Dance4Life. Pacotes representados: \texttt  {spade [external]} (framework base), \texttt  {agents.base} (agentes base), \texttt  {agents} (agentes operacionais), \texttt  {behaviours.lifecycle} e \texttt  {behaviours.operational} (behaviours SPADE), \texttt  {model} (modelos Pydantic), \texttt  {services} (persistência Firestore) e \texttt  {FIPA-ACL} (protocolo de comunicação). Relações: herança ($\triangleleft $), composição ($\bullet $---), agregação ($\circ $---) e dependência (\textit  {dashed}).}}{7}{}\protected@file@percent }
 \newlabel{fig:auml_classes}{{1}{7}{}{figure.1}{}}
-\@writefile{toc}{\contentsline {subsubsection}{Modelo de Interação}{7}{}\protected@file@percent }
-\citation{agentesinteligentes}
+\@writefile{toc}{\contentsline {subsubsection}{Modelo de Interação}{8}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{Gestão de Conversações e Isolamento de Sessões}{8}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{Troca de Dados Estruturados}{8}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Performativas FIPA-ACL utilizadas no sistema.}}{8}{}\protected@file@percent }
-\newlabel{performativas_fipa}{{3}{8}{}{table.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Diagramas de Atividades AUML por Protocolo}{8}{}\protected@file@percent }
 \citation{agentesinteligentes}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt  {sensor\_activity}. Fluxo: API $\rightarrow $ SensorAgent $\rightarrow $ CoordinatorAgent $\rightarrow $ HarAgent $\rightarrow $ EnvironmentAgent $\rightarrow $ DatabaseAgent. Retorno INFORM na direcção inversa após cada operação.}}{9}{}\protected@file@percent }
-\newlabel{fig:auml_sa}{{2}{9}{}{figure.2}{}}
+\citation{agentesinteligentes}
+\citation{agentesinteligentes}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Performativas FIPA-ACL utilizadas no sistema.}}{9}{}\protected@file@percent }
+\newlabel{performativas_fipa}{{3}{9}{}{table.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Diagramas de Atividades AUML por Protocolo}{9}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Diagramas de Colaboração AUML por Protocolo}{9}{}\protected@file@percent }
-\citation{agentesinteligentes}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt  {movement\_recommendation}. Fluxo simplificado: API $\rightarrow $ SensorAgent $\rightarrow $ CoordinatorAgent $\rightarrow $ DatabaseAgent. Retorno INFORM de DatabaseAgent para CoordinatorAgent.}}{10}{}\protected@file@percent }
-\newlabel{fig:auml_mr}{{3}{10}{}{figure.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Diagramas de Sequência AUML por Protocolo}{10}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Implementação e Funcionamento (Baseado em SPADE)}{10}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt  {matching}. Fluxo: API $\rightarrow $ ClusteringAgent (inferência deliberativa) $\rightarrow $ notificação HTTP lateral (\texttt  {/set\_user\_match}) $\rightarrow $ CoordinatorAgent $\rightarrow $ DatabaseAgent. Retorno INFORM de DatabaseAgent para CoordinatorAgent.}}{11}{}\protected@file@percent }
-\newlabel{fig:auml_m}{{4}{11}{}{figure.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt  {sensor\_activity}. Mensagens REQUEST numeradas 1--5 (setas sólidas, esquerda para a direita); mensagens INFORM 3.1, 4.1, 5.1 e 6 (setas tracejadas, direita para a esquerda). O \texttt  {conv-id} é propagado em todas as mensagens da conversação.}}{12}{}\protected@file@percent }
-\newlabel{fig:collab_sa}{{5}{12}{}{figure.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt  {movement\_recommendation}. Fluxo simplificado de quatro mensagens: REQUEST 1--3 (API $\rightarrow $ SensorAgent $\rightarrow $ CoordinatorAgent $\rightarrow $ DatabaseAgent) e INFORM 4 de confirmação de persistência.}}{13}{}\protected@file@percent }
-\newlabel{fig:collab_mr}{{6}{13}{}{figure.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt  {matching}. A mensagem 2 representa o efeito lateral HTTP (\texttt  {POST /set\_user\_match/\{id\}}) que o ClusteringAgent efectua directamente sobre a Flask API \textbf  {fora do canal ACL}, antes de encaminhar o resultado via XMPP para o CoordinatorAgent (mensagem 3).}}{14}{}\protected@file@percent }
-\newlabel{fig:collab_m}{{7}{14}{}{figure.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt  {sensor\_activity}. 11 mensagens numeradas: REQUEST 1--3, 5, 9 (setas sólidas); INFORM 4, 6, 8, 11 (setas tracejadas); auto-mensagens 7 (\texttt  {get\_weather\_temperature}) e 10 (\texttt  {save\_activity}). Os blocos de activação mostram o período em que cada agente aguarda resposta do downstream.}}{15}{}\protected@file@percent }
-\newlabel{fig:seq_sa}{{8}{15}{}{figure.8}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt  {movement\_recommendation}. Fluxo de 6 mensagens: REQUEST 1--2 (API→SensorAgent→CoordinatorAgent), auto-mensagem 3 (\texttt  {payload["recommendation"]=True}), REQUEST 4 (→DatabaseAgent), auto-mensagem 5 (\texttt  {save\_movement\_recommendation}) e INFORM 6 de confirmação.}}{16}{}\protected@file@percent }
-\newlabel{fig:seq_mr}{{9}{16}{}{figure.9}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt  {matching}. A mensagem 3 (\texttt  {HTTP POST /set\_user\_match/\{id\}}) é um efeito lateral síncrono executado pelo ClusteringAgent \textbf  {fora do canal ACL} antes de retomar o protocolo FIPA-Request na mensagem 4. O processamento deliberativo do \texttt  {UserMatchingClusterModel} é representado como auto-mensagem 2.}}{17}{}\protected@file@percent }
-\newlabel{fig:seq_m}{{10}{17}{}{figure.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt  {sensor\_activity}. Fluxo: API $\rightarrow $ SensorAgent $\rightarrow $ CoordinatorAgent $\rightarrow $ HarAgent $\rightarrow $ EnvironmentAgent $\rightarrow $ DatabaseAgent. Retorno INFORM na direcção inversa após cada operação.}}{10}{}\protected@file@percent }
+\newlabel{fig:auml_sa}{{2}{10}{}{figure.2}{}}
 \citation{asmnormas}
 \citation{agentesinteligentes}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Instalação Externa da SPADE e Ambiente de Execução}{18}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Fluxo de Dados — Pipeline Sequencial Assíncrono}{18}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt  {movement\_recommendation}. Fluxo simplificado: API $\rightarrow $ SensorAgent $\rightarrow $ CoordinatorAgent $\rightarrow $ DatabaseAgent. Retorno INFORM de DatabaseAgent para CoordinatorAgent.}}{11}{}\protected@file@percent }
+\newlabel{fig:auml_mr}{{3}{11}{}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Diagramas de Sequência AUML por Protocolo}{11}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Implementação e Funcionamento (Baseado em SPADE)}{11}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt  {matching}. Fluxo: API $\rightarrow $ ClusteringAgent (inferência deliberativa) $\rightarrow $ notificação HTTP lateral (\texttt  {/set\_user\_match}) $\rightarrow $ CoordinatorAgent $\rightarrow $ DatabaseAgent. Retorno INFORM de DatabaseAgent para CoordinatorAgent.}}{12}{}\protected@file@percent }
+\newlabel{fig:auml_m}{{4}{12}{}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt  {sensor\_activity}. Mensagens REQUEST numeradas 1--5 (setas sólidas, esquerda para a direita); mensagens INFORM 3.1, 4.1, 5.1 e 6 (setas tracejadas, direita para a esquerda). O \texttt  {conv-id} é propagado em todas as mensagens da conversação.}}{13}{}\protected@file@percent }
+\newlabel{fig:collab_sa}{{5}{13}{}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt  {movement\_recommendation}. Fluxo simplificado de quatro mensagens: REQUEST 1--3 (API $\rightarrow $ SensorAgent $\rightarrow $ CoordinatorAgent $\rightarrow $ DatabaseAgent) e INFORM 4 de confirmação de persistência.}}{14}{}\protected@file@percent }
+\newlabel{fig:collab_mr}{{6}{14}{}{figure.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt  {matching}. A mensagem 2 representa o efeito lateral HTTP (\texttt  {POST /set\_user\_match/\{id\}}) que o ClusteringAgent efectua directamente sobre a Flask API \textbf  {fora do canal ACL}, antes de encaminhar o resultado via XMPP para o CoordinatorAgent (mensagem 3).}}{15}{}\protected@file@percent }
+\newlabel{fig:collab_m}{{7}{15}{}{figure.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt  {sensor\_activity}. 11 mensagens numeradas: REQUEST 1--3, 5, 9 (setas sólidas); INFORM 4, 6, 8, 11 (setas tracejadas); auto-mensagens 7 (\texttt  {get\_weather\_temperature}) e 10 (\texttt  {save\_activity}). Os blocos de activação mostram o período em que cada agente aguarda resposta do downstream.}}{16}{}\protected@file@percent }
+\newlabel{fig:seq_sa}{{8}{16}{}{figure.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt  {movement\_recommendation}. Fluxo de 6 mensagens: REQUEST 1--2 (API→SensorAgent→CoordinatorAgent), auto-mensagem 3 (\texttt  {payload["recommendation"]=True}), REQUEST 4 (→DatabaseAgent), auto-mensagem 5 (\texttt  {save\_movement\_recommendation}) e INFORM 6 de confirmação.}}{17}{}\protected@file@percent }
+\newlabel{fig:seq_mr}{{9}{17}{}{figure.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt  {matching}. A mensagem 3 (\texttt  {HTTP POST /set\_user\_match/\{id\}}) é um efeito lateral síncrono executado pelo ClusteringAgent \textbf  {fora do canal ACL} antes de retomar o protocolo FIPA-Request na mensagem 4. O processamento deliberativo do \texttt  {UserMatchingClusterModel} é representado como auto-mensagem 2.}}{18}{}\protected@file@percent }
+\newlabel{fig:seq_m}{{10}{18}{}{figure.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Instalação Externa da SPADE e Ambiente de Execução}{19}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Fluxo de Dados — Pipeline Sequencial Assíncrono}{19}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Gestão de Conversações e Isolamento de Mensagens}{19}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Troca de Mensagens Baseada em Objetos (Pydantic + Jsonpickle)}{19}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Validação de Ontologias}{19}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Estrutura de ficheiros do projeto.}}{20}{}\protected@file@percent }
-\newlabel{estrutura_ficheiros}{{4}{20}{}{table.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Troca de Mensagens Baseada em Objetos (Pydantic + Jsonpickle)}{20}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Validação de Ontologias}{20}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Estrutura de Ficheiros do Projeto}{20}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Resultados e Análise Crítica}{20}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Sumário do Funcionamento e Testes}{20}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Análise Crítica — Estrangulamento Sequencial}{21}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusões e Recomendações para Melhoria}{21}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Conclusões}{21}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Recomendações e Trabalho Futuro}{22}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{Paralelismo de Comportamentos e Otimização Assíncrona}{22}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{Conformidade Protocolar FIPA-ACL}{22}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{Adição de Novos Agentes e Descoberta Dinâmica}{22}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{Segurança de Dados e Edge Computing}{22}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Estrutura de ficheiros do projeto.}}{21}{}\protected@file@percent }
+\newlabel{estrutura_ficheiros}{{4}{21}{}{table.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Resultados e Análise Crítica}{21}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Sumário do Funcionamento e Testes}{21}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Análise Crítica — Estrangulamento Sequencial}{22}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusões e Recomendações para Melhoria}{22}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Conclusões}{22}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Recomendações e Trabalho Futuro}{23}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Paralelismo de Comportamentos e Otimização Assíncrona}{23}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Conformidade Protocolar FIPA-ACL}{23}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Adição de Novos Agentes e Descoberta Dinâmica}{23}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Segurança de Dados e Edge Computing}{23}{}\protected@file@percent }
 \bibcite{bugaychenko2013}{1}
 \bibcite{camarinha2002}{2}
 \bibcite{crista2025}{3}
@@ -103,7 +103,7 @@
 \bibcite{humayun2022}{8}
 \bibcite{ivascu2021}{9}
 \bibcite{mendes2017}{10}
-\@writefile{toc}{\contentsline {subsubsection}{Melhorias de Código Identificadas}{23}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Melhorias de Código Identificadas}{24}{}\protected@file@percent }
 \bibcite{ozkara2022}{11}
 \bibcite{paraschiv2026}{12}
 \bibcite{sanchezsblas2021}{13}
@@ -120,4 +120,4 @@
 \bibcite{wooldridgejennings1995}{24}
 \bibcite{weiss1999}{25}
 \bibcite{durfeerosenchien1994}{26}
-\gdef \@abspage@last{24}
+\gdef \@abspage@last{25}
