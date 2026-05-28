@@ -181,6 +181,13 @@ DatabaseAgent & ReceiveDatabaseDataBehaviour & CyclicBehaviour & Reativo & s\_a,
 \end{tabular}
 \end{table}
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Classes.png}
+\caption{Diagrama de classes AUML do sistema Dance4Life. Pacotes representados: \texttt{spade [external]} (framework base), \texttt{agents.base} (agentes base), \texttt{agents} (agentes operacionais), \texttt{behaviours.lifecycle} e \texttt{behaviours.operational} (behaviours SPADE), \texttt{model} (modelos Pydantic), \texttt{services} (persistência Firestore) e \texttt{FIPA-ACL} (protocolo de comunicação). Relações: herança ($\triangleleft$), composição ($\bullet$---), agregação ($\circ$---) e dependência (\textit{dashed}).}
+\label{fig:auml_classes}
+\end{figure}
+
 \subsection{Protocolos de Comunicação e Performativas FIPA-ACL}
 A comunicação entre agentes no Dance4Life adota uma semântica compatível com FIPA-ACL, suportada pelas capacidades nativas do SPADE. Todas as mensagens relevantes incluem metadados performative, ontology e conversation-id, permitindo rastreabilidade e separação lógica de fluxos.
 
@@ -240,6 +247,78 @@ failure & Recetor → Emissor & Resposta semântica de falha & Definida em confi
 \end{table}
 
 A implementação atual demonstra alinhamento prático com os princípios FIPA-ACL, mas também evidencia espaço para maturação protocolar, sobretudo na adoção sistemática de agree/failure e em validação semântica mais estrita.
+
+\subsection{Diagramas de Atividades AUML por Protocolo}
+Os três diagramas seguintes representam o comportamento do sistema segundo a notação \textit{Agent UML} (AUML) \cite{agentesinteligentes}, adoptando pistas de actividade (\textit{swimlanes}) por agente e setas diferenciadas para as performativas REQUEST (encaminhamento) e INFORM (confirmação). Os diagramas foram gerados a partir do código-fonte verificado e reflectem a implementação efectiva, não um modelo idealizado.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_SA.png}
+\caption{Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt{sensor\_activity}. Fluxo: API $\rightarrow$ SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ HarAgent $\rightarrow$ EnvironmentAgent $\rightarrow$ DatabaseAgent. Retorno INFORM na direcção inversa após cada operação.}
+\label{fig:auml_sa}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_MR.png}
+\caption{Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt{movement\_recommendation}. Fluxo simplificado: API $\rightarrow$ SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ DatabaseAgent. Retorno INFORM de DatabaseAgent para CoordinatorAgent.}
+\label{fig:auml_mr}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_M.png}
+\caption{Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt{matching}. Fluxo: API $\rightarrow$ ClusteringAgent (inferência deliberativa) $\rightarrow$ notificação HTTP lateral (\texttt{/set\_user\_match}) $\rightarrow$ CoordinatorAgent $\rightarrow$ DatabaseAgent. Retorno INFORM de DatabaseAgent para CoordinatorAgent.}
+\label{fig:auml_m}
+\end{figure}
+
+\subsection{Diagramas de Colaboração AUML por Protocolo}
+Os diagramas de colaboração AUML (também designados \textit{communication diagrams} em UML 2.x) representam os agentes como instâncias nomeadas (no formato \texttt{jid:Classe}) e as ligações entre eles como canais de comunicação persistentes, com mensagens ACL numeradas sequencialmente sobre essas ligações \cite{agentesinteligentes}. Distinguem-se dos diagramas de actividades por enfatizarem a \textbf{estrutura da rede de comunicação} e a \textbf{ordem das trocas de mensagens}, em vez do fluxo de controlo interno de cada agente. As setas sólidas correspondem à performativa REQUEST (encaminhamento), as setas tracejadas à performativa INFORM (confirmação de processamento) e as setas duplas indicam chamadas HTTP externas fora do canal ACL.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Collab_SA.png}
+\caption{Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt{sensor\_activity}. Mensagens REQUEST numeradas 1--5 (setas sólidas, esquerda para a direita); mensagens INFORM 3.1, 4.1, 5.1 e 6 (setas tracejadas, direita para a esquerda). O \texttt{conv-id} é propagado em todas as mensagens da conversação.}
+\label{fig:collab_sa}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Collab_MR.png}
+\caption{Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt{movement\_recommendation}. Fluxo simplificado de quatro mensagens: REQUEST 1--3 (API $\rightarrow$ SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ DatabaseAgent) e INFORM 4 de confirmação de persistência.}
+\label{fig:collab_mr}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Collab_M.png}
+\caption{Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt{matching}. A mensagem 2 representa o efeito lateral HTTP (\texttt{POST /set\_user\_match/\{id\}}) que o ClusteringAgent efectua directamente sobre a Flask API \textbf{fora do canal ACL}, antes de encaminhar o resultado via XMPP para o CoordinatorAgent (mensagem 3).}
+\label{fig:collab_m}
+\end{figure}
+
+\subsection{Diagramas de Sequência AUML por Protocolo}
+Os diagramas de sequência AUML representam os agentes como linhas de vida (\textit{lifelines}) identificadas pelo par \texttt{jid:Classe\textlangle\textlangle estereótipo\textrangle\textrangle} e as mensagens ACL como setas numeradas sobre o eixo temporal (de cima para baixo) \cite{agentesinteligentes}. Relativamente aos diagramas de colaboração, acrescentam três elementos essenciais: os \textbf{blocos de activação} (rectângulos sobre a lifeline, que delimitam o período de processamento de cada agente), as \textbf{chamadas internas} (auto-mensagens, que representam operações locais como enriquecimento contextual ou persistência em Firestore) e as \textbf{secções de protocolo} (bandas que separam a Iniciação FIPA-Request, o Processamento e a Resolução). As setas sólidas com ponta ($\rightarrow\!\!>$) correspondem à performativa REQUEST e as setas tracejadas ($--\!\!>$) à performativa INFORM.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Seq_SA.png}
+\caption{Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt{sensor\_activity}. 11 mensagens numeradas: REQUEST 1--3, 5, 9 (setas sólidas); INFORM 4, 6, 8, 11 (setas tracejadas); auto-mensagens 7 (\texttt{get\_weather\_temperature}) e 10 (\texttt{save\_activity}). Os blocos de activação mostram o período em que cada agente aguarda resposta do downstream.}
+\label{fig:seq_sa}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Seq_MR.png}
+\caption{Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt{movement\_recommendation}. Fluxo de 6 mensagens: REQUEST 1--2 (API→SensorAgent→CoordinatorAgent), auto-mensagem 3 (\texttt{payload["recommendation"]=True}), REQUEST 4 (→DatabaseAgent), auto-mensagem 5 (\texttt{save\_movement\_recommendation}) e INFORM 6 de confirmação.}
+\label{fig:seq_mr}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Seq_M.png}
+\caption{Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt{matching}. A mensagem 3 (\texttt{HTTP POST /set\_user\_match/\{id\}}) é um efeito lateral síncrono executado pelo ClusteringAgent \textbf{fora do canal ACL} antes de retomar o protocolo FIPA-Request na mensagem 4. O processamento deliberativo do \texttt{UserMatchingClusterModel} é representado como auto-mensagem 2.}
+\label{fig:seq_m}
+\end{figure}
 
 \section{Implementação e Funcionamento (Baseado em SPADE)}
 O sistema Dance4Life foi implementado em Python e SPADE, com execução assíncrona sobre asyncio e comunicação ACL sobre XMPP. A solução combina uma API Flask para interação externa com uma rede de agentes residentes em loops próprios (threads dedicadas + event loop por agente), permitindo desacoplamento entre entrada HTTP e processamento multiagente.

@@ -1,11 +1,11 @@
 # Fdb version 4
-["xdvipdfmx"] 1778887804.99366 "relatorio_ASMA.xdv" "relatorio_ASMA.pdf" "relatorio_ASMA" 1778887805.23182 0
-  "relatorio_ASMA.xdv" 1778887804.97011 64976 24315aa128376bd17d0375cc1dbab354 "xelatex"
+["xdvipdfmx"] 1780009067.94279 "relatorio_ASMA.xdv" "relatorio_ASMA.pdf" "relatorio_ASMA" 1780009069.0405 0
+  "relatorio_ASMA.xdv" 1780009067.90748 75748 b35b085a8248b8240d9a84f1b7c13e40 "xelatex"
   (generated)
   "relatorio_ASMA.pdf"
   (rewritten before read)
-["xelatex"] 1778887804.74109 "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/ASMA/relatorio_ASMA.tex" "relatorio_ASMA.xdv" "relatorio_ASMA" 1778887805.23144 0
-  "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/ASMA/relatorio_ASMA.tex" 1778887804.51989 42382 2d935aa9bb5b36fd22e2121a701e6f32 ""
+["xelatex"] 1780009067.62368 "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/ASMA/relatorio_ASMA.tex" "relatorio_ASMA.xdv" "relatorio_ASMA" 1780009069.04002 0
+  "/Users/diego/Workspace/Simb/mia/2-semestre/trabalhos/SAASMRL/Relatórios/ASMA/relatorio_ASMA.tex" 1780009067.44223 49641 8d3ef44f10be267b095c1688be575f51 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmmi6.tfm" 1136768653 1512 f21f83efb36853c0b70002322c1ab3ad ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmmi9.tfm" 1136768653 1524 d89e2d087a9828407a196f428428ef4a ""
@@ -20,11 +20,13 @@
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmr12.tfm" 1254269338 12092 7b1546e2d096cfd5dcbd4049b0b1ec2e ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmr9.tfm" 1254269338 12084 b7f5e4c003de6f57f07c7e9fee73a37c ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmri10.tfm" 1254269338 17148 9556e1b5f936b77a796f68d2d559ba99 ""
+  "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmri9.tfm" 1254269338 17148 ca1ae65757b004f470b8cd636199f6fc ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmtk10.tfm" 1254269338 1368 5bfeb1cf8f9f0acdb7436bfaa8e0da4e ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmtt10.tfm" 1254269338 1372 2ef2c2b492b3c4cd7879fe083abbb061 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmtt9.tfm" 1254269338 1372 a2ff2d4391a2d6bba15b518acb79e80f ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmtti10.tfm" 1254269338 1372 0dcee1a56926aed3dd9ded91b7563563 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ts1-lmr9.tfm" 1254269338 1576 219e49590ff1846c6e9d9797f3bd2972 ""
+  "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ts1-lmtt10.tfm" 1254269338 1316 dd0a7a35fa2a1c1134451c343bdcaa45 ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/base/article.cls" 1748806692 20144 b966087dda3b194755eb460d32e2ef75 ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/base/fontenc.sty" 1761946296 5275 6f9d359641b36842524cdb97716ab75f ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/base/size10.clo" 1748806692 8448 686612a86f0e04f41ea577f5ec7e83d8 ""
@@ -44,15 +46,26 @@
   "/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstpatch.sty" 1710360531 353 9024412f43e92cd5b21fe9ded82d0610 ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/lm/t1lmr.fd" 1616454256 1867 996fe743d88a01aca041ed22cc10e1bb ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/lm/t1lmtt.fd" 1616454256 2682 555da1faa2e266801e4b221d01a42cb5 ""
+  "/usr/local/texlive/2026/texmf-dist/tex/latex/lm/ts1lmtt.fd" 1616454256 2739 a9185ca78909337213035903c24903f2 ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/oberdiek/aliascnt.sty" 1575152444 2652 813491e2bc95c1dafbb39cd7c54b380b ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/tools/multicol.sty" 1761946296 33142 efe8f4750fc02524935e7423b4bdef69 ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty" 1727642399 55384 b454dec21c2d9f45ec0b793f0995b992 ""
   "/usr/local/texlive/2026/texmf-dist/web2c/texmf.cnf" 1770478701 43630 e9fa012910491fe5ae08a72c3c2997a7 ""
   "/usr/local/texlive/2026/texmf-var/web2c/xetex/xelatex.fmt" 1774041148 5948559 1db49bf15858a732af7d952f30185331 ""
   "/usr/local/texlive/2026/texmf.cnf" 1772409725 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
+  "diagramas/Dance4Life_Classes.png" 1780008508.97166 212839 6b24c7c4456054b1823f30e3d2dc19f0 ""
+  "diagramas/Dance4Life_Collab_M.png" 1780005647.404 50899 bf4689c76d9a9c7af71485688c2e42b4 ""
+  "diagramas/Dance4Life_Collab_MR.png" 1780005647.36512 43656 2936682216623ace7ef8fc328f2dc2a8 ""
+  "diagramas/Dance4Life_Collab_SA.png" 1780005647.32211 53362 002774c85321fa98a8b97e9f2273d844 ""
+  "diagramas/Dance4Life_M.png" 1780004507.43902 71095 6ebb7fb468a9e2f44b0ea2a87bbec49b ""
+  "diagramas/Dance4Life_MR.png" 1780004507.38499 59207 a5deb67fc9bc07ffbf4e44398614b327 ""
+  "diagramas/Dance4Life_SA.png" 1780004507.32131 94312 e6c322622aef14b3c1b4b1544ad07031 ""
+  "diagramas/Dance4Life_Seq_M.png" 1780006630.07159 117880 4144a87e3587faa66fde3ebf55e9b8c7 ""
+  "diagramas/Dance4Life_Seq_MR.png" 1780006630.02591 87393 084a5ca215736b624086c28989bebc66 ""
+  "diagramas/Dance4Life_Seq_SA.png" 1780006629.98371 129658 ba907e220a02ca2b28970a91b0249557 ""
   "llncs.cls" 1706524644 43402 5fb5a2dc40571aa40f3d199c00cbb986 ""
-  "relatorio_ASMA.aux" 1778887804.96965 7436 bb83ad0478bcee469d59076833f99173 "xelatex"
-  "relatorio_ASMA.tex" 1778887804.51989 42382 2d935aa9bb5b36fd22e2121a701e6f32 ""
+  "relatorio_ASMA.aux" 1780009067.90672 13038 6ab0d7145ecde0fa2d4e690a0ded9118 "xelatex"
+  "relatorio_ASMA.tex" 1780009067.44223 49641 8d3ef44f10be267b095c1688be575f51 ""
   (generated)
   "relatorio_ASMA.aux"
   "relatorio_ASMA.log"

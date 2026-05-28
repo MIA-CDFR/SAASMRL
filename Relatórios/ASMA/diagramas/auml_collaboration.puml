@@ -1,0 +1,150 @@
+@startuml Dance4Life_Collab_SA
+' ================================================================
+' Dance4Life -- Diagrama de Colaboracao AUML
+' Padrao  : AUML (Odell, Parunak & Bauer, 2001)
+' Protocolo : FIPA-Request (FIPA SC00026H)
+' Ontologia : sensor_activity
+' Layout   : pipeline left-to-right
+'            REQUEST (-->)  setas solidas, esquerda para direita
+'            INFORM  (..>)  setas tracejadas, direita para esquerda
+' ================================================================
+!theme plain
+left to right direction
+skinparam componentStyle rectangle
+skinparam componentFontSize 9
+skinparam componentFontName Arial
+skinparam componentBorderThickness 1.5
+skinparam arrowColor #2C3E50
+skinparam arrowFontSize 8
+skinparam arrowFontColor #1B2631
+skinparam NoteBackgroundColor #FEF9E7
+skinparam NoteBorderColor #D4AC0D
+
+title <b>Dance4Life -- Diagrama de Colaboracao AUML</b>\nProtocolo FIPA-Request :: <i>sensor_activity</i>
+
+note as NFIPA
+  <b>FIPA-Request Interaction Protocol</b>
+  REQUEST (-->): encaminhamento de dados
+  INFORM  (..>): confirmacao local (ack)
+  conv-id: conv-{jid}-guid-{uuid}
+  agree/failure definidos em config
+  mas nao aplicados sistematicamente
+end note
+
+component "api_agent@localhost\n:BaseSenderAgent" as API #D6EAF8
+component "sensor_agent@localhost\n:SensorAgent\n[Reativo]" as SA #D5F5E3
+component "coordinator_agent@localhost\n:CoordinatorAgent\n[Hibrido]" as CA #FDEBD0
+component "har_agent@localhost\n:HarAgent\n[Reativo]" as HA #E8DAEF
+component "environment_agent@localhost\n:EnvironmentAgent\n[Hibrido]" as EA #FEF9E7
+component "database_agent@localhost\n:DatabaseAgent\n[Reativo de Servico]" as DB #F5CBA7
+
+' REQUEST: pipeline principal (esquerda -> direita)
+API --> SA : "1: REQUEST / sensor_activity\n    conv-id: conv-{jid}-guid-{uuid}"
+SA  --> CA : "2: REQUEST / sensor_activity"
+CA  --> HA : "3: REQUEST / sensor_activity"
+HA  --> EA : "4: REQUEST / sensor_activity"
+EA  --> DB : "5: REQUEST / sensor_activity\n    [+weather_temperature]"
+
+' INFORM: confirmacoes (direita -> esquerda, tracejado)
+CA ..> SA : "3.1: INFORM / sensor_activity [ack]"
+HA ..> CA : "4.1: INFORM / sensor_activity [ack]"
+EA ..> HA : "5.1: INFORM / sensor_activity [ack]"
+DB ..> EA : "6: INFORM / sensor_activity\n    [save_activity ok]"
+
+@enduml
+
+@startuml Dance4Life_Collab_MR
+' ================================================================
+' Dance4Life -- Diagrama de Colaboracao AUML
+' Padrao  : AUML (Odell, Parunak & Bauer, 2001)
+' Protocolo : FIPA-Request (FIPA SC00026H)
+' Ontologia : movement_recommendation
+' Layout   : pipeline left-to-right
+' ================================================================
+!theme plain
+left to right direction
+skinparam componentStyle rectangle
+skinparam componentFontSize 9
+skinparam componentFontName Arial
+skinparam componentBorderThickness 1.5
+skinparam arrowColor #2C3E50
+skinparam arrowFontSize 8
+skinparam arrowFontColor #1B2631
+skinparam NoteBackgroundColor #FEF9E7
+skinparam NoteBorderColor #D4AC0D
+
+title <b>Dance4Life -- Diagrama de Colaboracao AUML</b>\nProtocolo FIPA-Request :: <i>movement_recommendation</i>
+
+note as NFIPA
+  <b>FIPA-Request Interaction Protocol</b>
+  Fluxo simplificado: sem passagem por HarAgent/EnvironmentAgent
+  REQUEST (-->): encaminhamento
+  INFORM  (..>): confirmacao de persistencia
+  conv-id: conv-{jid}-guid-{uuid}
+end note
+
+component "api_agent@localhost\n:BaseSenderAgent" as API #D6EAF8
+component "sensor_agent@localhost\n:SensorAgent\n[Reativo]" as SA #D5F5E3
+component "coordinator_agent@localhost\n:CoordinatorAgent\n[Hibrido]" as CA #FDEBD0
+component "database_agent@localhost\n:DatabaseAgent\n[Reativo de Servico]" as DB #F5CBA7
+
+' REQUEST: pipeline principal
+API --> SA : "1: REQUEST / movement_recommendation\n    conv-id: conv-{jid}-guid-{uuid}"
+SA  --> CA : "2: REQUEST / movement_recommendation"
+CA  --> DB : "3: REQUEST / movement_recommendation\n    [+recommendation=True]"
+
+' INFORM: confirmacao de persistencia
+DB ..> CA : "4: INFORM / movement_recommendation\n    [save_movement_recommendation ok]"
+
+@enduml
+
+@startuml Dance4Life_Collab_M
+' ================================================================
+' Dance4Life -- Diagrama de Colaboracao AUML
+' Padrao  : AUML (Odell, Parunak & Bauer, 2001)
+' Protocolo : FIPA-Request (FIPA SC00026H)
+' Ontologia : matching
+' Layout   : top-to-bottom (efeito lateral HTTP exige duas ligacoes
+'             entre ClusteringAgent e API Flask)
+' ================================================================
+!theme plain
+top to bottom direction
+skinparam componentStyle rectangle
+skinparam componentFontSize 9
+skinparam componentFontName Arial
+skinparam componentBorderThickness 1.5
+skinparam arrowColor #2C3E50
+skinparam arrowFontSize 8
+skinparam arrowFontColor #1B2631
+skinparam NoteBackgroundColor #FEF9E7
+skinparam NoteBorderColor #D4AC0D
+
+title <b>Dance4Life -- Diagrama de Colaboracao AUML</b>\nProtocolo FIPA-Request :: <i>matching</i>
+
+note as NFIPA
+  <b>FIPA-Request Interaction Protocol</b>
+  Despacho paralelo apos asyncio.sleep
+  (mesmo pedido POST /collect_data_activities)
+  REQUEST ACL (-->): canal XMPP/SPADE
+  HTTP     (-[#E74C3C,dashed]->): efeito lateral fora do canal ACL
+  INFORM   (..>): confirmacao de persistencia
+  conv-id: conv-{jid}-guid-{uuid}
+end note
+
+component "api_agent@localhost\n:BaseSenderAgent / Flask API" as API #D6EAF8
+component "matching_agent@localhost\n:ClusteringAgent\n[Deliberativo]" as CLU #F1948A
+component "coordinator_agent@localhost\n:CoordinatorAgent\n[Hibrido]" as CA #FDEBD0
+component "database_agent@localhost\n:DatabaseAgent\n[Reativo de Servico]" as DB #F5CBA7
+
+' REQUEST ACL: pipeline principal
+API  --> CLU : "1: REQUEST / matching\n    payload: {new_data, users}"
+CLU  --> CA  : "3: REQUEST / matching\n    [base={invite_payload}]"
+CA   --> DB  : "4: REQUEST / matching\n    [+recommendation=True]"
+
+' Efeito lateral HTTP (fora do canal ACL)
+CLU -[#E74C3C,dashed]-> API : "2: HTTP POST /set_user_match/{user_id}\n    [notificacao de convite -- fora do canal ACL]"
+
+' INFORM: confirmacao de persistencia
+DB  ..> CA  : "5: INFORM / matching\n    [save_matching ok]"
+
+@enduml

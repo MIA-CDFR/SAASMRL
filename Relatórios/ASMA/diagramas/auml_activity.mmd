@@ -1,0 +1,198 @@
+%% ================================================================
+%% Dance4Life — Diagramas de Atividades AUML
+%% Padrão : AUML (Odell, Parunak & Bauer, 2001)
+%% Protocolo : FIPA-Request (FIPA SC00026H)
+%% Versão  : Mermaid
+%%
+%% Três protocolos representados:
+%%   ① sensor_activity
+%%   ② movement_recommendation
+%%   ③ matching
+%%
+%% Legenda de arestas:
+%%   ──►  Mensagem REQUEST  (encaminhamento de dados)
+%%   -.-► Mensagem INFORM   (confirmação / ack)
+%% ================================================================
+
+flowchart TD
+
+  %% ── Estilos por papel de agente ────────────────────────────
+  classDef apiCls  fill:#1A5276,stroke:#0E2F51,color:#fff,font-weight:bold
+  classDef saCls   fill:#1E8449,stroke:#145A32,color:#fff,font-weight:bold
+  classDef caCls   fill:#B9770E,stroke:#7D6608,color:#fff,font-weight:bold
+  classDef haCls   fill:#7D3C98,stroke:#512E5F,color:#fff,font-weight:bold
+  classDef eaCls   fill:#0E6655,stroke:#0B5345,color:#fff,font-weight:bold
+  classDef cluCls  fill:#943126,stroke:#641E16,color:#fff,font-weight:bold
+  classDef dbCls   fill:#922B21,stroke:#641E16,color:#fff,font-weight:bold
+  classDef extCls  fill:#5D6D7E,stroke:#2C3E50,color:#fff
+  classDef reqMsg  fill:#D6EAF8,stroke:#2471A3,color:#1B2631,font-style:italic
+  classDef infMsg  fill:#D5F5E3,stroke:#1E8449,color:#1B2631,font-style:italic
+  classDef guard   fill:#FEF9E7,stroke:#D4AC0D,color:#1B2631
+
+  %% ════════════════════════════════════════════════════════════
+  %% ① Protocolo FIPA-Request — sensor_activity
+  %%    API → SensorAgent → CoordinatorAgent → HarAgent
+  %%        → EnvironmentAgent → DatabaseAgent
+  %%    INFORM: DB→EA  EA→HA  HA→CA  CA→SA
+  %% ════════════════════════════════════════════════════════════
+
+  subgraph F1["① Protocolo FIPA-Request — ontologia: sensor_activity"]
+    direction TB
+
+    F1s(["▶ Início"]):::apiCls
+
+    F1_A["🔷 API Flask\nPOST /collect_data_activities\nValidar payload JSON\ndevice_id · acc · hr · ritmo · lat · lon"]:::apiCls
+
+    F1_m1(["MSG ACL\nperformative: REQUEST\nontology: sensor_activity\nconversation-id: conv-{jid}-guid-{uuid}"]):::reqMsg
+
+    F1_SA["🟢 SensorAgent\nReceiveSensorDataBehaviour\nDescodificar payload jsonpickle"]:::saCls
+
+    F1_SA_g{{"performative\n== REQUEST?"}}:::guard
+
+    F1_CA["🟠 CoordinatorAgent\nReceiveCoordinatorDataBehaviour\nDecidir por ontologia"]:::caCls
+
+    F1_CA_ack(["MSG ACL\nINFORM / sensor_activity\n→ SensorAgent\n[ack imediato após forward]"]):::infMsg
+
+    F1_SA_ack["🟢 SensorAgent\nReceber INFORM (ack)\n[CoordinatorAgent → SensorAgent]"]:::saCls
+
+    F1_HA["🟣 HarAgent\nReceiveHarDataBehaviour\n[Placeholder HAR — sem inferência ML]"]:::haCls
+
+    F1_HA_ack(["MSG ACL\nINFORM / sensor_activity\n→ CoordinatorAgent\n[ack imediato após forward]"]):::infMsg
+
+    F1_CA_ack2["🟠 CoordinatorAgent\nReceber INFORM (ack)\n[HarAgent → CoordinatorAgent]"]:::caCls
+
+    F1_EA["🔵 EnvironmentAgent\nEnvironmentDataBehaviour"]:::eaCls
+
+    F1_EA_w["☁️ get_weather_temperature\n(latitude, longitude)\n[API Meteorológica Externa]"]:::extCls
+
+    F1_EA_e["payload += weather_temperature\n[enriquecimento contextual]"]:::eaCls
+
+    F1_EA_ack(["MSG ACL\nINFORM / sensor_activity\n→ HarAgent\n[ack imediato após forward]"]):::infMsg
+
+    F1_HA_ack2["🟣 HarAgent\nReceber INFORM (ack)\n[EnvironmentAgent → HarAgent]"]:::haCls
+
+    F1_DB["🔴 DatabaseAgent\nReceiveDatabaseDataBehaviour"]:::dbCls
+
+    F1_DB_c["payload.pop('visited_agents')"]:::dbCls
+
+    F1_DB_s["💾 save_activity(payload)\n→ Firestore: dance4life_activity"]:::dbCls
+
+    F1_DB_ack(["MSG ACL\nINFORM / sensor_activity\n→ EnvironmentAgent\n[após persistência]"]):::infMsg
+
+    F1_EA_ack2["🔵 EnvironmentAgent\nReceber INFORM (ack)\n[DatabaseAgent → EnvironmentAgent]"]:::eaCls
+
+    F1e(["⏹ Fim"]):::apiCls
+
+    %% -- Fluxo REQUEST (setas sólidas) --
+    F1s        --> F1_A
+    F1_A       --> F1_m1
+    F1_m1      -->|"REQUEST / sensor_activity"| F1_SA
+    F1_SA      --> F1_SA_g
+    F1_SA_g    -- sim -->|"REQUEST / sensor_activity"| F1_CA
+    F1_SA_g    -- não --> F1e
+    F1_CA      -->|"REQUEST / sensor_activity"| F1_HA
+    F1_HA      -->|"REQUEST / sensor_activity"| F1_EA
+    F1_EA      --> F1_EA_w --> F1_EA_e
+    F1_EA_e    -->|"REQUEST / sensor_activity"| F1_DB
+    F1_DB      --> F1_DB_c --> F1_DB_s
+
+    %% -- Fluxo INFORM — retorno de confirmações (setas tracejadas) --
+    F1_DB_s    --> F1_DB_ack
+    F1_DB_ack  -.->|"INFORM / sensor_activity"| F1_EA_ack2
+    F1_EA_e    --> F1_EA_ack
+    F1_EA_ack  -.->|"INFORM / sensor_activity"| F1_HA_ack2
+    F1_HA      --> F1_HA_ack
+    F1_HA_ack  -.->|"INFORM / sensor_activity"| F1_CA_ack2
+    F1_CA      --> F1_CA_ack
+    F1_CA_ack  -.->|"INFORM / sensor_activity"| F1_SA_ack
+
+    F1_DB_s    --> F1e
+  end
+
+  %% ════════════════════════════════════════════════════════════
+  %% ② Protocolo FIPA-Request — movement_recommendation
+  %%    API → SensorAgent → CoordinatorAgent → DatabaseAgent
+  %%    INFORM: DB → CA
+  %% ════════════════════════════════════════════════════════════
+
+  subgraph F2["② Protocolo FIPA-Request — ontologia: movement_recommendation"]
+    direction TB
+
+    F2s(["▶ Início"]):::apiCls
+
+    F2_A["🔷 API Flask\nPOST /set_movement_recommendation\nValidar payload JSON"]:::apiCls
+
+    F2_m1(["MSG ACL\nperformative: REQUEST\nontology: movement_recommendation\nconversation-id: conv-{jid}-guid-{uuid}"]):::reqMsg
+
+    F2_SA["🟢 SensorAgent\nReceiveSensorDataBehaviour\nGuard: [performative == REQUEST]"]:::saCls
+
+    F2_CA["🟠 CoordinatorAgent\nReceiveCoordinatorDataBehaviour\nGuard: [ontology == movement_recommendation]"]:::caCls
+
+    F2_CA_e["payload['recommendation'] = True\n[anotação de processamento]"]:::caCls
+
+    F2_DB["🔴 DatabaseAgent\nReceiveDatabaseDataBehaviour\npayload.pop('visited_agents')"]:::dbCls
+
+    F2_DB_s["💾 save_movement_recommendation(payload)\n→ Firestore: dance4life_movement_recommendation"]:::dbCls
+
+    F2_DB_ack(["MSG ACL\nINFORM / movement_recommendation\n→ CoordinatorAgent"]):::infMsg
+
+    F2_CA_ack["🟠 CoordinatorAgent\nReceber INFORM (ack)\n[DatabaseAgent → CoordinatorAgent]"]:::caCls
+
+    F2e(["⏹ Fim"]):::apiCls
+
+    F2s     --> F2_A --> F2_m1
+    F2_m1   -->|"REQUEST / movement_recommendation"| F2_SA
+    F2_SA   -->|"REQUEST / movement_recommendation"| F2_CA
+    F2_CA   --> F2_CA_e
+    F2_CA_e -->|"REQUEST / movement_recommendation"| F2_DB
+    F2_DB   --> F2_DB_s --> F2_DB_ack
+    F2_DB_ack -.->|"INFORM / movement_recommendation"| F2_CA_ack
+    F2_DB_s --> F2e
+  end
+
+  %% ════════════════════════════════════════════════════════════
+  %% ③ Protocolo FIPA-Request — matching
+  %%    API → ClusteringAgent → CoordinatorAgent → DatabaseAgent
+  %%    Efeito lateral: ClusteringAgent → POST /set_user_match/{id}
+  %%    INFORM: DB → CA
+  %% ════════════════════════════════════════════════════════════
+
+  subgraph F3["③ Protocolo FIPA-Request — ontologia: matching"]
+    direction TB
+
+    F3s(["▶ Início"]):::apiCls
+
+    F3_A["🔷 API Flask\nPOST /collect_data_activities\nDespacho paralelo após asyncio.sleep\nPayload: new_data + users"]:::apiCls
+
+    F3_m1(["MSG ACL\nperformative: REQUEST\nontology: matching\nconversation-id: conv-{jid}-guid-{uuid}"]):::reqMsg
+
+    F3_CLU["🟤 ClusteringAgent\nReceiveClusteringDataBehaviour\nGuard: [performative == REQUEST]"]:::cluCls
+
+    F3_CLU_m["process_matching_request(payload)\nUserActivityClusterModel\n[Arquitetura Deliberativa]"]:::cluCls
+
+    F3_CLU_h["🌐 POST /set_user_match/{user_id}\nHTTP → Flask API\n[Efeito Lateral — Notificação de Convite]"]:::extCls
+
+    F3_CA["🟠 CoordinatorAgent\nReceiveCoordinatorDataBehaviour\nGuard: [ontology == matching]"]:::caCls
+
+    F3_CA_e["payload['recommendation'] = True\n[anotação de processamento]"]:::caCls
+
+    F3_DB["🔴 DatabaseAgent\nReceiveDatabaseDataBehaviour\npayload.pop('visited_agents')"]:::dbCls
+
+    F3_DB_s["💾 save_matching(payload)\n→ Firestore: dance4life_matching"]:::dbCls
+
+    F3_DB_ack(["MSG ACL\nINFORM / matching\n→ CoordinatorAgent"]):::infMsg
+
+    F3_CA_ack["🟠 CoordinatorAgent\nReceber INFORM (ack)\n[DatabaseAgent → CoordinatorAgent]"]:::caCls
+
+    F3e(["⏹ Fim"]):::apiCls
+
+    F3s       --> F3_A --> F3_m1
+    F3_m1     -->|"REQUEST / matching"| F3_CLU
+    F3_CLU    --> F3_CLU_m --> F3_CLU_h
+    F3_CLU_h  -->|"REQUEST / matching"| F3_CA
+    F3_CA     --> F3_CA_e
+    F3_CA_e   -->|"REQUEST / matching"| F3_DB
+    F3_DB     --> F3_DB_s --> F3_DB_ack
+    F3_DB_ack -.->|"INFORM / matching"| F3_CA_ack
+    F3_DB_s   --> F3e
+  end
