@@ -9,7 +9,7 @@
 '            INFORM  (..>)  setas tracejadas, direita para esquerda
 ' ================================================================
 !theme plain
-left to right direction
+top to bottom direction
 skinparam componentStyle rectangle
 skinparam componentFontSize 9
 skinparam componentFontName Arial
@@ -62,7 +62,7 @@ DB ..> EA : "6: INFORM / sensor_activity\n    [save_activity ok]"
 ' Layout   : pipeline left-to-right
 ' ================================================================
 !theme plain
-left to right direction
+top to bottom direction
 skinparam componentStyle rectangle
 skinparam componentFontSize 9
 skinparam componentFontName Arial
