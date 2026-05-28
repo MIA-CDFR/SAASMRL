@@ -320,6 +320,26 @@ Os diagramas de sequência AUML representam os agentes como linhas de vida (\tex
 \label{fig:seq_m}
 \end{figure}
 
+\subsection{Statecharts: Ciclo de Vida e Pipeline de Mensagens}
+
+O diagrama~\ref{fig:sc_lifecycle} modela o ciclo de vida do par servidor Flask -- \texttt{BaseBackgroundAgent}: arranque, registo via \texttt{POST /register\_agent}, monitorização periódica por heartbeat (period = 10\,s), deteção de timeout (HEARTBEAT\_TIMEOUT = 30\,s) pela \emph{cleanup thread} do servidor, e paragem ordenada com \texttt{POST /unregister\_agent}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.82\textwidth]{diagramas/Dance4Life_SC_Lifecycle.png}
+  \caption{Statechart — Ciclo de vida Server $\leftrightarrow$ \texttt{BaseBackgroundAgent}: registo, heartbeat periódico (period = 10\,s) e limpeza por timeout (HEARTBEAT\_TIMEOUT = 30\,s). As setas a tracejado representam chamadas HTTP fora do canal FIPA-ACL.}
+  \label{fig:sc_lifecycle}
+\end{figure}
+
+O diagrama~\ref{fig:sc_pipeline} apresenta os estados internos de cada agente e as transições inter-agentes para a ontologia \texttt{sensor\_activity}, a cadeia mais completa do sistema. Cada agente alterna entre \emph{Aguardando} (\texttt{receive(timeout=10)}), \emph{Processando} (decodificação e verificação) e \emph{Encaminhando} (\texttt{forward\_message}), emitindo um \texttt{INFORM} de reconhecimento ao remetente após cada salto.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.70\textwidth]{diagramas/Dance4Life_SC_Pipeline.png}
+  \caption{Statechart — Pipeline inter-agentes para a ontologia \texttt{sensor\_activity}: cada agente expõe os seus sub-estados internos (espera, processamento, encaminhamento) e as transições de saída por REQUEST FIPA-ACL e INFORM de reconhecimento.}
+  \label{fig:sc_pipeline}
+\end{figure}
+
 \section{Implementação e Funcionamento (Baseado em SPADE)}
 O sistema Dance4Life foi implementado em Python e SPADE, com execução assíncrona sobre asyncio e comunicação ACL sobre XMPP. A solução combina uma API Flask para interação externa com uma rede de agentes residentes em loops próprios (threads dedicadas + event loop por agente), permitindo desacoplamento entre entrada HTTP e processamento multiagente.
 
