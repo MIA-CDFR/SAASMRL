@@ -59,65 +59,57 @@ Rui Manuel Martins Marques Rodrigues (pg7942@alunos.uminho.pt)
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-O presente relatório descreve a conceção, modelação e implementação do protótipo Dance4Life, um ecossistema distribuído baseado em Sistemas Multiagente (SMA), desenvolvido em Python com a framework SPADE (Smart Python Agent Development Environment). O domínio de aplicação é o envelhecimento ativo, através da integração de dados de atividade física, contexto ambiental e emparelhamento social.
-A arquitetura implementada inclui um agente emissor na camada API (BaseSenderAgent) e seis agentes especializados em background (SensorAgent, CoordinatorAgent, HarAgent, EnvironmentAgent, DatabaseAgent e ClusteringAgent). A comunicação segue uma abordagem compatível com FIPA-ACL, com uso predominante das performativas request e inform, metadados de ontologia e conversation-id, e serialização de payloads com jsonpickle.
-Os resultados demonstram a viabilidade da abordagem multiagente para orquestração distribuída de pipelines edge-to-cloud, desde a recolha via API até à persistência em Firebase Firestore. O relatório apresenta ainda uma análise crítica das limitações observadas no código atual, nomeadamente ausência de handshake completo agree/failure, validação parcial de ontologias e acoplamento estático entre agentes, propondo melhorias para aumentar robustez, escalabilidade e conformidade com o enunciado.
+O presente relatório descreve a conceção, modelação e implementação do Dance4Life, um Sistema Multiagente (SMA) distribuído, desenvolvido em Python com a \textit{framework} SPADE (Smart Python Agent Development Environment), aplicado ao domínio do envelhecimento ativo. O sistema tem como objetivo suportar mecanismos de monitorização de atividade física, enriquecimento contextual e emparelhamento social através de uma arquitetura modular baseada em agentes especializados. A solução integra uma API REST (Application Programming Interface - Representational State Transfer) com um ecossistema multiagente responsável pela recolha, coordenação, processamento e persistência distribuída de dados. A comunicação entre agentes é realizada sobre XMPP (Extensible Messaging and Presence Protocol), seguindo princípios compatíveis com FIPA-ACL (Foundation for Intelligent Physical Agents - Agent Communication Language), através da utilização de performativas, ontologias e identificadores de conversação. A troca de informação é suportada por \textit{payloads} estruturados serializados com jsonpickle. Os resultados obtidos demonstram a viabilidade da abordagem multiagente para a orquestração assíncrona de \textit{pipelines} distribuídos em cenários de envelhecimento ativo. O relatório apresenta ainda uma análise crítica das limitações identificadas na implementação atual, nomeadamente ao nível da conformidade protocolar, validação semântica e acoplamento estático entre agentes, propondo futuras melhorias orientadas à escalabilidade, robustez e coordenação distribuída.
 
 
-\keywords{Sistemas Multiagente \and SPADE\and FIPA-ACL \and Envelhecimento Ativo \and Reconhecimento de Atividade (HAR)}
+\keywords{Sistemas Multiagente \and SPADE \and FIPA-ACL \and Envelhecimento Ativo \and Dance4Life \and Human Activity Recognition (HAR)}
 \end{abstract}
 %
 %
 %
 \section{Introdução}
+O presente trabalho insere-se no domínio dos Sistemas Multiagente aplicados ao envelhecimento ativo, explorando a utilização de arquiteturas distribuídas para monitorização, coordenação e processamento de dados em ambientes inteligentes. Esta secção apresenta o contexto e motivação do problema, os objetivos definidos para o projeto e a estrutura geral do relatório. 
+
 \subsection{Domínio e Motivação}
-O envelhecimento demográfico global constitui um dos principais desafios societais e de saúde pública da atualidade. A estimativa de que, até 2050, a população com mais de 65 anos atinja 1,5 mil milhões de pessoas impõe uma mudança de paradigma: a transição de cuidados clínicos hospitalares para modelos de envelhecimento ativo e monitorização remota na própria residência.
-É neste contexto que surge o ecossistema concetual Dance4Life, proposto como domínio de aplicação deste trabalho prático. O Dance4Life visa promover o envelhecimento ativo através da inferência implícita de preferências do utilizador, correlacionando o movimento físico com estímulos musicais e interações sociais. A diversidade de dados envolvidos (sensores inerciais, sinais vitais, contexto sonoro e perfis sociais) não pode ser gerida eficientemente por uma arquitetura monolítica.
-Os SMA emergem como o paradigma tecnológico ideal para este cenário. A sua natureza modular, distribuída e assíncrona permite que entidades computacionais autónomas - os agentes - colaborem para perceber o ambiente, interpretar dados ruidosos e tomar decisões em tempo real.
+O envelhecimento demográfico global constitui um dos principais desafios societais e de saúde pública da atualidade. A estimativa de que, até 2050, a população com mais de 65 anos atinja 1,5 mil milhões de pessoas impõe uma mudança de paradigma, promovendo a transição de modelos centrados em cuidados clínicos hospitalares para abordagens de envelhecimento ativo e monitorização remota no contexto residencial. 
+É neste enquadramento que surge o ecossistema concetual Dance4Life, proposto como domínio de aplicação deste trabalho prático. O Dance4Life pretende promover o envelhecimento ativo através da inferência implícita de preferências dos utilizadores, correlacionando padrões de dança e interações sociais. 
+A diversidade e heterogeneidade dos dados envolvidos, incluindo sensores inerciais, sinais vitais e perfis sociais, dificultam a adoção de arquiteturas monolíticas tradicionais. Neste contexto, os Sistemas Multiagente emergem como um paradigma tecnológico adequado, devido à sua natureza modular, distribuída e assíncrona. Esta abordagem permite que entidades computacionais autónomas, designadas agentes, cooperem entre si para percecionar o ambiente, interpretar dados heterogéneos e suportar mecanismos de decisão em tempo real.
 
 \subsection{Objetivos}
-O objetivo central deste projeto consiste na conceção e implementação de um protótipo distribuído baseado no paradigma SMA, focado no domínio do envelhecimento ativo, desenvolvido em Python com a biblioteca SPADE. Os objetivos são:
-\begin{itemize}
-\item Conceção Arquitetural: Desenhar uma arquitetura distribuída e modular, apoiada por metodologias Agent UML.
-\item Implementação de Agentes Inteligentes: Definir e implementar as classes de agentes atualmente operacionais no sistema (BaseSenderAgent, SensorAgent, CoordinatorAgent, HarAgent, EnvironmentAgent, DatabaseAgent e ClusteringAgent), com comportamentos CyclicBehaviour, OneShotBehaviour e PeriodicBehaviour.
-\item Padronização FIPA-ACL: Utilizar performativas e metadados alinhados com FIPA-ACL (performative, ontology, conversation-id), documentando o grau de conformidade efetivamente alcançado.
-\item Transmissão de Dados Estruturados: Garantir que o intercâmbio de mensagens utiliza payloads estruturados serializados com jsonpickle, reduzindo parsing manual e ambiguidade semântica.
-\item Orquestração Assíncrona: Desenvolver mecanismos de coordenação no CoordinatorAgent para gerir o pipeline sequencial sem bloqueios na thread principal.
-\end{itemize}
+O principal objetivo deste trabalho consiste na conceção e implementação de um protótipo distribuído baseado em Sistemas Multiagente, aplicado ao domínio do envelhecimento ativo e desenvolvido em Python com recurso à \textit{framework} SPADE. A solução proposta procura explorar as capacidades de coordenação distribuída, comunicação assíncrona e modularidade associadas ao paradigma multiagente.  
+Neste contexto, pretende-se desenvolver uma arquitetura distribuída suportada por metodologias de modelação Agent UML (AUML), assegurando uma organização modular dos diferentes componentes do sistema. O projeto contempla igualmente a implementação de vários agentes especializados, nomeadamente SensorAgent, CoordinatorAgent, HARAgent, EnvironmentAgent, DatabaseAgent e ClusteringAgent, recorrendo a behaviours do tipo CyclicBehaviour, OneShotBehaviour e PeriodicBehaviour.  
+Paralelamente, procura-se garantir a utilização de mecanismos de comunicação compatíveis com os princípios FIPA-ACL, incluindo performativas, ontologias e identificadores de conversação. Outro dos objetivos passa pela utilização de \textit{payloads} estruturados serializados com jsonpickle, promovendo maior consistência semântica na troca de informação entre agentes.  
+Por fim, pretende-se implementar mecanismos de coordenação assíncrona capazes de suportar o processamento distribuído do \textit{pipeline} de dados sem bloqueio da thread principal da aplicação. 
 
 \subsection{Estrutura do Relatório}
-O relatório está organizado do seguinte modo: a Secção 2 apresenta a conceção e modelação do sistema (topologia, agentes e protocolos); a Secção 3 detalha a implementação técnica e o fluxo de dados; a Secção 4 apresenta os resultados e a análise crítica; e a Secção 5 conclui com recomendações de trabalho futuro.
+O relatório encontra-se organizado da seguinte forma: a Secção 2 apresenta a conceção e modelação do sistema, incluindo a arquitetura, os agentes e os protocolos de comunicação; a Secção 3 descreve a implementação técnica e o funcionamento do \textit{pipeline} de dados; a Secção 4 apresenta os resultados obtidos e a respetiva análise crítica; por fim, a Secção 5 reúne as conclusões do trabalho e as principais recomendações para desenvolvimento futuro. 
 
 \subsection{Fundamentação Teórica}
-O enquadramento teórico deste trabalho assenta nos materiais pedagógicos da unidade curricular \cite{asmagentes,asmsma,asmnormas,agentesinteligentes}, em particular no texto de Novais e Analide \cite{agentesinteligentes} sobre Agentes Inteligentes e Sistemas Multiagente, complementado pelos trabalhos fundacionais da área.
-
-\noindent\textbf{Conceito de Agente e Propriedades.} Wooldridge \cite{wooldridge1999} define um agente como um sistema computacional capaz de revelar uma ação autónoma e flexível num determinado universo de discurso. A flexibilidade resulta de quatro propriedades nucleares da \textit{noção fraca} de agente \cite{wooldridgejennings1995}: \textbf{autonomia} (operar sem intervenção direta de terceiros), \textbf{reatividade} (detetar e responder a mudanças no ambiente), \textbf{pró-atividade} (tomar iniciativa guiada por objetivos) e \textbf{sociabilidade} (interagir com outros agentes de forma cooperativa ou competitiva). No Dance4Life estas propriedades têm correspondência direta: os comportamentos CyclicBehaviour detetam mensagens ACL (reatividade), cada agente processa dados de forma independente (autonomia) e o conjunto coopera para concluir o pipeline de processamento (sociabilidade).
-
-\noindent\textbf{Arquiteturas de Agentes.} Novais e Analide \cite{agentesinteligentes} sistematizam três paradigmas arquiteturais: \textit{deliberativo} (com representação simbólica do ambiente e planeamento de ações), \textit{reativo} (comportamento emergente de regras condição/ação, sem representação interna) e \textit{híbrido} (combinação de ambos, com prioridade à camada reativa para resposta rápida a estímulos externos). Esta taxonomia é aplicada a cada agente do sistema na Secção~2.2.
-
-\noindent\textbf{Sistemas Multiagente e Coordenação.} Um SMA compreende um conjunto de entidades que cooperam para solucionar um problema que ultrapassa as suas capacidades individuais \cite{durfeerosenchien1994,weiss1999}. A interação entre agentes requer três elementos fundamentais: plataforma de comunicação, linguagem de comunicação e ontologia partilhada \cite{agentesinteligentes}. No Dance4Life, estes requisitos são satisfeitos pelo protocolo XMPP (plataforma), pela semântica FIPA-ACL \cite{asmnormas} (linguagem) e pelas ontologias sensor\_activity, movement\_recommendation e matching. A coordenação adotada é \textbf{cooperativa} \cite{agentesinteligentes}: todos os agentes partilham o objetivo de processar e persistir dados de atividade do utilizador, sem interesses conflituantes, contrastando com modelos competitivos baseados em negociação ou leilão, que seriam mais adequados a cenários multiutilizador com recursos disputados.
+O enquadramento teórico deste trabalho baseia-se nos materiais pedagógicos da unidade curricular \cite{asmagentes,asmsma,asmnormas,agentesinteligentes}, com destaque para o texto de Novais e Analide \cite{agentesinteligentes} sobre Agentes Inteligentes e Sistemas Multiagente, complementado por referências clássicas da área. 
+Segundo Wooldridge \cite{wooldridge1999}, um agente corresponde a um sistema computacional capaz de atuar de forma autónoma e flexível num determinado ambiente. A noção fraca de agente caracteriza-se por quatro propriedades principais \cite{wooldridgejennings1995}: autonomia, reatividade, pró-atividade e sociabilidade. No contexto do Dance4Life, estas propriedades refletem-se diretamente na arquitetura implementada. Os agentes executam tarefas de forma independente, reagem a mensagens ACL recebidas através dos behaviours do SPADE e cooperam entre si ao longo do \textit{pipeline} distribuído de processamento. 
+Relativamente às arquiteturas de agentes, Novais e Analide \cite{agentesinteligentes} identificam três paradigmas principais: deliberativo, reativo e híbrido. O paradigma deliberativo assenta em mecanismos de representação e planeamento interno; o paradigma reativo baseia-se em respostas diretas a estímulos externos; e o paradigma híbrido combina ambas as abordagens. Esta classificação será posteriormente aplicada aos diferentes agentes do sistema na Secção 2.2. 
+Um Sistema Multiagente corresponde a um conjunto de entidades autónomas que cooperam para resolver problemas que ultrapassam as capacidades individuais de cada agente \cite{weiss1999,durfeerosenchien1994}. A comunicação entre agentes requer uma plataforma de comunicação, uma linguagem de interação e uma ontologia partilhada \cite{agentesinteligentes}. No Dance4Life, estes requisitos são assegurados através do protocolo XMPP, da semântica FIPA-ACL e das ontologias \texttt{sensor\_activity}, \texttt{movement\_recommendation} e matching. A coordenação adotada é de natureza cooperativa, uma vez que todos os agentes partilham o objetivo comum de processar e persistir dados relacionados com a atividade do utilizador. 
 
 \section{Conceção e Modelação do Sistema}
-A fase de conceção seguiu os princípios da metodologia de modelação baseada em agentes (Agent UML -- AUML) \cite{agentesinteligentes}. O desenvolvimento de um ecossistema focado no envelhecimento ativo exige o processamento de dados heterogéneos em tempo real (fisiológicos, inerciais e ambientais). A arquitetura de software foi desenhada para decompor responsabilidades computacionais em agentes especializados, segundo o paradigma SMA de Weiss \cite{weiss1999}, que privilegia a distribuição funcional e a interação cooperativa entre entidades autónomas em vez de sistemas monolíticos centralizados.
+A fase de conceção do sistema seguiu os princípios da metodologia de modelação baseada em agentes (AUML) \cite{agentesinteligentes}. O desenvolvimento de um ecossistema orientado ao envelhecimento ativo exige o processamento distribuído de dados heterogéneos em tempo real, incluindo informação fisiológica, inercial e contextual. 
+Neste contexto, a arquitetura foi concebida segundo o paradigma dos Sistemas Multiagente descrito por Weiss \cite{weiss1999}, privilegiando a distribuição funcional, a modularidade e a cooperação entre entidades autónomas. A decomposição das responsabilidades por agentes especializados permite reduzir o acoplamento entre componentes e facilitar a escalabilidade e evolução do sistema, em contraste com abordagens monolíticas centralizadas. 
+
 \subsection{Arquitetura do Sistema Multiagente (Topologia)}
-Na implementação atual, a arquitetura do Dance4Life adota uma topologia distribuída em cadeia, com entrada HTTP e processamento por agentes SPADE em background. A camada de entrada é assegurada por uma API Flask, que instancia o BaseSenderAgent com identidade XMPP api\_agent@localhost. Este agente emissor funciona como gateway lógico entre pedidos REST e o ecossistema multiagente.
+A arquitetura do Dance4Life foi concebida segundo o paradigma distribuído \textit{edge-cloud}, procurando equilibrar três requisitos fundamentais e frequentemente conflituantes em sistemas de saúde digital: a latência de resposta às intervenções, a preservação da privacidade dos dados biométricos e a escalabilidade do processamento analítico. A separação de responsabilidades entre dispositivo e servidor não é, por isso, meramente técnica, reflete uma decisão de desenho fundamentada nos princípios de \textit{Privacy by Design} exigidos pelo RGPD, ao garantir que os sinais fisiológicos brutos são processados localmente e apenas métricas derivadas atravessam a rede. A arquitetura resultante, ilustrada na Figura 1, organiza-se em cinco camadas funcionais com interfaces bem definidas. 
+A camada de aquisição no edge é materializada em duas aplicações nativas para Android, uma para \textit{smartphone} e outra para \textit{smartwatch}, responsáveis pela captura contínua dos sinais inerciais (acelerómetro triaxial e giroscópio, via \texttt{TYPE\_ACCELEROMETER} e \texttt{TYPE\_GYROSCOPE}) e fisiológicos (frequência cardíaca via \texttt{TYPE\_HEART\_RATE}, com mecanismo de \textit{fallback} baseado em estimativa por magnitudes inerciais quando o sensor não está disponível), bem como da localização geográfica enriquecida semanticamente por \textit{reverse geocoding} (cidade, país e rua). Ambos os dispositivos partilham os mesmos contratos de abstração definidos no módulo core, as interfaces SensorProvider, LocationProvider e DeviceProvider, tornando o código de domínio independente da plataforma física e facilitando a extensão a outros tipos de dispositivos. 
+O pré-processamento local é executado pelo DanceController, que agrega os eventos sensoriais em janelas deslizantes, computa as magnitudes euclidianas dos vetores inerciais, estima o indicador de ritmo de movimento e constrói a observação compacta MovementObservation, com as variáveis activityLevel, physicalFatigue e irritationLevel, que alimenta a política de Aprendizagem por Reforço inferida localmente via ONNX Runtime. A periodicidade de envio ao servidor está fixada em 30 segundos, assegurando granularidade temporal suficiente para análise longitudinal sem sobrecarregar a rede. 
+A camada de ingestão e serviços de contexto, implementada em Flask, expõe uma API REST (Representational State Transfer) com cinco endpoints principais: \texttt{/collect\_data\_activities} para receção de telemetria de atividade; \texttt{/get\_environment\_data} para consulta de contexto meteorológico em tempo real junto da API OpenWeatherMap; \texttt{/set\_movement\_recommendation} para registo das recomendações geradas no edge; e \texttt{/get\_user\_match} e \texttt{/set\_invite\_status} para gestão do ciclo de vida dos convites sociais. O servidor mantém ainda um registo de agentes ativos com mecanismo de \textit{heartbeat}, suportando a coordenação assíncrona da camada multiagente. 
 
-O fluxo principal de atividade segue o percurso SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ HarAgent $\rightarrow$ EnvironmentAgent $\rightarrow$ DatabaseAgent. Em paralelo, existe um ramo de emparelhamento social (matching), iniciado na API e delegado ao ClusteringAgent, que processa convites e encaminha dados para persistência através do CoordinatorAgent e do DatabaseAgent.
+A orquestração multiagente, construída sobre a \textit{framework} SPADE (Smart Python Agent Development Environment) seguindo as normas FIPA-ACL (Foundation for Intelligent Physical Agents - Agent Communication Language), implementa um \textit{pipeline} de mensagens orientadas por ontologias e performativas, seguindo a ordem SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ HARAgent$\rightarrow$ EnvironmentAgent $\rightarrow$ DatabaseAgent para o fluxo principal de atividade. O EnvironmentAgent enriquece o \textit{payload} com a temperatura ambiente obtida em tempo real, enquanto o DatabaseAgent persiste o evento enriquecido no Firebase. Em paralelo, um ramo independente do CoordinatorAgent encaminha dados de atividade para o MatchingAgent, que aplica um modelo de agrupamento por níveis de atividade para gerar convites sociais entre utilizadores compatíveis. 
 
-O CoordinatorAgent mantém o papel de nó de coordenação no encadeamento principal, mas sem impor handshake completo de confirmação em cada salto. Esta opção simplifica o protótipo e permite demonstrar a integração ponta-a-ponta com Firebase; contudo, introduz limitações de robustez que são discutidas na análise crítica.
-
-A camada de processamento especializado é composta por quatro agentes distintos:
-\begin{itemize}
-\item HarAgent, responsável pela passagem da fase de interpretação de atividade;
-\item EnvironmentAgent, que enriquece os dados com temperatura obtida por sensor externo;
-\item ClusteringAgent, que aplica lógica de agrupamento/convite social para a ontologia matching;
-\item DatabaseAgent, que assegura a persistência de atividades, recomendações e matching em Firebase Firestore.
-\end{itemize}
-Todos os agentes comunicam por mensagens ACL sobre XMPP, com payloads serializados em jsonpickle e metadados de ontologia e conversation-id. Esta organização mantém o sistema modular e facilita a substituição incremental de componentes, por exemplo na evolução futura do HarAgent para modelos de inferência reais.
+Esta arquitetura orientada a mensagens confere elevada modularidade e permite evoluir componentes individuais sem afetar o restante \textit{pipeline}. 
+Por fim, a camada de persistência e analítica utiliza o Firebase como \textit{backend} documental para armazenamento de eventos de atividade, convites, estados de matching e recomendações de movimento. Os dados persistidos são consumidos por \textit{dashboards} analíticos implementados em PowerBI, D3.js e Leaflet, disponibilizando visualizações interativas de séries temporais, distribuição geográfica, rankings de participação e decomposição de \textit{scores} por utilizador. 
+Esta arquitetura em cinco camadas reflete um equilíbrio deliberado entre a capacidade de resposta em tempo real, garantida pelo processamento e inferência no edge, e a riqueza analítica proporcionada pela persistência centralizada. A adoção do paradigma multiagente com SPADE não se limita a uma conveniência de implementação; decorre da necessidade de coordenar comportamentos heterogéneos (reconhecimento de atividade, enriquecimento contextual, matching social e persistência) de forma assíncrona, auditável e com separação clara de responsabilidades. Do ponto de vista da privacidade, o facto de os sinais biométricos brutos nunca abandonarem o dispositivo, sendo apenas transmitidas métricas derivadas com granularidade de 30 em 30 segundos, concretiza operacionalmente o princípio de minimização de dados preconizado pelo RGPD, constituindo simultaneamente uma vantagem técnica (redução de largura de banda e latência) e uma garantia de conformidade regulatória. 
 
 \begin{table}
 \centering
 \caption{Topologia e comunicações do sistema Dance4Life.}\label{agentes_comunicacao}
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{|l|l|l|}
 \hline
 Agente & Tipo / Papel & Communicates With \\
@@ -130,39 +122,25 @@ EnvironmentAgent & Enriquecimento ambiental & HarAgent, DatabaseAgent \\
 ClusteringAgent & Processamento de matching social & BaseSenderAgent, CoordinatorAgent \\
 DatabaseAgent & Persistência Firestore & EnvironmentAgent, CoordinatorAgent \\
 \hline
-\end{tabular}
+\end{tabular}}
 \end{table}
 
-**DIAGRAMA**
-
 \subsection{Definição dos Agentes}
-\subsubsection{Classes, Behaviours e Performativas}
-A implementação atual assenta em duas classes base: BaseBackgroundAgent (agentes residentes com ciclo próprio) e BaseSenderAgent (agente emissor associado à API). A primeira integra registo, heartbeat periódico e remoção no servidor Flask através de RegisterBehaviour, HeartbeatBehaviour e UnregisterBehaviour; a segunda encapsula envios pontuais com SendMessageBehaviour.
+A implementação atual assenta em duas classes base: BaseBackgroundAgent, utilizada para agentes residentes com ciclo de execução próprio, e BaseSenderAgent, responsável pelo envio de mensagens a partir da API. A primeira integra mecanismos de registo, \textit{heartbeat} periódico e remoção no servidor Flask através dos behaviours RegisterBehaviour, HeartbeatBehaviour e UnregisterBehaviour, enquanto a segunda encapsula envios pontuais através de SendMessageBehaviour. 
 
-\subsubsection{BaseSenderAgent (API) — Gateway Externo}
-O BaseSenderAgent é iniciado no arranque da API e envia mensagens ACL para o SensorAgent (atividade e recomendações) e para o ClusteringAgent (matching). Em cada envio, define performative, ontology e conversation-id, e serializa o payload com jsonpickle.
+O BaseSenderAgent é iniciado no arranque da API e funciona como gateway externo do sistema, enviando mensagens ACL para o SensorAgent, no caso de atividades e recomendações, e para o ClusteringAgent, no caso de operações de matching. Em cada envio são definidos metadados como performative, ontology e conversation-id, sendo o \textit{payload} serializado com jsonpickle. 
+O SensorAgent implementa o behaviour ReceiveSensorDataBehaviour (CyclicBehaviour), recebendo pedidos da API e reencaminhando-os para o CoordinatorAgent com preservação do conversation-id. O agente suporta as ontologias \texttt{sensor\_activity} e \texttt{movement\_recommendation} e enquadra-se numa arquitetura reativa \cite{agentesinteligentes}, uma vez que o seu comportamento assenta em regras diretas de receção e encaminhamento de mensagens. 
+O CoordinatorAgent implementa o behaviour ReceiveCoordinatorDataBehaviour (CyclicBehaviour) e assume o papel de coordenação do \textit{pipeline} principal. Para mensagens associadas à ontologia \texttt{sensor\_activity}, os dados são encaminhados para o HARAgent; para \texttt{movement\_recommendation} e matching, os dados seguem diretamente para o DatabaseAgent após um pequeno enriquecimento do \textit{payload}. Apesar do seu funcionamento predominantemente reativo, a lógica de decisão baseada em ontologias e performativas introduz características híbridas \cite{agentesinteligentes}, permitindo adaptar o encaminhamento em função do contexto da mensagem recebida. 
+O HARAgent implementa o behaviour ReceiveHarDataBehaviour (CyclicBehaviour), encaminhando pedidos relacionados com atividade física para o EnvironmentAgent. Nesta fase do protótipo, o agente não executa ainda inferência HAR baseada em modelos de Machine Learning, funcionando como uma etapa modular preparada para futura integração de modelos CNN (Convolutional Neural Network) ou LSTM (Long Short-Term Memory). Atualmente, o seu comportamento é essencialmente reativo. 
+O EnvironmentAgent implementa o behaviour EnvironmentDataBehaviour (CyclicBehaviour), sendo responsável pelo enriquecimento contextual dos dados. O agente descodifica o \textit{payload} recebido, obtém informação de temperatura através de coordenadas geográficas e adiciona o atributo \texttt{weather\_temperature} antes de encaminhar os dados para o DatabaseAgent. A necessidade de consultar informação externa confere-lhe características híbridas \cite{agentesinteligentes}, combinando comportamento reativo com aquisição contextual de conhecimento. 
+O ClusteringAgent implementa o behaviour ReceiveClusteringDataBehaviour (CyclicBehaviour), processando pedidos associados à ontologia matching através do modelo UserActivityClusterModel. O agente é ainda responsável pela publicação de convites para utilizadores através do endpoint \texttt{/set\_user\_match/<user\_id>}, encaminhando posteriormente os resultados para o CoordinatorAgent. Entre os agentes implementados, é o que mais se aproxima de uma arquitetura deliberativa \cite{agentesinteligentes}, uma vez que realiza processamento sobre perfis de utilizadores e dados de localização para suportar decisões de emparelhamento social. 
 
-\subsubsection{SensorAgent — Entrada da Camada Física/Lógica}
-Implementa ReceiveSensorDataBehaviour (CyclicBehaviour), recebendo pedidos da API e reencaminhando-os para o CoordinatorAgent com preservação do conversation-id. Suporta as ontologias sensor\_activity e movement\_recommendation. Seguindo a taxonomia de Novais e Analide \cite{agentesinteligentes}, classifica-se como \textbf{reativo}: o comportamento emerge de regras condição/ação diretas (receber mensagem $\rightarrow$ encaminhar), sem representação simbólica interna do ambiente.
-
-\subsubsection{CoordinatorAgent — Coordenação de Encaminhamento}
-Implementa ReceiveCoordinatorDataBehaviour (CyclicBehaviour). Para sensor\_activity, encaminha para HarAgent; para movement\_recommendation e matching, encaminha para DatabaseAgent após enriquecimento mínimo do payload (flag recommendation). O papel é de orquestração de encaminhamento, não de processamento analítico complexo. A lógica de decisão por ontologia e performativa introduz um elemento deliberativo, classificando este agente como \textbf{híbrido} \cite{agentesinteligentes}: o ciclo reativo é sobreposto por regras de roteamento baseadas no tipo de mensagem recebida, permitindo adaptação do fluxo em função do domínio.
-
-\subsubsection{HarAgent — Etapa HAR da Cadeia}
-Implementa ReceiveHarDataBehaviour (CyclicBehaviour) e reencaminha pedidos de atividade para o EnvironmentAgent. Nesta versão do protótipo, não executa ainda inferência HAR baseada em modelo de Machine Learning; funciona como etapa modular reservada para essa integração futura. O agente é atualmente \textbf{reativo}; a futura integração de modelos CNN/LSTM transformá-lo-á numa arquitetura \textbf{deliberativa} \cite{wooldridge1999}, com raciocínio sobre sinais inerciais para inferência de atividade física, correspondendo à visão de Wooldridge de agentes cognitivos orientados a objetivos.
-
-\subsubsection{EnvironmentAgent — Enriquecimento Contextual}
-Implementa EnvironmentDataBehaviour (CyclicBehaviour), descodifica o payload, obtém temperatura por coordenadas geográficas e adiciona o atributo weather\_temperature antes de encaminhar para o DatabaseAgent. A consulta à API meteorológica externa constitui uma decisão baseada no conteúdo do payload, conferindo a este agente um carácter \textbf{híbrido} \cite{agentesinteligentes}: o ciclo reativo é enriquecido com uma fase de aquisição de conhecimento contextual, na qual o agente perceciona o ambiente externo (temperatura/humidade) antes de encaminhar para a persistência.
-
-\subsubsection{ClusteringAgent — Matching Social}
-Implementa ReceiveClusteringDataBehaviour (CyclicBehaviour), processa pedidos da ontologia matching através de UserActivityClusterModel e publica convites para utilizadores via endpoint API (/set\_user\_match/<user\_id>). Posteriormente, encaminha o resultado consolidado para o CoordinatorAgent. Este é, dos agentes implementados, o mais próximo de uma arquitetura \textbf{deliberativa} \cite{wooldridge1999}: a execução de UserActivityClusterModel implica raciocínio sobre perfis de utilizadores e dados de localização para produzir decisões de emparelhamento social, aproximando-se da noção forte de agente com intencionalidade e competência \cite{agentesinteligentes}.
-
-\subsubsection{DatabaseAgent — Persistência}
-Implementa ReceiveDatabaseDataBehaviour (CyclicBehaviour), removendo visited\_agents antes de persistir. Suporta três operações: save\_activity, save\_movement\_recommendation e save\_matching em Firestore, conforme a ontologia recebida. Classifica-se como \textbf{agente de serviço reativo} na tipologia de Novais e Analide \cite{agentesinteligentes}: executa tarefas de persistência repetitivas em resposta a pedidos externos, sem representação interna do domínio aplicacional, correspondendo ao padrão de agente estacionário dedicado a operações de I/O.
+Por fim, o DatabaseAgent implementa o behaviour ReceiveDatabaseDataBehaviour (CyclicBehaviour), removendo o atributo \texttt{visited\_agents} antes da persistência dos dados. O agente suporta operações de \texttt{save\_activity}, \texttt{save\_movement\_recommendation} e \texttt{save\_matching} em Firestore, de acordo com a ontologia recebida. Na tipologia apresentada por Novais e Analide \cite{agentesinteligentes}, enquadra-se como um agente reativo orientado a serviços, dedicado a operações de persistência e \texttt{I/O} (\textit{Input/Output}). 
 
 \begin{table}
 \centering
 \caption{Síntese dos agentes, behaviours, tipos e classificação arquitetural.}\label{agentes_behaviours}
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{|l|l|l|l|l|}
 \hline
 Agente & Behaviour & Tipo & Arquitetura & Ontologia\\
@@ -170,7 +148,7 @@ Agente & Behaviour & Tipo & Arquitetura & Ontologia\\
 BaseSenderAgent & SendMessageBehaviour & OneShotBehaviour & Reativo & s\_a, m\_r, m\\
 SensorAgent & ReceiveSensorDataBehaviour & CyclicBehaviour & Reativo & s\_a, m\_r\\
 CoordinatorAgent & ReceiveCoordinatorDataBehaviour & CyclicBehaviour & Híbrido & s\_a, m\_r, m\\
-HarAgent & ReceiveHarDataBehaviour & CyclicBehaviour & Reativo$^\dagger$ & s\_a\\
+HARAgent & ReceiveHarDataBehaviour & CyclicBehaviour & Reativo$^\dagger$ & s\_a\\
 EnvironmentAgent & EnvironmentDataBehaviour & CyclicBehaviour & Híbrido & s\_a\\
 ClusteringAgent & ReceiveClusteringDataBehaviour & CyclicBehaviour & Deliberativo & m\\
 DatabaseAgent & ReceiveDatabaseDataBehaviour & CyclicBehaviour & Reativo & s\_a, m\_r, m\\
@@ -178,76 +156,141 @@ DatabaseAgent & ReceiveDatabaseDataBehaviour & CyclicBehaviour & Reativo & s\_a,
 \multicolumn{5}{l}{\footnotesize s\_a = sensor\_activity; m\_r = movement\_recommendation; m = matching} \\
 \multicolumn{5}{l}{\footnotesize $^\dagger$ Futuro: Deliberativo após integração de modelo HAR} \\
 \hline
-\end{tabular}
+\end{tabular}}
 \end{table}
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Classes.png}
+\caption{Diagrama de classes AUML do sistema Dance4Life. Pacote \texttt{agents}: sete classes de agentes com estereótipos de arquitetura (Reativo, Híbrido, Deliberativo, ReativoServiço, API). Pacote \texttt{model}: sete modelos Pydantic ligados por composição e agregação ao ClusteringAgent. Setas sólidas representam mensagens REQUEST (FIPA-ACL) e setas tracejadas representam INFORM (FIPA-ACL); a seta HTTP lateral indica a chamada direta do ClusteringAgent à API fora do canal XMPP.}
+\label{fig:auml_classes}
+\end{figure}
+
 \subsection{Protocolos de Comunicação e Performativas FIPA-ACL}
-A comunicação entre agentes no Dance4Life adota uma semântica compatível com FIPA-ACL, suportada pelas capacidades nativas do SPADE. Todas as mensagens relevantes incluem metadados performative, ontology e conversation-id, permitindo rastreabilidade e separação lógica de fluxos.
-
-Na versão implementada, as performativas efetivamente usadas na cadeia operacional são request e inform. As constantes agree e failure estão definidas na configuração, mas não se encontram aplicadas de forma sistemática no caminho principal. Assim, o sistema cumpre parcialmente o padrão FIPA Request Interaction Protocol: existe iniciação (request) e resolução (inform), mas não há handshake explícito em todas as interações.
-
-\subsubsection{Modelo de Interação}
-O fluxo de interação principal observa a seguinte sequência:
-
-\begin{enumerate}
-\item Iniciação (request): o emissor envia mensagem para o próximo agente da cadeia, incluindo:
-    \begin{itemize}
-        \item ontologia (sensor\_activity, movement\_recommendation ou matching);
-        \item conversation-id automático (gerado em SendMessageBehaviour);
-        \item payload serializado com jsonpickle.
-    \end{itemize}
-\item Processamento e reencaminhamento: cada agente descodifica, enriquece ou transforma o payload e encaminha para o agente seguinte, mantendo os metadados essenciais.
-\item Resolução (inform): após concluir a operação local (encaminhamento ou persistência), o agente responde ao emissor com performativa inform.
-    \begin{itemize}
-        \item em caso de sucesso, informa o remetente imediato;
-        \item em caso de erro, o tratamento atual é sobretudo por exceção e logging local, sem protocolo failure padronizado entre todos os pares.
-    \end{itemize}
-\end{enumerate}
-
-\subsubsection{Gestão de Conversações e Isolamento de Sessões}
-Cada mensagem criada no BaseSenderAgent inclui um conversation-id único (UUID). O identificador é propagado entre agentes durante os forwards, permitindo rastrear cada cadeia de processamento nos logs e nas mensagens.
-
-Importa, contudo, distinguir entre propagação e isolamento completo: apesar de o metadado existir e ser preservado, o código atual não implementa ainda uma filtragem estrita por conversation-id em todos os pontos de receção. Por essa razão, o mecanismo presente garante rastreabilidade, mas a gestão de concorrência pode ser fortalecida em evolução futura.
-
-Mesmo nesta forma, a abordagem já contribui para:
-\begin{itemize}
-\item observabilidade do fluxo ponta-a-ponta;
-\item depuração de interações em cadeias longas;
-\item preparação para isolamento rigoroso em cenários com maior concorrência.
-\end{itemize}
-
-\subsubsection{Troca de Dados Estruturados}
-Embora o transporte XMPP opere sobre texto, o protótipo evita strings ad hoc e adota payloads estruturados serializados com jsonpickle:
-\begin{itemize}
-\item os dados são construídos em dicionários estruturados e enriquecidos por cada etapa;
-\item jsonpickle.encode/jsonpickle.decode asseguram serialização e desserialização uniformes;
-\item existe um modelo de domínio em Pydantic (model/data\_model.py) para normalização semântica, embora o pipeline corrente opere maioritariamente sobre dicionários.
-\end{itemize}
-Esta solução cumpre o requisito do enunciado de privilegiar objetos estruturados em detrimento de mensagens textuais sem esquema.
+A comunicação entre agentes no Dance4Life segue uma semântica compatível com o padrão FIPA-ACL, suportada pelas capacidades disponibilizadas pelo SPADE. As mensagens trocadas incluem metadados como performative, ontology e conversation-id, permitindo identificar o tipo de operação, o domínio semântico associado e o contexto da conversação. 
+Na implementação atual, as performativas utilizadas no fluxo principal são request e inform. Embora as constantes agree e failure estejam definidas na configuração do sistema, a sua utilização ainda não ocorre de forma consistente em todas as interações. Assim, o sistema implementa parcialmente o protocolo FIPA Request Interaction Protocol, existindo uma fase de iniciação baseada em mensagens request e uma fase de resposta através de mensagens inform, mas sem um mecanismo completo de handshake entre todos os agentes. 
+O modelo de comunicação adotado segue uma sequência relativamente linear. Na fase de iniciação, o agente emissor envia uma mensagem ao próximo agente da cadeia, incluindo a ontologia correspondente ao domínio de operação, como \texttt{sensor\_activity}, \texttt{movement\_recommendation} ou matching, um conversation-id gerado automaticamente no SendMessageBehaviour, e ainda um \textit{payload} serializado através de jsonpickle. Após receção da mensagem, cada agente procede à descodificação, enriquecimento ou transformação do \textit{payload} e reencaminha os dados para o agente seguinte, preservando os metadados essenciais do contexto da conversação.  
+ 
+Depois de concluir a operação local, seja ela de processamento, encaminhamento ou persistência, o agente responde ao emissor imediato com uma mensagem do tipo inform. Em situações de sucesso, o remetente recebe confirmação da conclusão da operação; em caso de erro, o tratamento é atualmente realizado sobretudo através de mecanismos de exceção e logging local, não existindo ainda um protocolo failure uniformemente implementado entre todos os pares de agentes. 
+A gestão de conversações e o isolamento de sessões baseiam-se na utilização de conversation-id únicos, gerados sob a forma de UUIDs (Universally Unique Identifier) pelo BaseSenderAgent. Estes identificadores são propagados ao longo dos diferentes forwards entre agentes, permitindo rastrear integralmente cada cadeia de processamento nos logs e nas mensagens trocadas. Importa, contudo, distinguir entre propagação e isolamento completo de sessões: apesar de o metadado ser preservado ao longo do \textit{pipeline}, o código atual ainda não implementa uma filtragem rigorosa por conversation-id em todos os pontos de receção. Consequentemente, o mecanismo atual garante rastreabilidade e observabilidade do fluxo ponta-a-ponta, facilitando a depuração de interações em cadeias longas e preparando a arquitetura para futuras evoluções orientadas a cenários de maior concorrência e isolamento rigoroso de sessões. 
+Relativamente à troca de dados estruturados, embora o transporte XMPP opere sobre mensagens textuais, o protótipo evita a utilização de strings ad hoc e adota \textit{payloads} estruturados serializados com jsonpickle. Os dados são construídos sob a forma de dicionários estruturados, sendo progressivamente enriquecidos em cada etapa do \textit{pipeline}. Os métodos jsonpickle.encode e jsonpickle.decode asseguram a serialização e desserialização uniforme da informação, reduzindo ambiguidades semânticas e eliminando grande parte da necessidade de parsing manual.  
+Paralelamente, o sistema inclui ainda um modelo de domínio baseado em Pydantic, definido em model\texttt{/data\_model.py}, destinado à normalização semântica dos dados, embora o \textit{pipeline} atual opere maioritariamente sobre estruturas de dicionários. Esta abordagem cumpre o requisito de privilegiar objetos estruturados em detrimento de mensagens textuais sem esquema definido, contribuindo para uma arquitetura mais robusta, modular e extensível. 
+Em síntese, a implementação atual demonstra alinhamento com os princípios fundamentais do FIPA-ACL, embora ainda existam oportunidades de melhoria ao nível da disciplina protocolar, particularmente na adoção sistemática de \texttt{agree/failure} e em mecanismos mais rigorosos de validação semântica e isolamento de sessões. 
 
 \begin{table}
+\centering
 \caption{Performativas FIPA-ACL utilizadas no sistema.}\label{performativas_fipa}
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{|l|l|l|l|}
 \hline
 Performativa & Direção & Significado & Quando enviada\\
 \hline
-request & Emissor → Recetor & Pedido de execução/encaminhamento & Fluxos de atividade, matching e recomendação\\
-inform & Recetor → Emissor & Confirmação local de processamento & Após encaminhamento/persistência\\
-agree & Recetor → Emissor & Aceitação explícita do pedido & Definida em configuração (não aplicada de forma transversal)\\
-failure & Recetor → Emissor & Resposta semântica de falha & Definida em configuração (não aplicada de forma transversal)\\
+request & Emissor $\rightarrow$ Recetor & Pedido de execução\texttt{/encaminhamento} & Fluxos de atividade, matching e recomendação\\
+inform & Recetor $\rightarrow$ Emissor & Confirmação local de processamento & Após encaminhamento\texttt{/persist}ência\\
+agree & Recetor $\rightarrow$ Emissor & Aceitação explícita do pedido & Definida em configuração (não aplicada de forma transversal)\\
+failure & Recetor $\rightarrow$ Emissor & Resposta semântica de falha & Definida em configuração (não aplicada de forma transversal)\\
 \hline
-\end{tabular}
+\end{tabular}}
 \end{table}
 
-A implementação atual demonstra alinhamento prático com os princípios FIPA-ACL, mas também evidencia espaço para maturação protocolar, sobretudo na adoção sistemática de agree/failure e em validação semântica mais estrita.
+\subsection{Diagramas de Atividades AUML por Protocolo}
+Os três diagramas seguintes representam o comportamento do sistema segundo a notação \textit{Agent UML} (AUML) \cite{agentesinteligentes}, adoptando pistas de actividade (\textit{swimlanes}) por agente e setas diferenciadas para as performativas REQUEST (encaminhamento) e INFORM (confirmação). Os diagramas foram gerados a partir do código-fonte verificado e reflectem a implementação efectiva, não um modelo idealizado.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_SA.png}
+\caption{Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt{sensor\_activity}. Fluxo: API $\rightarrow$ SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ HarAgent $\rightarrow$ EnvironmentAgent $\rightarrow$ DatabaseAgent. Retorno INFORM na direcção inversa após cada operação.}
+\label{fig:auml_sa}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_MR.png}
+\caption{Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt{movement\_recommendation}. Fluxo simplificado: API $\rightarrow$ SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ DatabaseAgent. Retorno INFORM de DatabaseAgent para CoordinatorAgent.}
+\label{fig:auml_mr}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_M.png}
+\caption{Diagrama de actividades AUML — Protocolo FIPA-Request, ontologia \texttt{matching}. Fluxo: API $\rightarrow$ ClusteringAgent (inferência deliberativa) $\rightarrow$ notificação HTTP lateral (\texttt{/set\_user\_match}) $\rightarrow$ CoordinatorAgent $\rightarrow$ DatabaseAgent. Retorno INFORM de DatabaseAgent para CoordinatorAgent.}
+\label{fig:auml_m}
+\end{figure}
+
+\subsection{Diagramas de Colaboração AUML por Protocolo}
+Os diagramas de colaboração AUML (também designados \textit{communication diagrams} em UML 2.x) representam os agentes como instâncias nomeadas (no formato \texttt{jid:Classe}) e as ligações entre eles como canais de comunicação persistentes, com mensagens ACL numeradas sequencialmente sobre essas ligações \cite{agentesinteligentes}. Distinguem-se dos diagramas de actividades por enfatizarem a \textbf{estrutura da rede de comunicação} e a \textbf{ordem das trocas de mensagens}, em vez do fluxo de controlo interno de cada agente. As setas sólidas correspondem à performativa REQUEST (encaminhamento), as setas tracejadas à performativa INFORM (confirmação de processamento) e as setas duplas indicam chamadas HTTP externas fora do canal ACL.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Collab_SA.png}
+\caption{Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt{sensor\_activity}. Mensagens REQUEST numeradas 1--5 (setas sólidas, esquerda para a direita); mensagens INFORM 3.1, 4.1, 5.1 e 6 (setas tracejadas, direita para a esquerda). O \texttt{conv-id} é propagado em todas as mensagens da conversação.}
+\label{fig:collab_sa}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Collab_MR.png}
+\caption{Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt{movement\_recommendation}. Fluxo simplificado de quatro mensagens: REQUEST 1--3 (API $\rightarrow$ SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ DatabaseAgent) e INFORM 4 de confirmação de persistência.}
+\label{fig:collab_mr}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Collab_M.png}
+\caption{Diagrama de colaboração AUML — Protocolo FIPA-Request, ontologia \texttt{matching}. A mensagem 2 representa o efeito lateral HTTP (\texttt{POST /set\_user\_match/\{id\}}) que o ClusteringAgent efectua directamente sobre a Flask API \textbf{fora do canal ACL}, antes de encaminhar o resultado via XMPP para o CoordinatorAgent (mensagem 3).}
+\label{fig:collab_m}
+\end{figure}
+
+\subsection{Diagramas de Sequência AUML por Protocolo}
+Os diagramas de sequência AUML representam os agentes como linhas de vida (\textit{lifelines}) identificadas pelo par \texttt{jid:Classe\textlangle\textlangle estereótipo\textrangle\textrangle} e as mensagens ACL como setas numeradas sobre o eixo temporal (de cima para baixo) \cite{agentesinteligentes}. Relativamente aos diagramas de colaboração, acrescentam três elementos essenciais: os \textbf{blocos de activação} (rectângulos sobre a lifeline, que delimitam o período de processamento de cada agente), as \textbf{chamadas internas} (auto-mensagens, que representam operações locais como enriquecimento contextual ou persistência em Firestore) e as \textbf{secções de protocolo} (bandas que separam a Iniciação FIPA-Request, o Processamento e a Resolução). As setas sólidas com ponta ($\rightarrow\!\!>$) correspondem à performativa REQUEST e as setas tracejadas ($--\!\!>$) à performativa INFORM.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Seq_SA.png}
+\caption{Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt{sensor\_activity}. 11 mensagens numeradas: REQUEST 1--3, 5, 9 (setas sólidas); INFORM 4, 6, 8, 11 (setas tracejadas); auto-mensagens 7 (\texttt{get\_weather\_temperature}) e 10 (\texttt{save\_activity}). Os blocos de activação mostram o período em que cada agente aguarda resposta do downstream.}
+\label{fig:seq_sa}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Seq_MR.png}
+\caption{Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt{movement\_recommendation}. Fluxo de 6 mensagens: REQUEST 1--2 (API$\rightarrow$SensorAgent$\rightarrow$CoordinatorAgent), auto-mensagem 3 (\texttt{payload["recommendation"]=True}), REQUEST 4 ($\rightarrow$DatabaseAgent), auto-mensagem 5 (\texttt{save\_movement\_recommendation}) e INFORM 6 de confirmação.}
+\label{fig:seq_mr}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{diagramas/Dance4Life_Seq_M.png}
+\caption{Diagrama de sequência AUML — Protocolo FIPA-Request, ontologia \texttt{matching}. A mensagem 3 (\texttt{HTTP POST /set\_user\_match/\{id\}}) é um efeito lateral síncrono executado pelo ClusteringAgent \textbf{fora do canal ACL} antes de retomar o protocolo FIPA-Request na mensagem 4. O processamento deliberativo do \texttt{UserMatchingClusterModel} é representado como auto-mensagem 2.}
+\label{fig:seq_m}
+\end{figure}
+
+\subsection{Statecharts: Ciclo de Vida e Pipeline de Mensagens}
+
+O diagrama~\ref{fig:sc_lifecycle} modela o ciclo de vida do par servidor Flask -- \texttt{BaseBackgroundAgent}: arranque, registo via \texttt{POST /register\_agent}, monitorização periódica por \textit{heartbeat} (period = 10\,s), deteção de \textit{timeout} (HEARTBEAT\_TIMEOUT = 30\,s) pela \emph{cleanup thread} do servidor, e paragem ordenada com \texttt{POST /unregister\_agent}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.82\textwidth]{diagramas/Dance4Life_SC_Lifecycle.png}
+  \caption{Statechart — Ciclo de vida Server $\leftrightarrow$ \texttt{BaseBackgroundAgent}: registo, heartbeat periódico (period = 10\,s) e limpeza por timeout (HEARTBEAT\_TIMEOUT = 30\,s). As setas a tracejado representam chamadas HTTP fora do canal FIPA-ACL.}
+  \label{fig:sc_lifecycle}
+\end{figure}
+
+O diagrama~\ref{fig:sc_pipeline} apresenta os estados internos de cada agente e as transições inter-agentes para a ontologia \texttt{sensor\_activity}, a cadeia mais completa do sistema. Cada agente alterna entre \emph{Aguardando} (\texttt{receive(timeout=10)}), \emph{Processando} (decodificação e verificação) e \emph{Encaminhando} (\texttt{forward\_message}), emitindo um \texttt{INFORM} de reconhecimento ao remetente após cada salto.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.70\textwidth]{diagramas/Dance4Life_SC_Pipeline.png}
+  \caption{Statechart — Pipeline inter-agentes para a ontologia \texttt{sensor\_activity}: cada agente expõe os seus sub-estados internos (espera, processamento, encaminhamento) e as transições de saída por REQUEST FIPA-ACL e INFORM de reconhecimento.}
+  \label{fig:sc_pipeline}
+\end{figure}
 
 \section{Implementação e Funcionamento (Baseado em SPADE)}
-O sistema Dance4Life foi implementado em Python e SPADE, com execução assíncrona sobre asyncio e comunicação ACL sobre XMPP. A solução combina uma API Flask para interação externa com uma rede de agentes residentes em loops próprios (threads dedicadas + event loop por agente), permitindo desacoplamento entre entrada HTTP e processamento multiagente.
+O sistema Dance4Life foi implementado em Python e SPADE, com execução assíncrona sobre asyncio e comunicação ACL sobre XMPP. A solução combina uma API Flask para interação externa com uma rede de agentes residentes em loops próprios (threads dedicadas + event loop por agente), permitindo desacoplamento entre entrada HTTP e processamento multiagente. 
 
 \subsection{Instalação Externa da SPADE e Ambiente de Execução}
-A SPADE (Smart Python Agent Development Environment) é uma framework Python para o desenvolvimento de agentes assíncronos baseados em XMPP, alinhada com os princípios de comunicação FIPA-ACL \cite{asmnormas}. Ao contrário de plataformas como o JADE \cite{agentesinteligentes} (implementado em Java), o SPADE tira partido do motor assíncrono asyncio do Python, tornando-o particularmente adequado para ambientes de prototipagem rápida. No contexto deste projeto, a SPADE não foi integrada no stack Android; foi instalada externamente num ambiente Python autónomo localizado na pasta Python do projeto, com gestão de dependências em pyproject.toml.
-
-As dependências relevantes incluem spade, flask, jsonpickle, firebase-admin, requests e pandas. A execução segue o ciclo típico:
+A SPADE é uma \textit{framework} Python para o desenvolvimento de agentes assíncronos baseados em XMPP, alinhada com os princípios de comunicação FIPA-ACL \cite{asmnormas}. Ao contrário de plataformas como o JADE (Java Agent DEvelopment Framework) \cite{agentesinteligentes}, desenvolvido em Java, o SPADE tira partido do motor assíncrono asyncio do Python, tornando-o particularmente adequado para ambientes de prototipagem rápida. No contexto deste projeto, a SPADE não foi integrada no \textit{stack} Android; foi instalada externamente num ambiente Python autónomo localizado na pasta Python do projeto, com gestão de dependências em pyproject.toml. 
+As dependências relevantes incluem SPADE, Flask, jsonpickle, firebase-admin, requests e pandas. A execução segue o ciclo típico: 
 \begin{lstlisting}
 python -m venv .venv
 source .venv/bin/activate
@@ -255,50 +298,34 @@ pip install -e .
 python main.py
 \end{lstlisting}
 
-Esta separação entre componente móvel e backend SMA simplifica a experimentação, facilita debug e permite evolução independente do subsistema multiagente.
-
 \subsection{Fluxo de Dados — Pipeline Sequencial Assíncrono}
-Apesar de os SMA serem concorrentes por natureza, o protótipo implementa um pipeline encadeado. No caso sensor\_activity, a sequência observada em código é:
-\begin{itemize}
-\item API (BaseSenderAgent) envia request para SensorAgent;
-\item SensorAgent reencaminha para CoordinatorAgent;
-\item CoordinatorAgent reencaminha para HarAgent;
-\item HarAgent reencaminha para EnvironmentAgent;
-\item EnvironmentAgent adiciona weather\_temperature e envia para DatabaseAgent;
-\item DatabaseAgent persiste em Firestore e devolve inform ao emissor imediato.
-\end{itemize}
-
-Para movement\_recommendation, o fluxo segue API $\rightarrow$ SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ DatabaseAgent. Para matching, a API envia para ClusteringAgent, que processa convites e encaminha para CoordinatorAgent e DatabaseAgent.
-
-A assíncronia decorre da execução em behaviours cíclicos e do uso de event loops independentes por agente. O resultado é um sistema responsivo a múltiplos pedidos sem bloqueio da API principal.
-
-**DIAGRAMA**
+Apesar de os Sistemas Multiagente serem concorrentes por natureza, o protótipo implementado adota um \textit{pipeline} sequencial de processamento. No caso da ontologia \texttt{sensor\_activity}, o fluxo inicia-se na API, através do BaseSenderAgent, que envia uma mensagem request para o SensorAgent. Este agente reencaminha a informação para o CoordinatorAgent, que por sua vez encaminha os dados para o HARAgent.  
+Após a fase de interpretação da atividade, o HARAgent envia o \textit{payload} para o EnvironmentAgent, responsável por enriquecer os dados com informação adicional, nomeadamente o atributo \texttt{weather\_temperature} obtido através de sensores externos. Finalmente, o EnvironmentAgent encaminha os dados para o DatabaseAgent, que  realiza a persistência no Firebase e devolve uma mensagem inform ao emissor imediato. 
+Para a ontologia \texttt{movement\_recommendation}, o fluxo segue uma sequência mais reduzida, correspondente ao percurso API $\rightarrow$ SensorAgent $\rightarrow$ CoordinatorAgent $\rightarrow$ DatabaseAgent. Já no caso da ontologia matching, a API comunica diretamente com o ClusteringAgent, responsável pelo processamento de convites e pela lógica de agrupamento social, encaminhando posteriormente os dados para o CoordinatorAgent e para o DatabaseAgent. 
+A assíncronia do sistema resulta da utilização de behaviours cíclicos e da existência de event loops independentes em cada agente. Esta abordagem permite que os diferentes componentes executem processamento concorrente sem bloquearem a thread principal da API, garantindo maior capacidade de resposta perante múltiplos pedidos simultâneos. 
 
 \subsection{Gestão de Conversações e Isolamento de Mensagens}
-Cada envio realizado pelo BaseSenderAgent inclui conversation-id único com uuid4(), propagado nas mensagens seguintes:
+A coordenação de interações distribuídas entre múltiplos agentes requer mecanismos que permitam identificar, acompanhar e distinguir cada fluxo de processamento ao longo do sistema. Para esse efeito, o Dance4Life utiliza o atributo conversation-id, previsto na especificação FIPA-ACL, como identificador único de cada conversação iniciada na plataforma. 
+Sempre que a API necessita de desencadear uma nova operação, o BaseSenderAgent gera automaticamente um identificador único recorrendo à biblioteca uuid, associando-o à mensagem ACL antes do envio. Este identificador é posteriormente propagado ao longo de todos os encaminhamentos efetuados pelos diferentes agentes do \textit{pipeline}. 
 \begin{lstlisting}
 # BaseSenderAgent.SendMessageBehaviour
 msg.set_metadata("conversation-id", f"conv-{self.agent.jid}-guid-{uuid.uuid4()}")
 \end{lstlisting}
 
-A arquitetura preserva este identificador em forward\_message, mas ainda não executa correlação estrita de respostas em todos os comportamentos receptores. Assim, a solução oferece rastreabilidade robusta e base para isolamento completo em iterações futuras.
+A preservação deste metadado durante os diferentes forwards permite manter a identidade lógica da conversação independentemente do número de agentes envolvidos. Desta forma, torna-se possível rastrear integralmente o percurso de cada pedido desde a sua origem na API até à persistência final dos dados no DatabaseAgent. 
+Do ponto de vista operacional, o uso de conversation-id oferece benefícios importantes ao nível da observabilidade e depuração do sistema. Em cenários distribuídos, onde múltiplas mensagens podem circular simultaneamente entre vários agentes, a existência de um identificador comum permite correlacionar eventos registados nos logs, facilitando a análise de falhas, a monitorização do desempenho e a reconstrução do histórico de execução de cada pedido. 
+Contudo, importa distinguir entre rastreabilidade e isolamento efetivo de sessões. Embora o identificador seja atualmente propagado entre os agentes, a implementação ainda não realiza uma validação sistemática do conversation-id em todos os pontos de receção. Assim, os agentes utilizam o identificador sobretudo para efeitos de monitorização e contexto, não existindo ainda mecanismos completos de correlação de respostas ou filtragem rigorosa de mensagens pertencentes a diferentes sessões concorrentes. 
+Em cenários de elevada concorrência, esta limitação poderá originar dificuldades na associação inequívoca entre pedidos e respostas, especialmente quando múltiplas interações partilham a mesma ontologia e performativa. Como trabalho futuro, recomenda-se a implementação de mecanismos formais de correlação baseados em conversation-id, complementados pelos atributos ACL reply-with e in-reply-to, permitindo garantir isolamento completo das conversações e maior robustez na coordenação distribuída. 
+Em síntese, a utilização de identificadores únicos de conversação constitui um primeiro passo para a gestão estruturada das interações entre agentes, assegurando rastreabilidade ponta-a-ponta e preparando a arquitetura para futuras evoluções orientadas à escalabilidade, concorrência e conformidade protocolar com os princípios FIPA-ACL. 
 
 \subsection{Troca de Mensagens Baseada em Objetos (Pydantic + Jsonpickle)}
-A troca de mensagens evita texto não estruturado e adota serialização orientada a objetos:
-\begin{itemize}
-\item jsonpickle serializa payloads Python para o corpo da mensagem ACL;
-\item jsonpickle descodifica no recetor antes de qualquer transformação;
-\item os agentes acrescentam informação contextual (ex.: visited\_agents, weather\_temperature) mantendo estrutura consistente;
-\item modelos Pydantic em model/data\_model.py suportam evolução para validação tipada ponta-a-ponta.
-\end{itemize}
-Este paradigma reforça legibilidade, manutenção e qualidade semântica da comunicação distribuída.
-
-**DIAGRAMA**
+A troca de mensagens no sistema evita a utilização de texto não estruturado e adota um paradigma de serialização orientado a objetos. Para esse efeito, o jsonpickle é utilizado para serializar \textit{payloads} Python no corpo das mensagens ACL, permitindo que os dados sejam transmitidos de forma estruturada entre agentes.  
+No lado do recetor, o mesmo mecanismo é responsável pela descodificação dos \textit{payloads} antes de qualquer processamento ou transformação adicional. Ao longo do \textit{pipeline}, os diferentes agentes enriquecem progressivamente a informação com dados contextuais, como \texttt{visited\_agents} ou \texttt{weather\_temperature}, preservando sempre uma estrutura consistente dos objetos transmitidos.  
+Paralelamente, os modelos Pydantic definidos em model\texttt{/data\_model.py} fornecem suporte para uma futura evolução do sistema em direção a validação tipada ponta-a-ponta. Esta abordagem contribui significativamente para a legibilidade, manutenção e qualidade semântica da comunicação distribuída entre agentes. 
 
 \subsection{Validação de Ontologias}
-As ontologias suportadas são definidas em configuração central (AgentOntologies): sensor\_activity, movement\_recommendation e matching. Os agentes executam decisões condicionais por ontologia e performativa para encaminhar dados ao próximo componente.
-
-No estado atual, a validação ocorre por ramos condicionais em cada behaviour; não existe ainda um bloco transversal de rejeição semântica com resposta failure padronizada para todos os casos. Esta limitação é relevante para evolução da robustez protocolar.
+As ontologias suportadas são definidas em configuração central (AgentOntologies): \texttt{sensor\_activity}, \texttt{movement\_recommendation} e matching.  
+Os agentes executam decisões condicionais por ontologia e performativa para encaminhar dados ao próximo componente. No estado atual, a validação ocorre por ramos condicionais em cada behaviour; não existe ainda um bloco transversal de rejeição semântica com resposta failure padronizada para todos os casos. Esta limitação é relevante para evolução da robustez protocolar.
 
 Exemplo simplificado do padrão usado:
 \begin{lstlisting}
@@ -308,126 +335,70 @@ if ontology == AgentOntologies.SENSOR_ACTIVITY:
 \end{lstlisting}
 
 \subsection{Estrutura de Ficheiros do Projeto}
-O projeto está organizado nos seguintes módulos principais:
-\begin{table}
-\caption{Estrutura de ficheiros do projeto.}\label{estrutura_ficheiros}
-\begin{tabular}{|l|l|}
-\hline
-Ficheiro & Conteúdo / Responsabilidade\\
-\hline
-main.py & Arranque da API, dashboard e agentes SPADE\\
-api/server.py & Endpoints REST, registo/heartbeat de agentes, ponte para BaseSenderAgent\\
-agents/base\_background\_agent.py & Classe base com loop dedicado, register/heartbeat/unregister e forward\_message\\
-agents/base\_sender\_agent.py & Classe emissora de mensagens ACL a partir da API\\
-agents/sensor\_agent.py & Encaminhamento de atividade e recomendações para coordenação\\
-agents/coordinator\_agent.py & Encaminhamento central para HAR, matching e persistência\\
-agents/har\_agent.py & Etapa HAR (encaminhamento modular para EnvironmentAgent)\\
-agents/environment\_agent.py & Enriquecimento com dados ambientais (temperatura)\\
-agents/matching\_agent.py & Clustering social e geração de convites de matching\\
-agents/database\_agent.py & Persistência Firestore por ontologia\\
-model/data\_model.py & Modelos Pydantic de referência para normalização de dados\\
-services/firebase\_service.py & Operações de escrita/leitura em coleções Firebase\\
-\hline
-\end{tabular}
-\end{table}
+A estrutura de ficheiros do protótipo Dance4Life reflete uma arquitetura modular que segue as boas práticas de desenvolvimento em Python, promovendo a separação de responsabilidades através de uma organização das suas diretorias. O projeto encontra-se dividido em pastas específicas para isolar os comportamentos assíncronos e as definições das classes dos agentes, os modelos de validação de dados, os serviços de persistência na cloud, as configurações globais e as interfaces de fronteira baseadas no protocolo REST.  
+No centro desta organização encontra-se a diretoria agents/, que contém o núcleo comportamental do ecossistema. A classe abstrata BaseBackgroundAgent está centralizada no ficheiro \texttt{base\_background\_agent}.py, sendo responsável por gerir o ciclo de vida dos agentes através da criação de um loop de eventos dedicado (\texttt{agent\_loop}) executado numa thread secundária em segundo plano. O gateway lógico entre as rotas HTTP e a rede XMPP é assegurado pela classe BaseSenderAgent, localizada em \texttt{base\_sender\_agent}.py, que permite a conversão e o envio síncrono de mensagens através do método de bloqueio controlado join(). Os restantes ficheiros desta diretoria encapsulam os agentes especializados do \textit{pipeline}: o \texttt{sensor\_agent}.py define o agente de entrada reativa que ingere os dados físicos do edge ; o \texttt{coordinator\_agent}.py contém o orquestrador híbrido encarregue de triar as mensagens por ontologia ; o \texttt{har\_agent}.py serve como etapa modular para o reconhecimento de atividades humanas ; o \texttt{environment\_agent}.py implementa o enriquecimento do \textit{payload} com dados meteorológicos ; o \texttt{matching\_agent}.py aloja o ClusteringAgent focado na lógica de emparelhamento social ; e o \texttt{database\_agent}.py gere a persistência documental.  
+As restantes pastas fornecem o suporte de infraestrutura e dados necessário para o funcionamento do sistema. A diretoria model/ isola a lógica de dados, contendo o ficheiro \texttt{data\_model}.py com os esquemas de validação estrutural do Pydantic, e o ficheiro \texttt{user\_matching\_cluster}.py, que implementa o algoritmo de agrupamento UserActivityClusterModel consumido pelo agente de matching. A pasta services/ aloja o ficheiro \texttt{firebase\_service}.py, que centraliza as rotas assíncronas de escrita em Firestore (\texttt{save\_activity}, \texttt{save\_matching} e \texttt{save\_movement\_recommendation}). Os módulos de integração com APIs externas de meteorologia encontram-se isolados em sensor\texttt{/external\_sensors.py}, garantindo que as classes dos comportamentos fiquem livres de código de infraestrutura de rede. Por fim, a configuração central do sistema é gerida em config\texttt{/config.py}, onde se parametrizam as constantes de JIDs, credenciais, e os enumerados de ontologias e performativas FIPA-ACL, evitando o acoplamento rígido de strings e garantindo a consistência semântica de todo o ecossistema distribuído. 
+
+\subsection{Monitorização de Agentes — Heartbeat e Registo}
+O sistema Dance4Life assenta numa abordagem multiagente baseada na plataforma SPADE, onde diferentes agentes colaboram para processar dados de atividade física, informação ambiental e recomendações de emparelhamento. Para garantir a disponibilidade e a correta coordenação destes componentes, foi implementado um mecanismo de monitorização baseado em \textit{heartbeats}. 
+Todos os agentes do sistema herdam da classe base BaseBackgroundAgent, responsável por disponibilizar funcionalidades comuns relacionadas com o ciclo de vida dos agentes. Durante a sua inicialização, cada agente efetua automaticamente o registo junto do WebService através do endpoint \texttt{/register\_agent}, ficando disponível para participar nas operações do sistema. 
+Após o registo, é iniciado um comportamento periódico designado por HeartbeatBehaviour, responsável pelo envio de mensagens de \textit{heartbeat} para o endpoint /\textit{heartbeat}. Estas mensagens são enviadas a cada 10 segundos e contêm o identificador único do agente (JID – Jabber ID), permitindo ao servidor confirmar que o agente permanece operacional. 
+No lado do servidor, é mantida uma estrutura de registo contendo todos os agentes ativos e o instante temporal do último \textit{heartbeat} recebido. Sempre que um \textit{heartbeat} é recebido, o campo \texttt{last\_seen} associado ao respetivo agente é atualizado, permitindo acompanhar o estado de disponibilidade de cada componente da plataforma. 
+De forma complementar, o servidor executa uma tarefa periódica de limpeza responsável por verificar os tempos de inatividade dos agentes registados. Caso um agente deixe de enviar \textit{heartbeats} durante um período superior a 30 segundos, é considerado indisponível e removido automaticamente da lista de agentes ativos. Este mecanismo permite detetar falhas de comunicação, encerramentos inesperados ou interrupções de serviço sem necessidade de intervenção manual. 
+Quando um agente termina a sua execução de forma controlada, é ainda executado um processo de remoção através do endpoint \texttt{/unregister\_agent}, garantindo que o registo é removido imediatamente e evitando a permanência de informação desatualizada no sistema. 
+A implementação deste mecanismo contribui para a robustez da arquitetura Dance4Life, assegurando que apenas agentes ativos participam nos processos de comunicação e processamento. Adicionalmente, esta abordagem estabelece uma base para futuras extensões relacionadas com tolerância a falhas, recuperação automática de componentes e gestão dinâmica da infraestrutura multiagente. 
 
 \section{Resultados e Análise Crítica}
-A implementação do protótipo Dance4Life permitiu validar a viabilidade técnica de uma cadeia multiagente com integração API--SPADE--Firebase. Os testes funcionais realizados sobre os endpoints de entrada e os fluxos entre agentes confirmam que o sistema processa eventos de atividade, recomendações de movimento e matching social. Ainda assim, a análise crítica mostra um conjunto de limitações relevantes para conformidade total com os pressupostos do enunciado.
+A implementação do protótipo Dance4Life permitiu validar a viabilidade técnica de uma arquitetura multiagente integrada com API Flask, SPADE e Firebase. Os testes funcionais realizados sobre os endpoints de entrada e os diferentes fluxos entre agentes demonstraram o correto processamento de eventos de atividade, recomendações de movimento e operações de matching social. 
+
+Apesar dos resultados obtidos, a análise do sistema evidencia algumas limitações ao nível da robustez protocolar, validação semântica e gestão de concorrência, identificando igualmente oportunidades de melhoria para futuras evoluções da arquitetura. 
 
 \subsection{Sumário do Funcionamento e Testes}
-Durante as sessões de teste e execução, o comportamento emergente da rede de agentes confirmou a conformidade com as regras de negócio desenhadas em Agent UML. Verificaram-se os seguintes resultados práticos:
+Durante as sessões de teste e execução, o comportamento emergente da rede de agentes confirmou o correto funcionamento do sistema com as regras de negócio previamente desenhadas em Agent UML. Verificou-se, em primeiro lugar, o correto encadeamento funcional das atividades, em que os dados recebidos através do endpoint \texttt{/collect\_data\_activities} percorrem sucessivamente o SensorAgent, CoordinatorAgent, HARAgent, EnvironmentAgent e DatabaseAgent, culminando na persistência da informação na coleção \texttt{dance4life\_activity}. Paralelamente, o fluxo de matching revelou-se operacional, sendo os pedidos processados pelo ClusteringAgent, responsável pela emissão de convites para utilizadores e pela persistência final dos dados na coleção \texttt{dance4life\_matching}. 
 
-\begin{itemize}
-\item Encadeamento funcional de atividade: os dados recebidos em /collect\_data\_activities percorrem SensorAgent, CoordinatorAgent, HarAgent, EnvironmentAgent e DatabaseAgent, culminando em persistência em dance4life\_activity.
-\item Fluxo de matching operacional: pedidos de matching são processados no ClusteringAgent, com emissão de convites para utilizadores e persistência final em dance4life\_matching.
-\item Persistência multi-coleção validada: o DatabaseAgent grava dados em coleções distintas (atividade, recomendação e matching), refletindo separação de responsabilidades por ontologia.
-\item Comunicação orientada a payload estruturado: o uso de jsonpickle evita parsing textual manual e mantém consistência dos atributos ao longo da cadeia.
-\item Monitorização de vida dos agentes: o mecanismo register/heartbeat/unregister no servidor API fornece visibilidade operacional sobre agentes ativos.
-\end{itemize}
+Os testes permitiram ainda validar a persistência distribuída em múltiplas coleções, assegurada pelo DatabaseAgent, que grava dados distintos relacionados com atividade, recomendações e matching, refletindo uma clara separação de responsabilidades baseada nas diferentes ontologias do sistema. Adicionalmente, a comunicação orientada a \textit{payloads} estruturados demonstrou vantagens significativas ao longo do \textit{pipeline}, uma vez que a utilização de jsonpickle eliminou a necessidade de parsing textual manual e garantiu consistência semântica dos atributos trocados entre agentes. Por fim, o mecanismo de monitorização baseado em operações de register, \textit{heartbeat} e unregister implementado no servidor API forneceu visibilidade operacional sobre o estado e disponibilidade dos agentes ativos na plataforma. 
 
 \subsection{Análise Crítica — Estrangulamento Sequencial}
-Apesar dos resultados positivos, a análise crítica revela limitações estruturais que devem ser abordadas para garantir escalabilidade, resiliência e extensibilidade do sistema.
+Apesar dos resultados positivos alcançados, a análise crítica do sistema revela a existência de limitações estruturais que deverão ser abordadas em futuras evoluções, de forma a garantir maiores níveis de escalabilidade, resiliência e extensibilidade da arquitetura. Uma das principais limitações relaciona-se com a conformidade apenas parcial com o padrão FIPA-ACL. Embora as performativas agree e failure estejam definidas na configuração do sistema, a implementação atualmente operacional utiliza predominantemente mensagens request e inform, não existindo uma aplicação uniforme de mecanismos de handshake semântico completo, nomeadamente aceitação explícita e comunicação protocolar de falhas. 
 
-\begin{enumerate}
-\item Conformidade FIPA-ACL parcial
-Embora AGREE e FAILURE estejam definidos em configuração, a implementação ativa recorre sobretudo a REQUEST/INFORM. O handshake semântico completo (aceitação explícita e falha protocolar) não está uniformemente aplicado.
+Outra fragilidade identificada prende-se com a validação de ontologias, que é atualmente realizada através de blocos condicionais específicos em cada agente. Esta abordagem não dispõe ainda de um mecanismo transversal e estruturado para rejeição de ontologias desconhecidas, o que pode dificultar a robustez e consistência do sistema em cenários de expansão funcional.  
 
-\item Validação de ontologia não transversal
-A decisão por ontologia é feita em blocos condicionais por agente, sem mecanismo comum de rejeição estruturada quando uma ontologia desconhecida é recebida.
+Paralelamente, o encadeamento rígido dos agentes constitui também uma limitação relevante, uma vez que os endereços dos agentes se encontram hardcoded e o \textit{pipeline} depende de uma sequência fixa de forwards. A ausência de mecanismos de descoberta dinâmica reduz a flexibilidade da arquitetura e limita a escalabilidade e substituição transparente de serviços. 
 
-\item Encadeamento rígido e acoplamento estático
-Os endereços dos agentes estão hardcoded e o pipeline depende de uma ordem fixa de forwards. A ausência de descoberta dinâmica limita escalabilidade e substituição de serviços.
+Ao nível funcional, o HARAgent permanece ainda numa fase preliminar, funcionando essencialmente como etapa de encaminhamento de dados. A componente de inferência propriamente dita, baseada em modelos treinados de reconhecimento de atividade humana, constitui trabalho futuro. Adicionalmente, embora o sistema gere e propague conversation-id ao longo das interações, não existe ainda um mecanismo rigoroso de correlação e filtragem de respostas capaz de garantir isolamento completo das sessões em cenários de elevada concorrência. 
 
-\item Processamento HAR ainda placeholder
-O HarAgent atua atualmente como etapa de encaminhamento. A inferência propriamente dita (modelo treinado) permanece trabalho futuro.
+Foram igualmente identificadas fragilidades ao nível da robustez operacional. Atualmente, os erros de processamento são tratados sobretudo através de exceções e mecanismos de logging local, não existindo ainda políticas uniformes de retries automáticos, gestão semântica de timeouts ou estratégias de compensação transacional. Estas limitações reduzem a tolerância a falhas e a capacidade de recuperação automática do sistema perante problemas de comunicação ou processamento distribuído. 
 
-\item Ausência de correlação estrita de respostas
-O conversation-id é gerado e propagado, mas falta um mecanismo geral de correlação/filtragem de replies para garantir isolamento rigoroso sob concorrência elevada.
+Em síntese, o protótipo cumpre os objetivos nucleares associados à implementação de uma arquitetura distribuída baseada em agentes e demonstra funcionamento end-to-end dos principais fluxos operacionais.  
 
-\item Fragilidades de robustez operacional
-Erros de processamento são maioritariamente tratados por exceções e logs locais, sem política uniforme de retries, timeouts semânticos e compensação transacional.
-\end{enumerate}
-
-Em síntese, o protótipo cumpre os objetivos nucleares de arquitetura distribuída baseada em agentes e demonstra operação end-to-end. No entanto, para atingir um nível mais elevado de maturidade académica e técnica, recomenda-se reforçar a disciplina protocolar FIPA-ACL e mecanismos de resiliência.
+Contudo, para atingir um nível mais elevado de maturidade académica e técnica, recomenda-se reforçar a disciplina protocolar associada ao padrão FIPA-ACL, bem como introduzir mecanismos mais robustos de resiliência, coordenação e gestão de concorrência distribuída. 
 
 \section{Conclusões e Recomendações para Melhoria}
+Apresentam-se as principais conclusões obtidas durante o desenvolvimento do protótipo Dance4Life, bem como uma análise das limitações identificadas ao longo da implementação. São ainda discutidas possíveis evoluções futuras da arquitetura, com foco no reforço da robustez, escalabilidade e conformidade protocolar do sistema. 
+
 \subsection{Conclusões}
-O desenvolvimento do protótipo Dance4Life demonstra a viabilidade de uma infraestrutura SMA em Python/SPADE para o domínio do envelhecimento ativo, com integração funcional entre API externa, cadeia de agentes e persistência cloud. O sistema apresenta modularidade clara, isolamento de responsabilidades e capacidade de extensão por novos agentes e ontologias.
+O desenvolvimento do protótipo Dance4Life demonstra a viabilidade de uma infraestrutura baseada em Sistemas Multiagente, implementada em Python com recurso ao SPADE, aplicada ao domínio do envelhecimento ativo. O sistema evidencia uma integração funcional entre uma API externa, uma cadeia de agentes distribuídos e os mecanismos de persistência em cloud, apresentando simultaneamente uma arquitetura modular, clara separação de responsabilidades e capacidade de evolução através da introdução de novos agentes e ontologias. 
 
-Do ponto de vista do enunciado, os resultados alcançados são positivos:
-\begin{itemize}
-\item arquitetura distribuída definida e implementada;
-\item classes e behaviours de agentes identificados e operacionalizados em SPADE;
-\item comunicação entre agentes com metadados ACL e ontologias explícitas;
-\item utilização de payloads estruturados com serialização jsonpickle;
-\item persistência de resultados em Firebase Firestore.
-\end{itemize}
+Do ponto de vista dos objetivos definidos no enunciado, os resultados alcançados podem ser considerados globalmente positivos. Foi concebida e implementada uma arquitetura distribuída funcional, suportada por diferentes classes de agentes e behaviours operacionalizados em SPADE. A comunicação entre agentes recorre a metadados compatíveis com ACL, incluindo ontologias explicitamente definidas, permitindo estruturar semanticamente os fluxos de interação.  
 
-Em contrapartida, a conformidade com FIPA-ACL é ainda parcial no plano das performativas (ausência de handshake completo agree/failure). Esta limitação não invalida a prova de conceito, mas define prioridades objetivas para evolução.
+Paralelamente, o sistema utiliza \textit{payloads} estruturados serializados com jsonpickle, contribuindo para maior consistência semântica e redução da complexidade associada ao parsing manual de mensagens. Os resultados produzidos pelos diferentes agentes são ainda persistidos em Firebase, assegurando armazenamento distribuído e suporte à continuidade operacional da plataforma. 
+
+Contudo, a conformidade com o padrão FIPA-ACL permanece ainda parcial, sobretudo ao nível das performativas utilizadas. Apesar de o sistema implementar interações baseadas em request e inform, não existe ainda um mecanismo completo de handshake protocolar suportado por performativas como agree e failure. Esta limitação não compromete a validade da prova de conceito nem os objetivos centrais do projeto, mas estabelece prioridades claras para futuras evoluções técnicas e académicas do sistema. 
 
 \subsection{Recomendações e Trabalho Futuro}
-\subsubsection{Paralelismo de Comportamentos e Otimização Assíncrona}
-Para reduzir latência e aumentar throughput, recomenda-se a adoção de paralelismo controlado entre ramos independentes (por exemplo, análise HAR e enriquecimento contextual quando não houver dependência direta), com coordenação por asyncio.gather e políticas explícitas de timeout.
+Para reduzir a latência e aumentar o throughput do sistema, recomenda-se a adoção de mecanismos de paralelismo controlado entre ramos independentes do \textit{pipeline}, particularmente em situações em que determinadas operações não apresentam dependência direta entre si, como a análise HAR e o enriquecimento contextual. Esta abordagem poderá ser implementada recorrendo a funcionalidades assíncronas do asyncio, nomeadamente através de asyncio.gather, complementadas por políticas explícitas de \textit{timeout} e gestão de exceções. Desta forma, o sistema poderá executar múltiplos pedidos em paralelo, aumentando a eficiência global da infraestrutura distribuída. 
 
-Exemplo conceptual:
-\begin{lstlisting}
-result_har, result_ctx = await asyncio.gather(
-    request_har(data),
-    request_context(data),
-    return_exceptions=True
-)
-\end{lstlisting}
+Outra evolução fundamental passa pelo reforço da conformidade protocolar com FIPA-ACL. Em trabalhos futuros, recomenda-se a implementação integral do ciclo request $\rightarrow$ agree $\rightarrow$ inform\texttt{/failure} em todos os pares comunicantes, assegurando uma semântica de interação mais rigorosa e consistente. Paralelamente, deverão ser introduzidos templates de validação baseados em ontologias e mecanismos uniformes de resposta semântica a erros, aumentando a robustez e previsibilidade das interações entre agentes. 
 
-\subsubsection{Conformidade Protocolar FIPA-ACL}
-Implementar o ciclo completo request $\rightarrow$ agree $\rightarrow$ inform/failure em todos os pares comunicantes, com templates de validação por ontologia e respostas semânticas de erro consistentes.
+A arquitetura atual recorre ainda a endereços estáticos hardcoded, como \texttt{har\_agent}@localhost, o que limita a flexibilidade e escalabilidade do sistema. Nesse sentido, uma evolução importante consiste na introdução de mecanismos de descoberta dinâmica de serviços através de um Directory Facilitator ou Service Facilitator. Com esta abordagem, os agentes poderiam registar-se dinamicamente e o CoordinatorAgent passaria a descobrir os serviços adequados em tempo de execução, reduzindo o acoplamento estático da arquitetura. Complementarmente, recomenda-se a inclusão de novos agentes especializados. Um Security Agent poderia ser responsável pela auditoria de acessos e monitorização contínua de indicadores fisiológicos, como a frequência cardíaca, tendo autonomia para interromper sessões de dança em caso de deteção de fadiga ou risco clínico. Por sua vez, um Feedback Agent permitiria estabelecer um ciclo de interação proativa com o utilizador, fornecendo recomendações inteligentes, como sugestões musicais personalizadas baseadas no histórico de utilização e nos dados previamente armazenados. 
 
-\subsubsection{Adição de Novos Agentes e Descoberta Dinâmica}
-A infraestrutura atual recorre a endereços estáticos (hardcoded, e.g., \texttt{har\_agent@localhost}). Em trabalhos futuros, o sistema deve implementar mecanismos de Serviço de Diretório (Directory Facilitator ou Service Facilitator), permitindo que os agentes se registem dinamicamente e que o Coordenador descubra o serviço adequado em tempo de execução.
-Além disso, a arquitetura ganharia robustez com a inclusão de dois novos agentes:
-\begin{itemize}
-    \item Security Agent: Para auditoria de acessos e monitorização contínua da frequência cardíaca, com autonomia para interromper sessões de dança em caso de fadiga detetada.
-    \item Feedback Agent: Responsável por interagir de volta com o utilizador de forma proativa (e.g., recomendar uma música com base nos dados guardados), fechando o ciclo de recomendação inteligente.
-\end{itemize}
+Considerando a natureza sensível dos dados clínicos e demográficos manipulados pela plataforma, torna-se igualmente necessário reforçar os mecanismos de segurança e privacidade em conformidade com o RGPD. Neste contexto, recomenda-se, a adoção de paradigmas de Edge Computing, transferindo parte do processamento cognitivo, incluindo modelos de Machine Learning atualmente emulados no HAR, para o próprio dispositivo do utilizador. Desta forma, apenas parâmetros anonimizados seriam transmitidos pela rede XMPP, evitando a circulação de sinais biométricos brutos. Paralelamente, a comunicação entre agentes deverá incorporar mecanismos de encriptação end-to-end em todos os behaviours de rede. Outra evolução particularmente relevante consiste na implementação de estratégias de Federated Learning, permitindo que os agentes partilhem apenas parâmetros dos modelos treinados, preservando a privacidade dos dados individuais dos utilizadores. 
 
-\subsubsection{Segurança de Dados e Edge Computing}
-Considerando a sensibilidade clínica e demográfica dos dados gerados, é necessário o reforço da privacidade em conformidade com o RGPD. O desenvolvimento futuro deve englobar:
-\begin{itemize}
-    \item Edge Computing: Transição do processamento cognitivo (modelos de ML emulados no HAR) para o próprio dispositivo do utilizador, garantindo que apenas parâmetros anonimizados, e não sinais biométricos brutos, viajam pela rede XMPP.
-    \item Encriptação end-to-end: A comunicação deverá incorporar encriptação em todos os behaviours de rede.
-    \item Aprendizagem Colaborativa Distribuída: Implementação de Federated Learning, onde os agentes partilham apenas os parâmetros do modelo, preservando a privacidade dos dados brutos.
-\end{itemize}
+Durante a análise do código existente foram ainda identificadas várias melhorias de implementação que poderão aumentar significativamente a qualidade técnica do sistema. Entre elas destaca-se a normalização da validação de ontologias e performativas através de funções utilitárias transversais no BaseBackgroundAgent, reduzindo redundância e aumentando consistência. Recomenda-se também a introdução de mecanismos robustos de correlação de mensagens com base em conversation-id e reply-to em todos os recetores, garantindo melhor isolamento de sessões em cenários concorrentes.  
 
-\subsubsection{Melhorias de Código Identificadas}
-Na análise ao código existente, foram ainda identificadas as seguintes melhorias pontuais de implementação:
-\begin{itemize}
-    \item Normalizar validação de ontologias e performativas numa função utilitária transversal em BaseBackgroundAgent.
-    \item Introduzir correlação forte de mensagens por conversation-id e reply-to em todos os receptores.
-    \item Evitar blocos de código repetidos de forward através de factories de behaviour parametrizáveis.
-    \item Migrar gradualmente payloads críticos para modelos Pydantic no caminho de execução (não apenas como contrato de referência).
-    \item Implementar testes automáticos de integração para os três fluxos principais: atividade, matching e recomendação.
-\end{itemize}
+Outra melhoria importante passa pela eliminação de blocos repetidos de forward, substituindo-os por factories de behaviour parametrizáveis, promovendo reutilização e manutenção mais eficiente do código. Sugere-se ainda a migração gradual dos \textit{payloads} críticos para modelos Pydantic diretamente integrados no caminho de execução, em vez de serem utilizados apenas como contratos de referência. Por fim, torna-se essencial implementar testes automáticos de integração para os três fluxos principais do sistema: atividade, matching e recomendação. 
 
-O Dance4Life constitui uma prova de conceito sólida que demonstra o potencial dos Sistemas Multiagente para apoiar o envelhecimento ativo. A arquitetura é clara, modular e extensível, e a implementação em SPADE valida a capacidade dos agentes para operar de forma distribuída e assíncrona. As recomendações apresentadas fornecem um roteiro concreto para transformar o protótipo num sistema mais escalável, inteligente e alinhado com as necessidades reais da população sénior.
+Em síntese, o Dance4Life constitui uma prova de conceito sólida que evidencia o potencial dos Sistemas Multiagente no apoio ao envelhecimento ativo. A arquitetura proposta apresenta uma organização clara, modular e extensível, enquanto a implementação em SPADE demonstra a capacidade dos agentes operarem de forma distribuída e assíncrona. As recomendações identificadas ao longo da análise estabelecem um roteiro concreto para evoluir o protótipo para uma solução mais escalável, inteligente, resiliente e alinhada com as necessidades reais da população sénior. 
 
 %
 % ---- Bibliography ----

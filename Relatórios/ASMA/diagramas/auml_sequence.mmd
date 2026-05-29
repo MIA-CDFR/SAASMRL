@@ -1,0 +1,213 @@
+%% ================================================================
+%% Dance4Life — Diagrama de Sequência AUML
+%% Padrão  : AUML (Odell, Parunak & Bauer, 2001)
+%% Protocolo : FIPA-Request (FIPA SC00026H)
+%% Versão  : Mermaid sequenceDiagram
+%%
+%% Ficheiro contém três diagramas independentes:
+%%   [1] sensor_activity        — linhas 1–93
+%%   [2] movement_recommendation — linhas 95–155
+%%   [3] matching               — linhas 157–232
+%%
+%% Para renderizar em ferramentas que suportam apenas um diagrama
+%% por ficheiro, copie cada bloco sequenceDiagram separadamente.
+%%
+%% Legenda de setas:
+%%   ->>   REQUEST  (seta sólida com ponta)
+%%   -->>  INFORM   (seta tracejada com ponta — confirmação/ack)
+%%   -x    LATERAL  (seta com X — efeito lateral HTTP fora do canal ACL)
+%% ================================================================
+
+
+%% ============================================================
+%% [1] Protocolo FIPA-Request — ontologia: sensor_activity
+%%
+%% Participantes:
+%%   API  : api_agent@localhost       : BaseSenderAgent
+%%   SA   : sensor_agent@localhost    : SensorAgent      [Reativo]
+%%   CA   : coordinator_agent@...     : CoordinatorAgent  [Híbrido]
+%%   HA   : har_agent@localhost       : HarAgent          [Reativo]
+%%   EA   : environment_agent@...     : EnvironmentAgent  [Híbrido]
+%%   DB   : database_agent@localhost  : DatabaseAgent     [Reativo]
+%%
+%% Mensagens REQUEST (->>) : 1, 2, 3, 5, 9
+%% Mensagens INFORM (->>)  : 4, 6, 8, 11
+%% ============================================================
+sequenceDiagram
+  autonumber
+
+  participant API as api_agent@localhost<br/>:BaseSenderAgent
+  participant SA  as sensor_agent@localhost<br/>:SensorAgent&lt;&lt;Reativo&gt;&gt;
+  participant CA  as coordinator_agent@localhost<br/>:CoordinatorAgent&lt;&lt;Híbrido&gt;&gt;
+  participant HA  as har_agent@localhost<br/>:HarAgent&lt;&lt;Reativo&gt;&gt;
+  participant EA  as environment_agent@localhost<br/>:EnvironmentAgent&lt;&lt;Híbrido&gt;&gt;
+  participant DB  as database_agent@localhost<br/>:DatabaseAgent&lt;&lt;ReativoServico&gt;&gt;
+
+  Note over API,DB: FIPA-Request Interaction Protocol<br/>conv-id: conv-{jid}-guid-{uuid}<br/>Performativas implementadas: REQUEST, INFORM<br/>agree/failure definidas em config mas não aplicadas sistematicamente
+
+  rect rgb(214, 234, 248)
+    Note over API,DB: Iniciação FIPA-Request
+    activate API
+    API->>SA: REQUEST / sensor_activity<br/>[device_id, acc, hr, ritmo, lat, lon]
+    Note right of API: performative: request<br/>ontology: sensor_activity<br/>conversation-id: conv-{jid}-guid-{uuid}
+    activate SA
+
+    SA->>CA: REQUEST / sensor_activity<br/>[+visited_agents: [api_agent, sensor_agent]]
+    activate CA
+
+    CA->>HA: REQUEST / sensor_activity
+    Note right of CA: Guard: [ontology == sensor_activity]<br/>Roteamento: CoordinatorAgent → HarAgent
+    activate HA
+
+    CA-->>SA: INFORM / sensor_activity<br/>[ack: encaminhado para HarAgent]
+    Note left of CA: Confirmação imediata ao remetente<br/>antes do downstream terminar
+    deactivate SA
+
+    HA->>EA: REQUEST / sensor_activity
+    Note right of HA: Placeholder HAR<br/>Sem inferência ML nesta versão
+    activate EA
+
+    HA-->>CA: INFORM / sensor_activity<br/>[ack: encaminhado para EnvironmentAgent]
+    deactivate CA
+  end
+
+  rect rgb(254, 249, 231)
+    Note over EA: Enriquecimento Contextual
+    EA->>EA: get_weather_temperature(lat, lon)<br/>[API Meteorológica Externa]
+    Note right of EA: Arquitetura Híbrida:<br/>fase deliberativa de aquisição<br/>de conhecimento contextual
+
+    EA-->>HA: INFORM / sensor_activity<br/>[ack: encaminhado para DatabaseAgent]
+    deactivate HA
+
+    EA->>DB: REQUEST / sensor_activity<br/>[payload +weather_temperature]
+    activate DB
+  end
+
+  rect rgb(245, 203, 167)
+    Note over DB: Resolução FIPA-Request
+    DB->>DB: payload.pop("visited_agents")<br/>save_activity(payload)<br/>→ Firestore: dance4life_activity
+    Note right of DB: Agente Reativo de Serviço:<br/>remove rastreio de agentes<br/>antes de persistir
+
+    DB-->>EA: INFORM / sensor_activity<br/>[persistência concluída]
+    deactivate DB
+    deactivate EA
+    deactivate API
+  end
+
+
+%% ============================================================
+%% [2] Protocolo FIPA-Request — ontologia: movement_recommendation
+%%
+%% Participantes:
+%%   API  : api_agent@localhost       : BaseSenderAgent
+%%   SA   : sensor_agent@localhost    : SensorAgent      [Reativo]
+%%   CA   : coordinator_agent@...     : CoordinatorAgent  [Híbrido]
+%%   DB   : database_agent@localhost  : DatabaseAgent     [Reativo]
+%%
+%% Fluxo simplificado: sem HarAgent / EnvironmentAgent
+%% Mensagens REQUEST (->>) : 1, 2, 4
+%% Mensagens INFORM  (-->>) : 6
+%% ============================================================
+sequenceDiagram
+  autonumber
+
+  participant API as api_agent@localhost<br/>:BaseSenderAgent
+  participant SA  as sensor_agent@localhost<br/>:SensorAgent&lt;&lt;Reativo&gt;&gt;
+  participant CA  as coordinator_agent@localhost<br/>:CoordinatorAgent&lt;&lt;Híbrido&gt;&gt;
+  participant DB  as database_agent@localhost<br/>:DatabaseAgent&lt;&lt;ReativoServico&gt;&gt;
+
+  Note over API,DB: FIPA-Request Interaction Protocol<br/>Fluxo simplificado — sem passagem por HarAgent / EnvironmentAgent<br/>conv-id: conv-{jid}-guid-{uuid}
+
+  rect rgb(214, 234, 248)
+    Note over API,DB: Iniciação FIPA-Request
+    activate API
+    API->>SA: REQUEST / movement_recommendation<br/>[dados de recomendação de movimento]
+    Note right of API: performative: request<br/>ontology: movement_recommendation<br/>conversation-id: conv-{jid}-guid-{uuid}
+    activate SA
+
+    SA->>CA: REQUEST / movement_recommendation<br/>[+visited_agents: [api_agent, sensor_agent]]
+    Note right of SA: Guard: [performative == REQUEST]<br/>SensorAgent como relay reativo
+    activate CA
+
+    CA->>CA: payload["recommendation"] = True<br/>[anotação de processamento]
+    Note right of CA: Guard: [ontology == movement_recommendation]<br/>Roteamento direto para DatabaseAgent
+
+    CA->>DB: REQUEST / movement_recommendation<br/>[+recommendation=True]
+    activate DB
+  end
+
+  rect rgb(245, 203, 167)
+    Note over DB: Resolução FIPA-Request
+    DB->>DB: payload.pop("visited_agents")<br/>save_movement_recommendation(payload)<br/>→ Firestore: dance4life_movement_recommendation
+
+    DB-->>CA: INFORM / movement_recommendation<br/>[persistência concluída]
+    Note right of DB: performative: inform<br/>ontology: movement_recommendation<br/>DatabaseAgent → CoordinatorAgent
+    deactivate DB
+    deactivate CA
+    deactivate SA
+    deactivate API
+  end
+
+
+%% ============================================================
+%% [3] Protocolo FIPA-Request — ontologia: matching
+%%
+%% Participantes:
+%%   API  : api_agent@localhost       : BaseSenderAgent / Flask API
+%%   CLU  : matching_agent@localhost  : ClusteringAgent  [Deliberativo]
+%%   CA   : coordinator_agent@...     : CoordinatorAgent  [Híbrido]
+%%   DB   : database_agent@localhost  : DatabaseAgent     [Reativo]
+%%
+%% Mensagem 3 é efeito lateral HTTP fora do canal ACL.
+%% Mensagens REQUEST (->>) : 1, 4, 6
+%% HTTP lateral    (-x)    : 3
+%% Mensagens INFORM (-->>) : 8
+%% ============================================================
+sequenceDiagram
+  autonumber
+
+  participant API as api_agent@localhost<br/>:BaseSenderAgent / Flask API
+  participant CLU as matching_agent@localhost<br/>:ClusteringAgent&lt;&lt;Deliberativo&gt;&gt;
+  participant CA  as coordinator_agent@localhost<br/>:CoordinatorAgent&lt;&lt;Híbrido&gt;&gt;
+  participant DB  as database_agent@localhost<br/>:DatabaseAgent&lt;&lt;ReativoServico&gt;&gt;
+
+  Note over API,DB: FIPA-Request Interaction Protocol<br/>Despacho paralelo ao sensor_activity após asyncio.sleep<br/>conv-id: conv-{jid}-guid-{uuid}<br/>Mensagem 3 é efeito lateral HTTP — fora do canal ACL XMPP
+
+  rect rgb(214, 234, 248)
+    Note over API,DB: Iniciação FIPA-Request
+    activate API
+    API->>CLU: REQUEST / matching<br/>[payload: {new_data: {...}, users: {...}}]
+    Note right of API: performative: request<br/>ontology: matching<br/>conversation-id: conv-{jid}-guid-{uuid}<br/>Despacho paralelo após asyncio.sleep
+    activate CLU
+  end
+
+  rect rgb(241, 148, 138)
+    Note over CLU: Processamento Deliberativo
+    CLU->>CLU: cluster_model.process_matching_request(payload)<br/>UserMatchingClusterModel<br/>_build_cluster_progression(ritmo)<br/>_build_progression_invite(user_id, ...)
+    Note right of CLU: Arquitetura Deliberativa:<br/>raciocínio sobre perfis<br/>Níveis: Iniciante > Moderado<br/>       > Avançado > Expert
+
+    CLU-xAPI: HTTP POST /set_user_match/{user_id}<br/>[notificação de convite — FORA do canal ACL]
+    Note right of CLU: EFEITO LATERAL EXTERNO<br/>Chamada HTTP síncrona via requests.post()<br/>Fora do protocolo FIPA-ACL / XMPP<br/>Ocorre antes do encaminhamento ACL
+  end
+
+  rect rgb(253, 235, 208)
+    Note over CLU,DB: Encaminhamento ACL e Resolução FIPA-Request
+    CLU->>CA: REQUEST / matching<br/>[invite_payload: {type, cluster, userId, city, ...}]
+    Note right of CLU: performative: request<br/>ontology: matching<br/>Payload reduzido: resultado do convite
+    activate CA
+
+    CA->>CA: payload["recommendation"] = True<br/>[anotação de processamento]
+    Note right of CA: Guard: [ontology == matching]<br/>Roteamento direto para DatabaseAgent
+
+    CA->>DB: REQUEST / matching<br/>[+recommendation=True]
+    activate DB
+
+    DB->>DB: payload.pop("visited_agents")<br/>save_matching(payload)<br/>→ Firestore: dance4life_matching
+
+    DB-->>CA: INFORM / matching<br/>[persistência concluída]
+    Note right of DB: performative: inform<br/>ontology: matching<br/>Confirmação de persistência em Firestore
+    deactivate DB
+    deactivate CA
+    deactivate CLU
+    deactivate API
+  end

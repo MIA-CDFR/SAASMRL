@@ -1,0 +1,99 @@
+@startuml Dance4Life_Classes
+' ================================================================
+' Dance4Life -- Diagrama de Classes AUML
+' Padrao  : AUML (Odell, Parunak & Bauer, 2001)
+' Protocolo : FIPA-ACL (FIPA SC00061G / SC00026H)
+' ================================================================
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontSize 10
+skinparam classFontName Arial
+skinparam classBorderThickness 1.5
+skinparam arrowColor #2C3E50
+skinparam arrowFontSize 9
+skinparam packageBorderColor #5D6D7E
+skinparam packageFontStyle bold
+skinparam NoteBackgroundColor #FEF9E7
+skinparam NoteBorderColor #D4AC0D
+skinparam classBackgroundColor<<Agent>> #D6EAF8
+skinparam classBorderColor<<Agent>> #2471A3
+skinparam classBackgroundColor<<CyclicBehaviour>> #D5F5E3
+skinparam classBorderColor<<CyclicBehaviour>> #1E8449
+skinparam classBackgroundColor<<OneShotBehaviour>> #A9DFBF
+skinparam classBorderColor<<OneShotBehaviour>> #1E8449
+skinparam classBackgroundColor<<PeriodicBehaviour>> #82E0AA
+skinparam classBorderColor<<PeriodicBehaviour>> #1E8449
+skinparam classBackgroundColor<<DataModel>> #FEF9E7
+skinparam classBorderColor<<DataModel>> #D4AC0D
+skinparam classBackgroundColor<<Config>> #F2F3F4
+skinparam classBorderColor<<Config>> #717D7E
+skinparam classBackgroundColor<<Service>> #FDEBD0
+skinparam classBorderColor<<Service>> #BA4A00
+skinparam classBackgroundColor<<FIPA-ACL>> #E8DAEF
+skinparam classBorderColor<<FIPA-ACL>> #7D3C98
+skinparam classBackgroundColor<<External>> #EAECEE
+skinparam classBorderColor<<External>> #717D7E
+
+' ================================================================
+' PACOTE: Modelos de Dados (Pydantic BaseModel)
+' ================================================================
+package "model" #FEF9E7 {
+  class SensorActivityData <<DataModel>> {
+    + device_id  : str
+    + acc        : float?
+    + hr         : int?
+    + ritmo      : float?
+    + latitude   : float?
+    + longitude  : float?
+  }
+  class MatchingData <<DataModel>> {
+    + emparelhado_utilizador_id : str?
+  }
+  class CalculatedActivityData <<DataModel>> {
+    + actividade          : str?
+    + interesse           : float?
+    + timestamp           : str?
+    + timestamp_dia_semana: str?
+    + timestamp_hora      : int?
+    + timestamp_dia       : int?
+    + timestamp_mes       : str?
+    + timestamp_ano       : int?
+  }
+  class EnvironmentData <<DataModel>> {
+    + musica_id               : str?
+    + musica_nome             : str?
+    + musica_banda            : str?
+    + musica_tipo_nome        : str?
+    + quantidade_pessoas_sala : int?
+    + atividade_media_sala    : float?
+    + interesse_medio_sala    : float?
+    + matching_list_sal       : List[str]
+  }
+  class WeatherData <<DataModel>> {
+    + temperatura : float?
+    + humidade    : float?
+  }
+  class ActivityData <<DataModel>> {
+    + sensor_activity_data     : SensorActivityData
+    + matching_data            : MatchingData?
+    + calculated_activity_data : CalculatedActivityData?
+    + environment_data         : EnvironmentData?
+    + weather_data             : WeatherData?
+  }
+  class UserMatchingClusterModel {
+    + n_clusters      : int = 4
+    + max_distance_km : float = 8.0
+    + min_similarity  : float = 0.45
+    + max_kmeans_iter : int = 20
+    + user_profiles   : Dict[str, Dict]
+    --
+    + process_matching_request(payload) : dict
+    + _upsert_profile(user_id, payload)
+    + _build_feature_vector(profile) : List[float]
+    + _build_cluster_progression(ritmo) : dict
+    + _build_progression_invite(uid, profile, prog) : dict
+    + _cluster_from_ritmo(ritmo) : str
+  }
+}
+
+@enduml

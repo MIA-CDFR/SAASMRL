@@ -1,0 +1,202 @@
+@startuml Dance4Life_Agents_Architecture
+!theme plain
+skinparam backgroundColor #fefefe
+skinparam classBackgroundColor #F0F0F0
+skinparam classBorderColor #333333
+skinparam arrowColor #333333
+skinparam linetype ortho
+
+' Cores para diferentes tipos de classes
+skinparam class {
+    BackgroundColor<<Framework>> #E1F5FF
+    BackgroundColor<<Agent_Role>> #FFF9C4
+    BackgroundColor<<Behaviour>> #F3E5F5
+    BackgroundColor<<Auxiliary>> #E8F5E9
+    BackgroundColor<<Data_Model>> #FFEAA7
+}
+
+' SPADE Framework Classes
+class Agent <<Framework>> {
+    +start()
+    +stop()
+}
+
+' Base Classes
+class BaseBackgroundAgent <<Framework>> {
+    -agent_loop: asyncio.AbstractEventLoop
+    -__init__(jid, password)
+    +_run_loop()
+    +start_background()
+    +stop_background()
+    +_run_unregister()
+    +forward_message(behaviour, payload, agent_to, performative, ontology, conversation_id)
+}
+
+class BaseSenderAgent <<Auxiliary>> {
+    +send_message(payload, agent_to, performative, ontology)
+}
+
+' Behaviour Classes
+class OneShotBehaviour <<Behaviour>> {
+    +run()
+}
+
+class CyclicBehaviour <<Behaviour>> {
+    +run()
+}
+
+class SendMessageBehaviour <<Behaviour>> {
+    -payload: dict
+    -agent_to: str
+    -performative: str
+    -ontology: str
+    +run()
+}
+
+' Agent Implementations
+class SensorAgent <<Agent_Role>> {
+    +setup()
+    +add_behaviour(ReceiveSensorDataBehaviour)
+}
+
+class ReceiveSensorDataBehaviour <<Behaviour>> {
+    +run()
+    --
+    Forward to COORDINATOR_AGENT
+}
+
+class CoordinatorAgent <<Agent_Role>> {
+    +setup()
+    +add_behaviour(ReceiveCoordinatorDataBehaviour)
+}
+
+class ReceiveCoordinatorDataBehaviour <<Behaviour>> {
+    +run()
+    --
+    Forward to HAR_AGENT
+    Forward to DATABASE_AGENT
+}
+
+class HarAgent <<Agent_Role>> {
+    +setup()
+    +add_behaviour(ReceiveHarDataBehaviour)
+}
+
+class ReceiveHarDataBehaviour <<Behaviour>> {
+    +run()
+    --
+    Forward to ENVIRONMENT_AGENT
+    Forward to MATCHING_AGENT
+}
+
+class EnvironmentAgent <<Agent_Role>> {
+    +setup()
+    +add_behaviour(EnvironmentDataBehaviour)
+}
+
+class EnvironmentDataBehaviour <<Behaviour>> {
+    +run()
+    --
+    Enrich payload with weather_temperature
+    Forward to DATABASE_AGENT
+}
+
+class DatabaseAgent <<Agent_Role>> {
+    +setup()
+    +add_behaviour(ReceiveDatabaseDataBehaviour)
+}
+
+class ReceiveDatabaseDataBehaviour <<Behaviour>> {
+    +run()
+    --
+    save_activity(payload)
+    save_matching(payload)
+    save_movement_recommendation(payload)
+}
+
+class ClusteringAgent <<Agent_Role>> {
+    -cluster_model: UserActivityClusterModel
+    +__init__(jid, password)
+    +_notify_cluster_invite(payload)
+    +setup()
+}
+
+class MatchingAgent <<Agent_Role>> {
+    +setup()
+    +add_behaviour(ReceiveMatchingDataBehaviour)
+}
+
+class ReceiveMatchingDataBehaviour <<Behaviour>> {
+    +run()
+    --
+    Process user matching
+    Forward to CLUSTERING_AGENT
+}
+
+' Data Models
+class UserActivityClusterModel <<Data_Model>> {
+    +fit(data)
+    +predict(user_data)
+    +get_clusters()
+}
+
+' Inheritance relationships
+Agent <|-- BaseBackgroundAgent
+BaseBackgroundAgent <|-- SensorAgent
+BaseBackgroundAgent <|-- CoordinatorAgent
+BaseBackgroundAgent <|-- HarAgent
+BaseBackgroundAgent <|-- EnvironmentAgent
+BaseBackgroundAgent <|-- DatabaseAgent
+BaseBackgroundAgent <|-- ClusteringAgent
+BaseBackgroundAgent <|-- MatchingAgent
+BaseBackgroundAgent <|-- BaseSenderAgent
+
+OneShotBehaviour <|-- SendMessageBehaviour
+CyclicBehaviour <|-- ReceiveSensorDataBehaviour
+CyclicBehaviour <|-- ReceiveCoordinatorDataBehaviour
+CyclicBehaviour <|-- ReceiveHarDataBehaviour
+CyclicBehaviour <|-- EnvironmentDataBehaviour
+CyclicBehaviour <|-- ReceiveDatabaseDataBehaviour
+CyclicBehaviour <|-- ReceiveMatchingDataBehaviour
+
+' Aggregation/Composition relationships
+SensorAgent *-- ReceiveSensorDataBehaviour
+CoordinatorAgent *-- ReceiveCoordinatorDataBehaviour
+HarAgent *-- ReceiveHarDataBehaviour
+EnvironmentAgent *-- EnvironmentDataBehaviour
+DatabaseAgent *-- ReceiveDatabaseDataBehaviour
+MatchingAgent *-- ReceiveMatchingDataBehaviour
+ClusteringAgent *-- UserActivityClusterModel
+
+' Message Flow relationships (uses)
+ReceiveSensorDataBehaviour --> CoordinatorAgent : forward message
+ReceiveCoordinatorDataBehaviour --> HarAgent : forward message
+ReceiveCoordinatorDataBehaviour --> DatabaseAgent : forward message
+ReceiveHarDataBehaviour --> EnvironmentAgent : forward message
+ReceiveHarDataBehaviour --> MatchingAgent : forward message
+EnvironmentDataBehaviour --> DatabaseAgent : forward message
+ReceiveMatchingDataBehaviour --> ClusteringAgent : forward message
+
+' Layout hints
+note right of BaseBackgroundAgent
+    Manages asyncio event loop
+    in separate thread for
+    background agent execution
+end note
+
+note right of SensorAgent
+    Entry point for sensor data
+    Receives external sensor inputs
+end note
+
+note right of DatabaseAgent
+    Persists data to Firebase
+    Final destination for data
+end note
+
+note right of ClusteringAgent
+    Performs user activity clustering
+    and matching recommendations
+end note
+
+@enduml

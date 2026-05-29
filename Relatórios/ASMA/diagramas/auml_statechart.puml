@@ -1,0 +1,184 @@
+' ==============================================================
+' Dance4Life - Statecharts AUML
+' Bloco 1 : Ciclo de vida Server <-> BaseBackgroundAgent
+' Bloco 2 : Pipeline inter-agentes (sensor_activity)
+' ==============================================================
+
+' --------------------------------------------------------------
+@startuml Dance4Life_SC_Lifecycle
+' --------------------------------------------------------------
+title Ciclo de Vida: Server <-> BaseBackgroundAgent\n(Registo · Heartbeat Periodico · Paragem)
+
+skinparam defaultFontSize 9
+skinparam defaultFontName Arial
+skinparam ArrowColor #2C3E50
+skinparam StateBackgroundColor #EBF5FB
+skinparam StateBorderColor #2874A6
+skinparam NoteBackgroundColor #FEF9E7
+skinparam NoteBorderColor #D4AC0D
+
+' ===== AGENTE =====
+state "Agente (BaseBackgroundAgent)" as AGENT #D5F5E3 {
+
+    [*] --> Boot
+
+    state Boot        : start_background()\nsetup()
+    state Registando  : RegisterBehaviour\nPOST /register_agent {jid}
+
+    state "Ativo" as Ativo {
+        [*]          --> Aguardando
+        Aguardando   : receive(timeout=10)
+        Processando  : decode payload\nverifica ontologia/performativa
+        Encaminhando : forward_message()\npara agente seguinte
+
+        Aguardando   --> Aguardando   : [timeout, sem msg]
+        Aguardando   --> Processando  : [msg != None]
+        Processando  --> Encaminhando : [ontologia reconhecida]
+        Processando  --> Aguardando   : [ontologia desconhecida]
+        Encaminhando --> Aguardando   : msg enviada
+    }
+
+    state Parando : UnregisterBehaviour\nPOST /unregister_agent {jid}
+
+    Boot       --> Registando : setup() chamado
+    Registando --> Ativo      : registado
+    Ativo      --> Parando    : stop_background()
+    Parando    --> [*]
+
+    note bottom of Ativo
+      HeartbeatBehaviour (period=10s) corre em paralelo:
+      POST /heartbeat {jid}  a cada 10 segundos
+    end note
+}
+
+' ===== SERVIDOR =====
+state "Flask Server" as SERVER #D6EAF8 {
+
+    [*] --> S_Idle
+
+    state S_Idle       : aguarda pedidos HTTP\nregistered_agents: {}
+    state S_Registado  : registered_agents[jid] = {last_seen: now()}
+    state S_Vivo       : last_seen atualizado
+    state S_Timeout    : now - last_seen > 30s\n(cleanup_thread deteta)
+
+    S_Idle      --> S_Registado : POST /register_agent {jid}
+    S_Registado --> S_Vivo      : POST /heartbeat {jid}
+    S_Vivo      --> S_Vivo      : POST /heartbeat {jid}\n[atualiza last_seen]
+    S_Vivo      --> S_Timeout   : cleanup_thread\n[now - last_seen > 30s]
+    S_Timeout   --> S_Idle      : del registered_agents[jid]
+    S_Registado --> S_Idle      : POST /unregister_agent {jid}
+    S_Vivo      --> S_Idle      : POST /unregister_agent {jid}
+
+    note right of S_Vivo
+      HEARTBEAT_TIMEOUT = 30s
+      cleanup_thread: daemon, loop infinito
+    end note
+}
+
+' Interacoes HTTP entre Agente e Servidor
+Registando -[dashed,#1E8449]-> S_Idle      : <<HTTP>> POST /register_agent
+Ativo      -[dashed,#B9770E]-> S_Vivo      : <<HTTP>> POST /heartbeat (10s)
+Parando    -[dashed,#922B21]-> S_Vivo      : <<HTTP>> POST /unregister_agent
+
+@enduml
+
+
+' --------------------------------------------------------------
+@startuml Dance4Life_SC_Pipeline
+' --------------------------------------------------------------
+title Pipeline Inter-Agentes: sensor_activity\nFIPA-ACL REQUEST (→) e INFORM (- - →) por salto
+
+skinparam defaultFontSize 9
+skinparam defaultFontName Arial
+skinparam ArrowColor #2C3E50
+skinparam StateBackgroundColor #EBF5FB
+skinparam StateBorderColor #2874A6
+skinparam NoteBackgroundColor #FEF9E7
+skinparam NoteBorderColor #D4AC0D
+
+' ---- API ----
+state "API / BaseSenderAgent" as API #AED6F1 {
+    [*]        --> API_Send
+    API_Send   : send_message(REQUEST,\nsensor_activity) -> SA
+    API_Send   --> [*]
+}
+
+' ---- SensorAgent ----
+state "SensorAgent" as SA #A9DFBF {
+    [*]        --> SA_Wait
+    SA_Wait    : receive(timeout=10)
+    SA_Fwd     : forward -> CoordinatorAgent
+    SA_Ack     : INFORM recebido [ack]
+
+    SA_Wait --> SA_Fwd : [REQUEST, sensor_activity]
+    SA_Fwd  --> SA_Wait : aguarda
+    SA_Wait --> SA_Ack  : [INFORM, sensor_activity]
+    SA_Ack  --> SA_Wait
+}
+
+' ---- CoordinatorAgent ----
+state "CoordinatorAgent" as CA #FAD7A0 {
+    [*]        --> CA_Wait
+    CA_Wait    : receive(timeout=10)
+    CA_Route   : encaminha por ontologia
+    CA_FwdHar  : forward -> HarAgent
+    CA_Inf     : INFORM -> sender (SA)
+
+    CA_Wait  --> CA_Route  : [REQUEST, sensor_activity]
+    CA_Route --> CA_FwdHar
+    CA_FwdHar --> CA_Inf
+    CA_Inf  --> CA_Wait
+}
+
+' ---- HarAgent ----
+state "HarAgent" as HAR #A9DFBF {
+    [*]        --> HAR_Wait
+    HAR_Wait   : receive(timeout=10)
+    HAR_Proc   : [HAR placeholder]
+    HAR_FwdEnv : forward -> EnvironmentAgent
+    HAR_Inf    : INFORM -> sender (CA)
+
+    HAR_Wait --> HAR_Proc  : [REQUEST, sensor_activity]
+    HAR_Proc --> HAR_FwdEnv
+    HAR_FwdEnv --> HAR_Inf
+    HAR_Inf --> HAR_Wait
+}
+
+' ---- EnvironmentAgent ----
+state "EnvironmentAgent" as ENV #FAD7A0 {
+    [*]        --> ENV_Wait
+    ENV_Wait   : receive(timeout=10)
+    ENV_Enrich : payload +=\nweather_temperature
+    ENV_FwdDB  : forward -> DatabaseAgent
+    ENV_Inf    : INFORM -> sender (HAR)
+
+    ENV_Wait   --> ENV_Enrich : [REQUEST, sensor_activity]
+    ENV_Enrich --> ENV_FwdDB
+    ENV_FwdDB  --> ENV_Inf
+    ENV_Inf    --> ENV_Wait
+}
+
+' ---- DatabaseAgent ----
+state "DatabaseAgent" as DB #F1948A {
+    [*]        --> DB_Wait
+    DB_Wait    : receive(timeout=10)
+    DB_Save    : save_activity(payload)\n-> Firebase
+    DB_Inf     : INFORM -> sender (ENV)
+
+    DB_Wait --> DB_Save : [REQUEST, sensor_activity]
+    DB_Save --> DB_Inf  : gravado
+    DB_Inf  --> DB_Wait
+}
+
+' ---- Transicoes inter-agentes ----
+API --> SA  : REQUEST
+SA  --> CA  : REQUEST forward
+CA  --> HAR : REQUEST forward
+CA  --> SA  : INFORM ack
+HAR --> ENV : REQUEST forward
+HAR --> CA  : INFORM ack
+ENV --> DB  : REQUEST forward
+ENV --> HAR : INFORM ack
+DB  --> ENV : INFORM save_ok
+
+@enduml

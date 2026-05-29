@@ -1,0 +1,273 @@
+@startuml Dance4Life_Classes
+' ================================================================
+' Dance4Life -- Diagrama de Classes AUML
+' Padrao  : AUML (Odell, Parunak & Bauer, 2001)
+' Protocolo : FIPA-ACL (FIPA SC00061G / SC00026H)
+' ================================================================
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontSize 10
+skinparam classFontName Arial
+skinparam classBorderThickness 1.5
+skinparam arrowColor #2C3E50
+skinparam arrowFontSize 9
+skinparam packageBorderColor #5D6D7E
+skinparam packageFontStyle bold
+skinparam NoteBackgroundColor #FEF9E7
+skinparam NoteBorderColor #D4AC0D
+skinparam classBackgroundColor<<Agent>> #D6EAF8
+skinparam classBorderColor<<Agent>> #2471A3
+skinparam classBackgroundColor<<CyclicBehaviour>> #D5F5E3
+skinparam classBorderColor<<CyclicBehaviour>> #1E8449
+skinparam classBackgroundColor<<OneShotBehaviour>> #A9DFBF
+skinparam classBorderColor<<OneShotBehaviour>> #1E8449
+skinparam classBackgroundColor<<PeriodicBehaviour>> #82E0AA
+skinparam classBorderColor<<PeriodicBehaviour>> #1E8449
+skinparam classBackgroundColor<<DataModel>> #FEF9E7
+skinparam classBorderColor<<DataModel>> #D4AC0D
+skinparam classBackgroundColor<<Config>> #F2F3F4
+skinparam classBorderColor<<Config>> #717D7E
+skinparam classBackgroundColor<<Service>> #FDEBD0
+skinparam classBorderColor<<Service>> #BA4A00
+skinparam classBackgroundColor<<FIPA-ACL>> #E8DAEF
+skinparam classBorderColor<<FIPA-ACL>> #7D3C98
+skinparam classBackgroundColor<<External>> #EAECEE
+skinparam classBorderColor<<External>> #717D7E
+
+' ================================================================
+' PACOTE: FIPA-ACL -- Protocolo de Comunicacao
+' ================================================================
+package "FIPA-ACL [protocol]" #E8DAEF {
+  class ACLMessage <<FIPA-ACL>> {
+    + to : str
+    + body : str
+    --
+    + performative : str
+    + ontology : str
+    + conversation-id : str
+    ==
+    + set_metadata(key, value)
+    + get_metadata(key) : str
+  }
+  class AgentPerformatives <<Config>> {
+    {static} REQUEST  : str = "request"
+    {static} AGREE    : str = "agree"
+    {static} INFORM   : str = "inform"
+    {static} FAILURE  : str = "failure"
+  }
+  class AgentOntologies <<Config>> {
+    {static} SENSOR_ACTIVITY         : str = "sensor_activity"
+    {static} MOVEMENT_RECOMMENDATION : str = "movement_recommendation"
+    {static} MATCHING                : str = "matching"
+  }
+}
+
+' ================================================================
+' PACOTE: Framework SPADE (externo)
+' ================================================================
+package "spade [external]" #EAECEE {
+  abstract class Agent <<External>> {
+    + jid      : JID
+    + password : str
+    --
+    + start()
+    + stop()
+    + add_behaviour(b)
+    + {abstract} setup()
+  }
+  abstract class CyclicBehaviour <<External>> {
+    --
+    + {abstract} run()
+    + receive(timeout) : Message
+    + send(msg)
+  }
+  abstract class OneShotBehaviour <<External>> {
+    --
+    + {abstract} run()
+    + send(msg)
+    + join()
+  }
+  abstract class PeriodicBehaviour <<External>> {
+    + period : float
+    --
+    + {abstract} run()
+  }
+}
+
+' ================================================================
+' PACOTE: Behaviours de Ciclo de Vida
+' ================================================================
+package "behaviours.lifecycle" #D5F5E3 {
+  class RegisterBehaviour <<OneShotBehaviour>> {
+  }
+  class HeartbeatBehaviour <<PeriodicBehaviour>> {
+  }
+  class UnregisterBehaviour <<OneShotBehaviour>> {
+  }
+  class SendMessageBehaviour <<OneShotBehaviour>> {
+  }
+}
+
+' ================================================================
+' PACOTE: Agentes Base
+' ================================================================
+package "agents.base" #D6EAF8 {
+  abstract class BaseBackgroundAgent <<Agent>> {
+    + agent_loop : EventLoop
+    --
+    + start_background()
+    + stop_background()
+    # _run_loop()
+    # _run_unregister()
+    + forward_message(behaviour, payload,\n  agent_to, performative,\n  ontology, conversation_id)
+    + {abstract} setup()
+  }
+  class BaseSenderAgent <<Agent>> {
+    + agent_loop : EventLoop
+    --
+    + start_background()
+    + stop_background()
+    + run_loop()
+    + send_message(payload, agent_to,\n  performative, ontology)
+  }
+}
+
+' ================================================================
+' PACOTE: Behaviours Operacionais
+' ================================================================
+package "behaviours.operational" #A9DFBF {
+  class ReceiveSensorDataBehaviour <<CyclicBehaviour>> {
+    -- Ontologias --
+    sensor_activity
+    movement_recommendation
+    ==
+    + run()
+  }
+  class ReceiveCoordinatorDataBehaviour <<CyclicBehaviour>> {
+    -- Roteamento --
+    sensor_activity -> HarAgent
+    movement_recommendation -> DatabaseAgent
+    matching -> DatabaseAgent
+    ==
+    + run()
+  }
+  class ReceiveHarDataBehaviour <<CyclicBehaviour>> {
+    -- Ontologias --
+    sensor_activity -> EnvironmentAgent
+    ==
+    + run()
+  }
+  class EnvironmentDataBehaviour <<CyclicBehaviour>> {
+    -- Enriquecimento --
+    get_weather_temperature(lat,lon)
+    + weather_temperature
+    ==
+    + run()
+  }
+  class ReceiveClusteringDataBehaviour <<CyclicBehaviour>> {
+    -- Ontologias --
+    matching -> UserMatchingClusterModel
+    ==
+    + run()
+  }
+  class ReceiveDatabaseDataBehaviour <<CyclicBehaviour>> {
+    -- Persistencia --
+    sensor_activity -> save_activity()
+    movement_recommendation -> save_movement_recommendation()
+    matching -> save_matching()
+    ==
+    + run()
+  }
+}
+
+' ================================================================
+' PACOTE: Agentes Operacionais
+' ================================================================
+package "agents" #BDD7EE {
+  class SensorAgent <<Agent>> {
+    + setup()
+  }
+  class CoordinatorAgent <<Agent>> {
+    + setup()
+  }
+  class HarAgent <<Agent>> {
+    + setup()
+  }
+  class EnvironmentAgent <<Agent>> {
+    + setup()
+  }
+  class ClusteringAgent <<Agent>> {
+    + cluster_model : UserMatchingClusterModel
+    --
+    + _notify_cluster_invite(payload) : dict
+    + _notify_invites(payload)
+    + setup()
+  }
+  class DatabaseAgent <<Agent>> {
+    + setup()
+  }
+}
+
+' ================================================================
+' HERANCA: Framework SPADE
+' ================================================================
+Agent            <|-- BaseBackgroundAgent
+Agent            <|-- BaseSenderAgent
+OneShotBehaviour  <|-- RegisterBehaviour
+PeriodicBehaviour <|-- HeartbeatBehaviour
+OneShotBehaviour  <|-- UnregisterBehaviour
+OneShotBehaviour  <|-- SendMessageBehaviour
+CyclicBehaviour   <|-- ReceiveSensorDataBehaviour
+CyclicBehaviour   <|-- ReceiveCoordinatorDataBehaviour
+CyclicBehaviour   <|-- ReceiveHarDataBehaviour
+CyclicBehaviour   <|-- EnvironmentDataBehaviour
+CyclicBehaviour   <|-- ReceiveClusteringDataBehaviour
+CyclicBehaviour   <|-- ReceiveDatabaseDataBehaviour
+
+' ================================================================
+' HERANCA: Agentes operacionais
+' ================================================================
+BaseBackgroundAgent <|-- SensorAgent
+BaseBackgroundAgent <|-- CoordinatorAgent
+BaseBackgroundAgent <|-- HarAgent
+BaseBackgroundAgent <|-- EnvironmentAgent
+BaseBackgroundAgent <|-- ClusteringAgent
+BaseBackgroundAgent <|-- DatabaseAgent
+
+' ================================================================
+' COMPOSICAO AUML: Agente possui Behaviours
+' ================================================================
+BaseBackgroundAgent "1" *-- "1" RegisterBehaviour   : owns
+BaseBackgroundAgent "1" *-- "1" HeartbeatBehaviour  : owns
+BaseBackgroundAgent "1" *-- "1" UnregisterBehaviour : owns
+BaseSenderAgent     "1" *-- "1..*" SendMessageBehaviour : creates
+SensorAgent      "1" *-- "1" ReceiveSensorDataBehaviour     : owns
+CoordinatorAgent "1" *-- "1" ReceiveCoordinatorDataBehaviour : owns
+HarAgent         "1" *-- "1" ReceiveHarDataBehaviour         : owns
+EnvironmentAgent "1" *-- "1" EnvironmentDataBehaviour        : owns
+ClusteringAgent  "1" *-- "1" ReceiveClusteringDataBehaviour  : owns
+DatabaseAgent    "1" *-- "1" ReceiveDatabaseDataBehaviour    : owns
+
+' ================================================================
+' DEPENDENCIAS: Behaviours -> ACLMessage (FIPA-ACL)
+' ================================================================
+SendMessageBehaviour            ..> ACLMessage : "<<creates>>"
+ReceiveSensorDataBehaviour      ..> ACLMessage : "<<uses>>"
+ReceiveCoordinatorDataBehaviour ..> ACLMessage : "<<uses>>"
+ReceiveHarDataBehaviour         ..> ACLMessage : "<<uses>>"
+EnvironmentDataBehaviour        ..> ACLMessage : "<<uses>>"
+ReceiveClusteringDataBehaviour  ..> ACLMessage : "<<uses>>"
+ReceiveDatabaseDataBehaviour    ..> ACLMessage : "<<uses>>"
+
+' ================================================================
+' DEPENDENCIAS: Agentes -> Config
+' ================================================================
+BaseBackgroundAgent ..> AgentPerformatives : "<<uses>>"
+SendMessageBehaviour ..> AgentPerformatives : "<<uses>>"
+SendMessageBehaviour ..> AgentOntologies    : "<<uses>>"
+
+' ================================================================
+' DEPENDENCIAS: DatabaseAgent -> FirebaseService
+' ================================================================
+
+@enduml

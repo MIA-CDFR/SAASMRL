@@ -1,0 +1,212 @@
+@startuml Dance4Life_Classes
+' ================================================================
+' Dance4Life -- Diagrama de Classes AUML (agentes + modelos)
+' Padrao  : AUML (Odell, Parunak & Bauer, 2001)
+' Protocolo : FIPA-ACL (FIPA SC00061G / SC00026H)
+' Layout  : agentes (coluna esq, pipeline vertical)
+'           modelos (coluna dir, agrupados por ActivityData)
+' ================================================================
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam classFontSize 9
+skinparam classFontName Arial
+skinparam classBorderThickness 1.5
+skinparam arrowColor #2C3E50
+skinparam arrowFontSize 7
+skinparam packageBorderColor #5D6D7E
+skinparam packageFontStyle bold
+skinparam nodesep 35
+skinparam ranksep 40
+skinparam NoteBackgroundColor #FEF9E7
+skinparam NoteBorderColor #D4AC0D
+skinparam classBackgroundColor<<API>>           #1A5276
+skinparam classFontColor<<API>>                 #FFFFFF
+skinparam classBorderColor<<API>>               #0E2F51
+skinparam classBackgroundColor<<Reativo>>       #1E8449
+skinparam classFontColor<<Reativo>>             #FFFFFF
+skinparam classBorderColor<<Reativo>>           #145A32
+skinparam classBackgroundColor<<Hibrido>>       #B9770E
+skinparam classFontColor<<Hibrido>>             #FFFFFF
+skinparam classBorderColor<<Hibrido>>           #7D6608
+skinparam classBackgroundColor<<Deliberativo>>  #7D3C98
+skinparam classFontColor<<Deliberativo>>        #FFFFFF
+skinparam classBorderColor<<Deliberativo>>      #512E5F
+skinparam classBackgroundColor<<ReativoServico>> #922B21
+skinparam classFontColor<<ReativoServico>>      #FFFFFF
+skinparam classBorderColor<<ReativoServico>>    #641E16
+skinparam classBackgroundColor<<DataModel>>     #FEF9E7
+skinparam classBorderColor<<DataModel>>         #D4AC0D
+
+' ================================================================
+' PACOTE: Agentes (pipeline vertical)
+' ================================================================
+package "agents" {
+
+  together {
+    class BaseSenderAgent <<API>> {
+      jid: api_agent@localhost
+      --
+      send_message(payload, agent_to,\n  performative, ontology)
+    }
+  }
+
+  together {
+    class SensorAgent <<Reativo>> {
+      jid: sensor_agent@localhost
+      sensor_activity · movement_recommendation
+    }
+    class ClusteringAgent <<Deliberativo>> {
+      jid: matching_agent@localhost
+      cluster_model : UserMatchingClusterModel
+      --
+      _notify_cluster_invite(payload)
+    }
+  }
+
+  together {
+    class CoordinatorAgent <<Hibrido>> {
+      jid: coordinator_agent@localhost
+      routes by ontology
+    }
+  }
+
+  together {
+    class HarAgent <<Reativo>> {
+      jid: har_agent@localhost
+      sensor_activity [placeholder HAR]
+    }
+  }
+
+  together {
+    class EnvironmentAgent <<Hibrido>> {
+      jid: environment_agent@localhost
+      enriches: +weather_temperature
+    }
+  }
+
+  together {
+    class DatabaseAgent <<ReativoServico>> {
+      jid: database_agent@localhost
+      --
+      save_activity()
+      save_movement_recommendation()
+      save_matching()
+    }
+  }
+}
+
+' ================================================================
+' PACOTE: Modelos de dados (Pydantic)
+' ================================================================
+package "model" #FEF9E7 {
+
+  class ActivityData <<DataModel>> {
+    sensor_activity_data : SensorActivityData
+    matching_data : MatchingData?
+    calculated_activity_data : CalculatedActivityData?
+    environment_data : EnvironmentData?
+    weather_data : WeatherData?
+  }
+
+  together {
+    class SensorActivityData <<DataModel>> {
+      device_id : str
+      acc : float? · hr : int?
+      ritmo : float?
+      latitude : float? · longitude : float?
+    }
+    class WeatherData <<DataModel>> {
+      temperatura : float?
+      humidade : float?
+    }
+  }
+
+  together {
+    class MatchingData <<DataModel>> {
+      emparelhado_utilizador_id : str?
+    }
+    class EnvironmentData <<DataModel>> {
+      musica_nome : str? · musica_tipo_nome : str?
+      quantidade_pessoas_sala : int?
+      atividade_media_sala : float?
+      matching_list_sal : List[str]
+    }
+    class CalculatedActivityData <<DataModel>> {
+      actividade : str? · interesse : float?
+      timestamp : str?
+      timestamp_hora : int? · timestamp_mes : str?
+    }
+  }
+
+  class UserMatchingClusterModel {
+    n_clusters : int = 4
+    max_distance_km : float = 8.0
+    user_profiles : Dict[str, Dict]
+    --
+    process_matching_request(payload) : dict
+    _build_cluster_progression(ritmo) : dict
+    _cluster_from_ritmo(ritmo) : str
+  }
+}
+
+' ================================================================
+' LINKS OCULTOS: forcam pipeline vertical dos agentes
+' ================================================================
+BaseSenderAgent  -[hidden]down-> SensorAgent
+BaseSenderAgent  -[hidden]down-> ClusteringAgent
+SensorAgent      -[hidden]down-> CoordinatorAgent
+ClusteringAgent  -[hidden]down-> CoordinatorAgent
+CoordinatorAgent -[hidden]down-> HarAgent
+HarAgent         -[hidden]down-> EnvironmentAgent
+EnvironmentAgent -[hidden]down-> DatabaseAgent
+
+' ================================================================
+' COMUNICACAO ACL: REQUEST (-->)
+' ================================================================
+BaseSenderAgent  -->  SensorAgent     : "REQUEST s_a · m_r"
+BaseSenderAgent  -->  ClusteringAgent : "REQUEST matching"
+SensorAgent      -->  CoordinatorAgent : "REQUEST s_a · m_r"
+CoordinatorAgent -->  HarAgent         : "REQUEST s_a"
+CoordinatorAgent -->  DatabaseAgent    : "REQUEST m_r · matching"
+HarAgent         -->  EnvironmentAgent : "REQUEST s_a"
+EnvironmentAgent -->  DatabaseAgent    : "REQUEST s_a"
+ClusteringAgent  -->  CoordinatorAgent : "REQUEST matching"
+
+' ================================================================
+' COMUNICACAO ACL: INFORM (.>)
+' ================================================================
+CoordinatorAgent .>  SensorAgent      : "INFORM s_a [ack]"
+HarAgent         .>  CoordinatorAgent : "INFORM s_a [ack]"
+EnvironmentAgent .>  HarAgent         : "INFORM s_a [ack]"
+DatabaseAgent    .>  EnvironmentAgent : "INFORM s_a"
+DatabaseAgent    .>  CoordinatorAgent : "INFORM m_r · matching"
+
+' ================================================================
+' EFEITO LATERAL HTTP (fora do canal ACL)
+' ================================================================
+ClusteringAgent  -->  BaseSenderAgent : "HTTP POST /set_user_match\n[fora do canal ACL]"
+
+' ================================================================
+' PERSISTENCIA: DatabaseAgent -> modelos
+' ================================================================
+DatabaseAgent ..> ActivityData   : "save_activity()"
+DatabaseAgent ..> MatchingData   : "save_matching()"
+DatabaseAgent ..> EnvironmentData : "save_movement_recommendation()"
+
+' ================================================================
+' COMPOSICAO: ClusteringAgent <-> UserMatchingClusterModel
+' ================================================================
+ClusteringAgent "1" *-- "1" UserMatchingClusterModel : composes
+
+' ================================================================
+' COMPOSICAO / AGREGACAO: ActivityData -> sub-modelos
+' ================================================================
+ActivityData "1" *--  "1"    SensorActivityData     : contains
+ActivityData "1" o-- "0..1"  MatchingData           : has
+ActivityData "1" o-- "0..1"  CalculatedActivityData : has
+ActivityData "1" o-- "0..1"  EnvironmentData        : has
+ActivityData "1" o-- "0..1"  WeatherData            : has
+
+@enduml

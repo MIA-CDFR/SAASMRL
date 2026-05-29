@@ -1,0 +1,358 @@
+@startuml Dance4Life_SA
+' ================================================================
+' Dance4Life — Diagrama de Atividades AUML
+' Protocolo : FIPA-Request (FIPA SC00026H)
+' Ontologia : sensor_activity
+' Fluxo     : API -> SA -> CA -> HA -> EA -> DB
+' INFORM    : DB->EA  EA->HA  HA->CA  CA->SA
+' ================================================================
+!theme plain
+skinparam defaultTextAlignment center
+skinparam activityBorderColor      #34495E
+skinparam activityBackgroundColor  #FDFEFE
+skinparam activityFontSize         10
+skinparam activityFontName         Arial
+skinparam swimlaneBorderColor      #5D6D7E
+skinparam swimlaneBorderThickness  2
+skinparam swimlaneTitleFontStyle   bold
+skinparam swimlaneTitleFontSize    11
+skinparam arrowColor               #2C3E50
+skinparam arrowFontSize            9
+skinparam NoteBackgroundColor      #FEF9E7
+skinparam NoteBorderColor          #D4AC0D
+
+title <b>Dance4Life -- Diagrama de Atividades AUML</b>\nProtocolo FIPA-Request :: sensor_activity
+
+|API Flask|
+start
+note right
+  <b>Iniciador:</b> BaseSenderAgent
+  <b>Entrada:</b> POST /collect_data_activities
+  <b>Payload:</b> device_id, acc, hr, ritmo, lat, lon
+end note
+:Receber POST /collect_data_activities;
+:Criar mensagem ACL
+performative: REQUEST
+ontology: sensor_activity
+conversation-id: conv-{jid}-guid-{uuid};
+
+|SensorAgent|
+note right
+  <b>Agente Reativo</b>
+  ReceiveSensorDataBehaviour
+  (CyclicBehaviour)
+end note
+:Receber MSG ACL
+REQUEST / sensor_activity;
+if (performative == REQUEST?) then (sim)
+else (nao)
+  :Ignorar mensagem;
+  stop
+endif
+:forward_message()
+-> CoordinatorAgent
+REQUEST / sensor_activity;
+
+|CoordinatorAgent|
+note right
+  <b>Agente Hibrido</b>
+  ReceiveCoordinatorDataBehaviour
+  Guard: [ontology == sensor_activity]
+end note
+:Receber MSG ACL
+REQUEST / sensor_activity;
+if (ontology == sensor_activity?) then (sim)
+else (nao)
+  stop
+endif
+:forward_message()
+-> HarAgent
+REQUEST / sensor_activity;
+:forward_message() [ack imediato]
+-> SensorAgent
+INFORM / sensor_activity;
+
+|SensorAgent|
+:Receber INFORM
+[ack de CoordinatorAgent];
+
+|HarAgent|
+note right
+  <b>Agente Reativo (Placeholder HAR)</b>
+  ReceiveHarDataBehaviour
+  Sem inferencia ML nesta versao
+end note
+:Receber MSG ACL
+REQUEST / sensor_activity;
+:forward_message()
+-> EnvironmentAgent
+REQUEST / sensor_activity;
+:forward_message() [ack imediato]
+-> CoordinatorAgent
+INFORM / sensor_activity;
+
+|CoordinatorAgent|
+:Receber INFORM
+[ack de HarAgent];
+
+|EnvironmentAgent|
+note right
+  <b>Agente Hibrido</b>
+  EnvironmentDataBehaviour
+  Enriquecimento contextual
+end note
+:Receber MSG ACL
+REQUEST / sensor_activity;
+:get_weather_temperature(lat, lon)
+[Chamada a API Meteorologica Externa];
+:payload["weather_temperature"] = temp;
+:forward_message()
+-> DatabaseAgent
+REQUEST / sensor_activity;
+:forward_message() [ack imediato]
+-> HarAgent
+INFORM / sensor_activity;
+
+|HarAgent|
+:Receber INFORM
+[ack de EnvironmentAgent];
+
+|DatabaseAgent|
+note right
+  <b>Agente Reativo de Servico</b>
+  ReceiveDatabaseDataBehaviour
+end note
+:Receber MSG ACL
+REQUEST / sensor_activity;
+:payload.pop("visited_agents");
+:save_activity(payload)
+-> Firestore: dance4life_activity;
+:forward_message()
+-> EnvironmentAgent
+INFORM / sensor_activity;
+
+|EnvironmentAgent|
+:Receber INFORM
+[ack de DatabaseAgent];
+
+|API Flask|
+:Retornar HTTP 200 OK
+{"status": "ok"};
+stop
+
+@enduml
+
+@startuml Dance4Life_MR
+' ================================================================
+' Dance4Life -- Diagrama de Atividades AUML
+' Protocolo : FIPA-Request (FIPA SC00026H)
+' Ontologia : movement_recommendation
+' Fluxo     : API -> SA -> CA -> DB
+' INFORM    : DB -> CA
+' ================================================================
+!theme plain
+skinparam defaultTextAlignment center
+skinparam activityBorderColor      #34495E
+skinparam activityBackgroundColor  #FDFEFE
+skinparam activityFontSize         10
+skinparam activityFontName         Arial
+skinparam swimlaneBorderColor      #5D6D7E
+skinparam swimlaneBorderThickness  2
+skinparam swimlaneTitleFontStyle   bold
+skinparam swimlaneTitleFontSize    11
+skinparam arrowColor               #2C3E50
+skinparam arrowFontSize            9
+skinparam NoteBackgroundColor      #FEF9E7
+skinparam NoteBorderColor          #D4AC0D
+
+title <b>Dance4Life -- Diagrama de Atividades AUML</b>\nProtocolo FIPA-Request :: movement_recommendation
+
+|API Flask|
+start
+note right
+  <b>Iniciador:</b> BaseSenderAgent
+  <b>Entrada:</b> POST /set_movement_recommendation
+end note
+:Receber POST /set_movement_recommendation;
+:Criar mensagem ACL
+performative: REQUEST
+ontology: movement_recommendation
+conversation-id: conv-{jid}-guid-{uuid};
+
+|SensorAgent|
+note right
+  <b>Agente Reativo</b>
+  ReceiveSensorDataBehaviour
+  Guard: [performative == REQUEST]
+end note
+:Receber MSG ACL
+REQUEST / movement_recommendation;
+if (performative == REQUEST?) then (sim)
+else (nao)
+  :Ignorar mensagem;
+  stop
+endif
+:forward_message()
+-> CoordinatorAgent
+REQUEST / movement_recommendation;
+
+|CoordinatorAgent|
+note right
+  <b>Agente Hibrido</b>
+  Guard: [ontology == movement_recommendation]
+  Fluxo direto para DatabaseAgent
+end note
+:Receber MSG ACL
+REQUEST / movement_recommendation;
+if (ontology == movement_recommendation?) then (sim)
+else (nao)
+  stop
+endif
+:payload["recommendation"] = True;
+:forward_message()
+-> DatabaseAgent
+REQUEST / movement_recommendation;
+
+|DatabaseAgent|
+note right
+  <b>Agente Reativo de Servico</b>
+  ReceiveDatabaseDataBehaviour
+end note
+:Receber MSG ACL
+REQUEST / movement_recommendation;
+:payload.pop("visited_agents");
+:save_movement_recommendation(payload)
+-> Firestore: dance4life_movement_recommendation;
+:forward_message()
+-> CoordinatorAgent
+INFORM / movement_recommendation;
+
+|CoordinatorAgent|
+:Receber INFORM
+[ack de DatabaseAgent];
+
+|API Flask|
+:Retornar HTTP 200 OK
+{"status": "ok"};
+stop
+
+@enduml
+
+@startuml Dance4Life_M
+' ================================================================
+' Dance4Life -- Diagrama de Atividades AUML
+' Protocolo : FIPA-Request (FIPA SC00026H)
+' Ontologia : matching
+' Fluxo     : API -> CluA -> CA -> DB
+' Efeito lateral: CluA -> POST /set_user_match/{id} (HTTP)
+' INFORM    : DB -> CA
+' ================================================================
+!theme plain
+skinparam defaultTextAlignment center
+skinparam activityBorderColor      #34495E
+skinparam activityBackgroundColor  #FDFEFE
+skinparam activityFontSize         10
+skinparam activityFontName         Arial
+skinparam swimlaneBorderColor      #5D6D7E
+skinparam swimlaneBorderThickness  2
+skinparam swimlaneTitleFontStyle   bold
+skinparam swimlaneTitleFontSize    11
+skinparam arrowColor               #2C3E50
+skinparam arrowFontSize            9
+skinparam NoteBackgroundColor      #FEF9E7
+skinparam NoteBorderColor          #D4AC0D
+
+title <b>Dance4Life -- Diagrama de Atividades AUML</b>\nProtocolo FIPA-Request :: matching
+
+|API Flask|
+start
+note right
+  <b>Iniciador:</b> BaseSenderAgent
+  <b>Entrada:</b> POST /collect_data_activities
+  Despacho paralelo apos asyncio.sleep
+  Payload: {new_data, users}
+end note
+:Receber POST /collect_data_activities
+[despacho paralelo -- fluxo matching];
+:Criar mensagem ACL
+performative: REQUEST
+ontology: matching
+conversation-id: conv-{jid}-guid-{uuid};
+
+|ClusteringAgent|
+note right
+  <b>Agente Deliberativo</b>
+  ReceiveClusteringDataBehaviour
+  Guard: [performative == REQUEST]
+end note
+:Receber MSG ACL
+REQUEST / matching;
+if (performative == REQUEST?) then (sim)
+else (nao)
+  :Ignorar mensagem;
+  stop
+endif
+:cluster_model.process_matching_request(payload)
+UserActivityClusterModel
+[raciocinio sobre perfis de utilizadores];
+note right
+  <b>Arquitetura Deliberativa</b>
+  Inferencia de emparelhamento social
+  com base em atividade e localizacao
+end note
+:_notify_cluster_invite(payload);
+
+|API Flask|
+note right
+  <b>Efeito Lateral Externo</b>
+  Chamada HTTP sincrona fora do canal ACL
+end note
+:Receber POST /set_user_match/{user_id}
+[Notificacao de Convite de Emparelhamento];
+
+|ClusteringAgent|
+:forward_message()
+-> CoordinatorAgent
+REQUEST / matching;
+
+|CoordinatorAgent|
+note right
+  <b>Agente Hibrido</b>
+  Guard: [ontology == matching]
+  Fluxo direto para DatabaseAgent
+end note
+:Receber MSG ACL
+REQUEST / matching;
+if (ontology == matching?) then (sim)
+else (nao)
+  stop
+endif
+:payload["recommendation"] = True;
+:forward_message()
+-> DatabaseAgent
+REQUEST / matching;
+
+|DatabaseAgent|
+note right
+  <b>Agente Reativo de Servico</b>
+  ReceiveDatabaseDataBehaviour
+end note
+:Receber MSG ACL
+REQUEST / matching;
+:payload.pop("visited_agents");
+:save_matching(payload)
+-> Firestore: dance4life_matching;
+:forward_message()
+-> CoordinatorAgent
+INFORM / matching;
+
+|CoordinatorAgent|
+:Receber INFORM
+[ack de DatabaseAgent];
+
+|API Flask|
+:Retornar HTTP 200 OK
+{"status": "ok"};
+stop
+
+@enduml
