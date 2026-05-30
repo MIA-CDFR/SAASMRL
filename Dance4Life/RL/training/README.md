@@ -325,6 +325,7 @@ dqn:
 
 | Parâmetro               | Descrição                      |
 | ----------------------- | ------------------------------ |
+| learning_rate           | Taxa de aprendizagem           |
 | buffer_size             | Replay Buffer Size             |
 | learning_starts         | Passos antes de iniciar treino |
 | batch_size              | Tamanho do batch               |
