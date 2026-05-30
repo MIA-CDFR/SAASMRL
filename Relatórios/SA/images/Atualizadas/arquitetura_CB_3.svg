@@ -7,7 +7,7 @@
    version="1.1"
    id="svg60"
    sodipodi:docname="arquitetura_CB_3.svg"
-   inkscape:version="1.4.2 (ebf0e94, 2025-05-08)"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -26,12 +26,12 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="1.2966667"
      inkscape:cx="339.71721"
-     inkscape:cy="463.88174"
-     inkscape:window-width="3440"
-     inkscape:window-height="1369"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
+     inkscape:cy="216.70951"
+     inkscape:window-width="1150"
+     inkscape:window-height="1000"
+     inkscape:window-x="3490"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
      inkscape:current-layer="svg60" />
   <title
      style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"
@@ -100,9 +100,7 @@
        style="font-style:normal"
        id="tspan3">Camada 1 — Aquisição no <tspan
    style="font-style:italic"
-   id="tspan4">edge</tspan> <tspan
-   style="font-style:italic"
-   id="tspan5">smartphone</tspan> e <tspan
+   id="tspan4">edge smartphone</tspan> e <tspan
    style="font-style:italic"
    id="tspan6">smartwatch</tspan>t</tspan></text>
   <!-- Smartphone sub-container -->
@@ -720,8 +718,8 @@
      fill="var(--color-text-secondary)"
      style="color:#ffffff;font-weight:400;font-size:12px;font-family:'Anthropic Sans', '-apple-system', BlinkMacSystemFont, 'Segoe UI', sans-serif;dominant-baseline:central;text-anchor:middle;opacity:1;fill:#c2c0b6;stroke:#080808;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
      id="text49"><tspan
-   style="font-style:italic"
-   id="tspan28">Matching</tspan> social</text>
+       style="font-style:italic"
+       id="tspan28">Clustering Agent</tspan></text>
   <!-- ligação matching → database -->
   <path
      d="M 284,557 H 579 V 500"

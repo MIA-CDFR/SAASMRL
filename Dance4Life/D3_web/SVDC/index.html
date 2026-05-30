@@ -561,7 +561,7 @@ footer {
 <!-- ═══════════════════════════════════════════════ -->
 <section id="invitations">
   <div class="section-label" data-pt="02 — CONVITES SOCIAIS" data-en="02 — SOCIAL INVITATIONS">02 — CONVITES SOCIAIS</div>
-  <h2 class="section-title" data-pt="Dinâmica de Conexão Social" data-en="Social Connection Dynamics">Dinâmica de Conexão Social</h2>
+  <h2 class="section-title" data-pt="Dinâmica de Interação Social" data-en="Social Connection Dynamics">Dinâmica de Interação Social</h2>
   <p class="section-desc" data-pt="5.000 convites trocados entre utilizadores com uma taxa de aceitação próxima dos 50%, revelando um ecossistema social equilibrado." data-en="5,000 invitations exchanged between users with an acceptance rate close to 50%, revealing a balanced social ecosystem.">5.000 convites trocados entre utilizadores com uma taxa de aceitação próxima dos 50%, revelando um ecossistema social equilibrado.</p>
 
   <div class="two-col" style="margin-bottom:24px;">
@@ -2482,10 +2482,10 @@ function buildRankTable() {
       <tr>
         <th id="th-rank">#</th>
         <th id="th-user">Utilizador</th>
-        <th id="th-activity">Ativid.</th>
+        <th id="th-activity">Atividades</th>
         <th id="th-accepted">Aceites</th>
-        <th id="th-matching">Match.</th>
-        <th id="th-recs">Recs</th>
+        <th id="th-matching">Matchings</th>
+        <th id="th-recs">Recomendações</th>
         <th id="th-score">Score</th>
       </tr>
     </thead>
@@ -2531,14 +2531,14 @@ function buildRankTable() {
             activities: 'Atividades',
             accepted: 'Aceites',
             matching: 'Matchings',
-            recs: 'Recs',
+            recs: 'Recomendações',
             score: 'Score'
           }
         : {
             activities: 'Activities',
             accepted: 'Accepted',
             matching: 'Matchings',
-            recs: 'Recs',
+            recs: 'Recomendations',
             score: 'Score'
           };
 
@@ -2655,7 +2655,10 @@ function setLang(lang) {
     lang === 'pt' ? 'Aceites' : 'Accepted';
 
   document.getElementById('th-matching').textContent =
-    lang === 'pt' ? 'Match.' : 'Matchings';
+    lang === 'pt' ? 'Matchings' : 'Matchings';
+
+  document.getElementById('th-recs').textContent =
+    lang === 'pt' ? 'Recomendações' : 'Recomendations';    
 
   document.getElementById('btn-pt').classList.toggle('active', lang === 'pt');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
